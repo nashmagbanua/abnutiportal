@@ -63,10 +63,17 @@
 }
         /* --- LOGIN PAGE --- */
         #login-page {
-            height: 100vh; display: flex; justify-content: center; align-items: center;
-            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('assets/background.jpg') center/cover;
-            position: fixed; width: 100%; z-index: 2000;
-        }
+    height: 100vh; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+    /* Eto ang secret: Dark gradient sa ibabaw ng image */
+    background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.7)), 
+                url('assets/background.webp') center/cover no-repeat;
+    position: fixed; 
+    width: 100%; 
+    z-index: 2000;
+}
 
         .login-box {
             background: white; padding: 35px; border-radius: 15px;
@@ -180,7 +187,7 @@ td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
     height: 40px; 
     border-radius: 50%;
     /* Palitan ang URL ng path ng iyong SVG */
-    background: url('assets/supervisor1.svg') center/cover no-repeat;
+    background: url('assets/visor.svg') center/cover no-repeat;
     background-color: #edf2f7; /* Background color para sa icon */
     border: 2px solid white; 
     box-shadow: 0 4px 15px rgba(0,0,0,0.15);
@@ -312,12 +319,12 @@ td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFiZWFjcnBveWZhY2dtYnp4amN1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2NTM5NTIsImV4cCI6MjA2NDIyOTk1Mn0.6kfxKLJxidW4BcqsMJte61AtzydrTW-1ZJIJytiUBt4';
        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const db = {
-            "abn2026": { n: "Sir Carl Bryan", r: "Department Head" },
-            "abn20261": { n: "A. Ortega", r: "Supervisor" },
-            "abn20262": { n: "A. Calisay", r: "Supervisor" },
-            "abn20263": { n: "A. Apuang", r: "Supervisor" },
-            "abn20264": { n: "J. Reyes", r: "Supervisor" }
-        };
+    "abn2026": { n: "Sir Carl Bryan", r: "Department Head", p: "visor.svg" },
+    "abn20261": { n: "A. Ortega", r: "Supervisor", p: "visor1.svg" },
+    "abn20262": { n: "A. Calisay", r: "Supervisor", p: "visor2.svg" },
+    "abn20263": { n: "A. Apuang", r: "Supervisor", p: "visor3.svg" },
+    "abn20264": { n: "J. Reyes", r: "Supervisor", p: "visor4.svg" }
+};
         // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
@@ -636,21 +643,26 @@ function fetchCoalDelivery(date) {
     `;
 }
 
-        function login() {
+       function login() {
     const val = document.getElementById('passCode').value;
     if(db[val]) {
-        // ITANDA ANG USER (Eto ang dagdag)
         localStorage.setItem('isLoggedIn', 'true');
         localStorage.setItem('userCode', val);
 
         document.getElementById('login-page').style.display = 'none';
         document.getElementById('main-app').style.display = 'block';
         
+        // --- ETO ANG DAGDAG: SET DYNAMIC PROFILE PIC ---
+        const profilePath = 'assets/' + db[val].p;
+        document.getElementById('profileBtn').style.backgroundImage = `url('${profilePath}')`;
+        
         document.getElementById('pName').innerText = db[val].n;
         document.getElementById('pRole').innerText = db[val].r;
         
         loadDashboard(); 
-    } else { alert("Access Denied!"); }
+    } else { 
+        alert("Access Denied!"); 
+    }
 }
 
         // --- NEW PROFILE DROPDOWN SCRIPT ---
@@ -914,34 +926,39 @@ window.onload = function() {
         document.getElementById('login-page').style.display = 'none';
         document.getElementById('main-app').style.display = 'block';
         
-        // I-load ang user data
+        // --- ETO ANG DAGDAG: SET DYNAMIC PROFILE PIC PARA SA REFRESH ---
+        // Kukunin nito ang filename (hal. visor1.svg) mula sa db base sa userCode
+        const profilePath = 'assets/' + db[userCode].p;
+        document.getElementById('profileBtn').style.backgroundImage = `url('${profilePath}')`;
+        
+        // I-load ang user data (Pangalan at Role)
         document.getElementById('pName').innerText = db[userCode].n;
         document.getElementById('pRole').innerText = db[userCode].r;
 
-        // --- FIX SA REALTIME SUBSCRIPTION (window.onload) ---
-const gpmSubscription = supabaseClient
-  .channel('custom-all-channel')
-  .on('postgres_changes', 
-      { event: 'INSERT', schema: 'public', table: 'gpm_readings' }, // Siguraduhing 'gpm_readings' ito
-      payload => {
-          console.log('New GPM detected!', payload.new);
-          // Kung nasa Dashboard, i-update ang card
-          if(document.getElementById('latestGPM')) fetchLatestGPM(); 
-          // Kung nasa GPM page, i-refresh ang table
-          if(document.getElementById('gpmTableBody')) fetchGPMLogs(); 
-      }
-  )
-  .subscribe();
+        // --- REALTIME SUBSCRIPTION ---
+        const gpmSubscription = supabaseClient
+          .channel('custom-all-channel')
+          .on('postgres_changes', 
+              { event: 'INSERT', schema: 'public', table: 'gpm_readings' }, 
+              payload => {
+                  console.log('New GPM detected!', payload.new);
+                  if(document.getElementById('latestGPM')) fetchLatestGPM(); 
+                  if(document.getElementById('gpmTableBody')) fetchGPMLogs(); 
+              }
+          )
+          .subscribe();
 
-// --- DAGDAG: Automatic Logout kung walang activity (Security) ---
-let idleTime = 0;
-document.onmousemove = () => idleTime = 0;
-setInterval(() => {
-    idleTime++;
-    if (idleTime > 30) { // Logout after 30 mins of inactivity
-        // logout(); 
-    }
-}, 60000);
+        // --- SECURITY: IDLE TIMER ---
+        let idleTime = 0;
+        document.onmousemove = () => idleTime = 0;
+        document.onkeypress = () => idleTime = 0; // Dagdag para pati keyboard activity
+        setInterval(() => {
+            idleTime++;
+            if (idleTime >= 30) { 
+                logout(); 
+            }
+        }, 60000);
+
         // Diretsong Dashboard
         loadDashboard();
     }
