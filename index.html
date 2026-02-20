@@ -15,12 +15,14 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --primary: #1a202c;
-            --accent: #3182ce;
-            --sidebar-width: 280px;
-            --sidebar-min: 80px;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+    /* Binago: Ginawang Off-White ang Primary */
+    --primary: #f8f9fa;       
+    --dark-text: #1a202c;     /* Para sa text na dati ay white */
+    --accent: #3182ce;        /* Blue accent */
+    --sidebar-width: 280px;
+    --sidebar-min: 80px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
         body, html {
             margin: 0; padding: 0;
@@ -89,18 +91,26 @@
             color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;
         }
 
-        /* --- SIDEBAR --- */
-        #sidebar {
-            width: var(--sidebar-width); background: var(--primary);
-            height: 100vh; position: fixed; transition: var(--transition); z-index: 1000; overflow: hidden;
-        }
-
+       /* --- SIDEBAR UPDATED --- */
+#sidebar {
+    width: var(--sidebar-width); 
+    background: var(--primary); /* Off-white background */
+    height: 100vh; 
+    position: fixed; 
+    transition: var(--transition); 
+    z-index: 1000; 
+    overflow: hidden;
+    
+    /* Eto yung Shadow na dinagdag natin */
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.05); 
+    border-right: 1px solid #e2e8f0; 
+}
         #sidebar.collapsed { width: var(--sidebar-min); }
 
         .sidebar-brand {
-            height: 80px; display: flex; align-items: center; padding: 0 20px;
-            color: white; cursor: pointer; white-space: nowrap;
-        }
+    height: 80px; display: flex; align-items: center; padding: 0 20px;
+    color: var(--dark-text); cursor: pointer; white-space: nowrap;
+}
 
         /* Palitan ang dating .z-icon ng ganito */
 .sidebar-logo {
@@ -128,25 +138,32 @@
 
         .search-box { padding: 10px 20px; transition: var(--transition); }
         .search-inner {
-            background: rgba(255, 255, 255, 0.1); border-radius: 10px;
-            display: flex; align-items: center; padding: 12px;
-        }
-        .search-inner input {
-            background: transparent; border: none; color: white;
-            margin-left: 10px; outline: none; width: 100%;
-        }
+    background: #edf2f7; /* Light gray box sa loob ng sidebar */
+    border-radius: 10px;
+    display: flex; align-items: center; padding: 12px;
+}
+.search-inner input {
+    background: transparent; border: none; 
+    color: var(--dark-text); /* Itim na text */
+    margin-left: 10px; outline: none; width: 100%;
+}
+.search-inner i { color: #718096; }
 
         .nav-item {
-            display: flex; align-items: center; padding: 18px 25px;
-            color: #a0aec0; text-decoration: none; cursor: pointer; transition: 0.2s;
-        }
+    display: flex; align-items: center; padding: 18px 25px;
+    color: #718096; /* Muted gray text */
+    text-decoration: none; cursor: pointer; transition: 0.2s;
+}
         .nav-item.active {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border-left: 4px solid var(--accent);
-        }
-        .nav-item:hover { background: rgba(255,255,255,0.05); color: white; }
-        .nav-item i { font-size: 1.3rem; min-width: 35px; }
+    background: #ebf8ff; /* Light blue tint pag active */
+    color: var(--accent);
+    border-left: 4px solid var(--accent);
+}
+        .nav-item:hover { 
+    background: #edf2f7; 
+    color: var(--accent); 
+}
+       .nav-item i { font-size: 1.3rem; min-width: 35px; }
         #sidebar.collapsed .nav-item span { display: none; }
         
         /* Table & Filter Styles */
@@ -228,7 +245,13 @@ td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
         .content { margin-left: var(--sidebar-width); padding: 25px 40px; transition: var(--transition); }
         .content.expanded { margin-left: var(--sidebar-min); }
 
-        #greet { font-size: 1.2rem; font-weight: 700; color: var(--primary); margin: 0; line-height: 32px; }
+        #greet { 
+    font-size: 1.2rem; 
+    font-weight: 700; 
+    color: #1a202c; /* Gawin nating solid dark gray/black ito */
+    margin: 0; 
+    line-height: 32px; 
+}
         .sub-text { font-size: 0.95rem; color: #718096; margin: 5px 0 30px 0; }
 
         body.dark-mode { background-color: #121212; color: white; }
