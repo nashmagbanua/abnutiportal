@@ -1003,7 +1003,9 @@ async function fetchDashboardData(yDate) {
 window.onload = function() {
     const isLoggedIn = localStorage.getItem('isLoggedIn');
     const userCode = localStorage.getItem('userCode');
-
+    if (document.getElementById('login-page').style.display !== 'none') {
+    document.getElementById('passCode').focus();
+}
     if (isLoggedIn === 'true' && db[userCode]) {
         // Skip login page
         document.getElementById('login-page').style.display = 'none';
