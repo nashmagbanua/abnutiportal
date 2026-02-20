@@ -1056,6 +1056,16 @@ const gpmSubscription = supabaseClient
         loadDashboard();
     }
 };
+        // Pakikinggan natin ang keyboard press sa passcode input
+document.getElementById('passCode').addEventListener('keyup', function(event) {
+    // 13 ang key code ng 'Enter', pero mas modern ang event.key === 'Enter'
+    if (event.key === 'Enter') {
+        // Pipigilan natin ang default behavior (para hindi mag-refresh ang page)
+        event.preventDefault();
+        // Tatawagin na natin ang login function mo
+        login();
+    }
+});
     </script>
 </body>
 </html>
