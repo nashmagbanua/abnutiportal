@@ -53,7 +53,12 @@
     margin: 0;
 }
 .stat-card h4 { margin: 0; color: #718096; font-size: 0.85rem; text-transform: uppercase; }
-.stat-card .value { font-size: 1.8rem; font-weight: 800; color: var(--primary); margin: 10px 0; }
+.stat-card .value { 
+    font-size: 1.8rem; 
+    font-weight: 800; 
+    color: #1a202c; 
+    margin: 10px 0; 
+}
 .stat-card .label { font-size: 0.8rem; color: #a0aec0; }
 
 .chart-container {
@@ -159,11 +164,17 @@
     display: flex; align-items: center; padding: 12px;
 }
 .search-inner input {
-    background: transparent; border: none; 
-    color: var(--dark-text); /* Itim na text */
-    margin-left: 10px; outline: none; width: 100%;
+    background: transparent; 
+    border: none; 
+    color: #1a202c; /* Dark text para sa search */
+    margin-left: 10px; 
+    outline: none; 
+    width: 100%;
 }
-.search-inner i { color: #718096; }
+
+.search-inner i { 
+    color: #718096; /* Gray icon para lilitaw sa off-white */
+}
 
         .nav-item {
     display: flex; align-items: center; padding: 18px 25px;
@@ -197,7 +208,7 @@
 .filter-bar input[type="date"] { padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-family: inherit; }
 .info-badge { background: #edf2f7; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; color: #4a5568; font-weight: 600; }
 .total-badge {
-    background: var(--primary);
+    background: #38a169; 
     color: white;
     padding: 5px 15px;
     border-radius: 20px;
@@ -247,7 +258,12 @@ td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
         .user-info-header {
             padding: 12px; border-bottom: 1px solid #edf2f7; margin-bottom: 5px;
         }
-        .user-info-header p { margin: 0; font-weight: bold; font-size: 14px; color: var(--primary); }
+        .user-info-header p { 
+    margin: 0; 
+    font-weight: bold; 
+    font-size: 14px; 
+    color: #1a202c; /* Pinalitan ang var(--primary) ng Dark */
+}
         .user-info-header small { color: #718096; }
 
         .dropdown-item {
