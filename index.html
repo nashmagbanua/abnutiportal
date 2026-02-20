@@ -873,7 +873,6 @@ async function fetchLatestGPM() {
     }
 
     if (data) {
-        // GAMITIN ang 'gpm' imbes na 'gpm_value'
         const value = parseFloat(data.gpm).toFixed(2);
         const time = new Date(data.created_at).toLocaleTimeString([], { 
             hour: '2-digit', 
@@ -883,8 +882,13 @@ async function fetchLatestGPM() {
         gpmDisplay.innerText = `${value} GPM`;
         timeDisplay.innerHTML = `<i class="far fa-clock"></i> ${time}`;
         
-        // Warning color
-        gpmDisplay.style.color = (value < 100) ? "#e53e3e" : "var(--primary)";
+        // --- ETO ANG FIX ---
+        // Imbes na var(--primary), gagamit tayo ng solid na kulay para laging kita.
+        if (value < 150) {
+            gpmDisplay.style.color = "#e53e3e"; // Red kung low flow
+        } else {
+            gpmDisplay.style.color = "#1a202c"; // Dark Gray/Black kung normal
+        }
     }
 }
 async function fetchDashboardData(yDate) {
