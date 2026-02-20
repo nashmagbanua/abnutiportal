@@ -760,19 +760,27 @@ function fetchCoalDelivery(date) {
 }
 
 // Function para i-check kung nag-input na ang operator today
-function checkTodayStatus() {
+async function checkTodayStatus() {
+    const statusEl = document.getElementById('updateStatus');
+    if (!statusEl) return;
+
     const today = new Date().toISOString().split('T')[0];
-    database.ref('readings/' + today).on('value', (snapshot) => {
-        const statusEl = document.getElementById('updateStatus');
-        const progressEl = document.getElementById('todayProgress');
-        if (snapshot.exists()) {
-            statusEl.innerHTML = "<span style='color: #48bb78;'>● Updated for today</span>";
-            progressEl.innerText = "COMPLETED";
-        } else {
-            statusEl.innerHTML = "<span style='color: #e53e3e;'>● No data for today</span>";
-            progressEl.innerText = "PENDING";
-        }
-    });
+    const startOfDay = `${today}T00:00:00.000Z`;
+    const endOfDay = `${today}T23:59:59.999Z`;
+
+    const { count, error } = await supabaseClient
+        .from('gpm_readings')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', startOfDay)
+        .lte('created_at', endOfDay);
+
+    if (error) return;
+
+    if (count > 0) {
+        statusEl.innerHTML = "<span style='color: #48bb78;'>● Updated for today</span>";
+    } else {
+        statusEl.innerHTML = "<span style='color: #e53e3e;'>● No data for today</span>";
+    }
 }
 async function fetchLatestGPM() {
     const gpmDisplay = document.getElementById('latestGPM');
@@ -936,17 +944,25 @@ window.onload = function() {
         document.getElementById('pRole').innerText = db[userCode].r;
 
         // --- REALTIME SUBSCRIPTION ---
-        const gpmSubscription = supabaseClient
-          .channel('custom-all-channel')
-          .on('postgres_changes', 
-              { event: 'INSERT', schema: 'public', table: 'gpm_readings' }, 
-              payload => {
-                  console.log('New GPM detected!', payload.new);
-                  if(document.getElementById('latestGPM')) fetchLatestGPM(); 
-                  if(document.getElementById('gpmTableBody')) fetchGPMLogs(); 
-              }
-          )
-          .subscribe();
+        // --- SA LOOB NG window.onload ---
+const gpmSubscription = supabaseClient
+  .channel('custom-all-channel')
+  .on('postgres_changes', 
+      { event: 'INSERT', schema: 'public', table: 'gpm_readings' }, 
+      payload => {
+          console.log('New GPM detected!', payload.new);
+          
+          // 1. I-update ang GPM Value sa card
+          if(document.getElementById('latestGPM')) fetchLatestGPM(); 
+          
+          // 2. I-update ang "Updated for today" status (ITO ANG BAGO)
+          if(document.getElementById('updateStatus')) checkTodayStatus();
+          
+          // 3. I-refresh ang table kung nasa GPM page
+          if(document.getElementById('gpmTableBody')) fetchGPMLogs(); 
+      }
+  )
+  .subscribe();
 
         // --- SECURITY: IDLE TIMER ---
         let idleTime = 0;
