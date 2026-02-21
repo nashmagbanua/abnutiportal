@@ -145,21 +145,28 @@
         </div>
 
         <div class="login-side">
-            <div id="login-form" class="glass-box">
-                <h2 style="text-align:center; margin-top:0;">Welcome Back</h2>
-                <div class="input-group">
-                    <label>Company ID</label>
-                    <input type="text" id="loginID" placeholder="Enter ID">
-                </div>
-                <div class="input-group">
-                    <label>Password</label>
-                    <input type="password" id="loginPass" placeholder="••••••••">
-                    <i class="fas fa-eye toggle-pass" style="position:absolute; right:15px; top:38px; cursor:pointer; color:gray;" onclick="togglePassword('loginPass', this)"></i>
-                </div>
-                <button class="login-btn" onclick="handleLogin()">SIGN IN</button>
-                <p style="text-align:center; font-size: 0.85rem; margin-top: 20px; cursor:pointer;" onclick="toggleForms()">No account? <span style="color:var(--primary)">Register</span></p>
-            </div>
-
+<div id="login-form" class="glass-box">
+    <h2 style="text-align:center; margin-top:0;">Welcome Back</h2>
+    <div class="input-group">
+        <label>Company ID</label>
+        <input type="text" id="loginID" placeholder="Enter ID">
+    </div>
+    
+    <div class="input-group">
+        <label>Password</label>
+        <div style="position: relative;">
+            <input type="password" id="loginPass" placeholder="••••••••">
+            
+            <i class="fas fa-eye toggle-pass" 
+               style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: gray;" 
+               onclick="togglePassword('loginPass', this)">
+            </i>
+        </div>
+    </div>
+    
+    <button class="login-btn" onclick="handleLogin()">SIGN IN</button>
+    <p style="text-align:center; font-size: 0.85rem; margin-top: 20px; cursor:pointer;" onclick="toggleForms()">No account? <span style="color:var(--primary)">Register</span></p>
+</div>
             <div id="register-form" class="glass-box" style="display:none;">
                 <h2 style="text-align:center; margin-top:0;">Create Account</h2>
                 <div class="input-group">
@@ -187,9 +194,15 @@
                 <label style="font-size: 0.8rem; color:gray; display:block; margin-bottom:10px;">Select Avatar</label>
                 <div class="avatar-grid" id="avatarGrid"></div>
                 <div class="input-group">
-                    <label>Password</label>
-                    <input type="password" id="regPass">
-                </div>
+    <label>Password</label>
+    <div style="position: relative;">
+        <input type="password" id="regPass" placeholder="••••••••">
+        <i class="fas fa-eye toggle-pass" 
+           style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: gray;" 
+           onclick="togglePassword('regPass', this)">
+        </i>
+    </div>
+</div>
                 <button class="login-btn" onclick="handleRegister()">REGISTER</button>
                 <p style="text-align:center; font-size: 0.85rem; margin-top: 15px; cursor:pointer;" onclick="toggleForms()">Back to Login</p>
             </div>
@@ -226,10 +239,15 @@
         });
 
         function togglePassword(id, el) {
-            const input = document.getElementById(id);
-            input.type = input.type === 'password' ? 'text' : 'password';
-            el.classList.toggle('fa-eye-slash');
-        }
+    const input = document.getElementById(id);
+    if (input.type === 'password') {
+        input.type = 'text';
+        el.classList.replace('fa-eye', 'fa-eye-slash');
+    } else {
+        input.type = 'password';
+        el.classList.replace('fa-eye-slash', 'fa-eye');
+    }
+}
 
         function toggleForms() {
             const login = document.getElementById('login-form');
