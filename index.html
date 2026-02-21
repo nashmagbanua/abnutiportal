@@ -13,330 +13,293 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        :root {
-    /* Binago: Ginawang Off-White ang Primary */
-    --primary: #f8f9fa;       
-    --dark-text: #1a202c;     /* Para sa text na dati ay white */
-    --accent: #38a169;        /* Blue accent */
-    --sidebar-width: 280px;
-    --sidebar-min: 80px;
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="users.js"></script>
+ <style>
+    :root {
+        /* Default Light Theme */
+        --primary: #f8f9fa;       
+        --dark-text: #1a202c;
+        --accent: #38a169;
+        --sidebar-width: 280px;
+        --sidebar-min: 80px;
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --bg-body: #f0f2f5;
+        --bg-card: #ffffff;
+        --text-main: #1a202c;
+        --text-sub: #718096;
+        --border-color: #e2e8f0;
+    }
 
-        body, html {
-            margin: 0; padding: 0;
-            font-family: 'Inter', sans-serif;
-            background-color: #f0f2f5;
-            transition: background 0.3s;
-        }
+    /* DARK MODE SETTINGS */
+    body.dark-mode {
+        --bg-body: #121212;
+        --bg-card: #1e1e1e;
+        --primary: #1a1a1a;
+        --text-main: #f7fafc;
+        --text-sub: #a0aec0;
+        --border-color: #2d3748;
+        --dark-text: #f7fafc;
+    }
 
-.stats-grid {
-    display: grid;
-    /* Binago: gagawin nating 2 columns lang kapag malapad ang screen */
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
-    gap: 20px;
-    margin-bottom: 30px;
-}
-.stat-card {
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-    border-left: 5px solid var(--accent);
-}
-.header-flex {
-    margin-bottom: 25px;
-}
-.header-flex h1 {
-    font-size: 1.5rem;
-    margin: 0;
-}
-stat-card h4 { 
-    margin: 0; 
-    color: #4a5568; /* Darker Gray para malinaw basahin */
-    font-size: 0.85rem; 
-    text-transform: uppercase; 
-    letter-spacing: 0.5px;
-}
-.stat-card .value { 
-    font-size: 1.8rem; 
-    font-weight: 800; 
-    color: #1a202c; 
-    margin: 10px 0; 
-}
-.stat-card .label { 
-    font-size: 0.8rem; 
-    color: #718096; 
-    font-weight: 500;
-}
-        #updateStatus {
-    font-size: 0.75rem; 
-    margin-top: 8px; 
-    font-weight: 600;
-    
-}
+    body, html {
+        margin: 0; padding: 0;
+        font-family: 'Inter', sans-serif;
+        background-color: var(--bg-body);
+        color: var(--text-main);
+        transition: background 0.3s;
+    }
 
-.chart-container {
-    background: white;
-    padding: 25px;
-    border-radius: 15px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-    height: 350px;
-}
-        /* --- LOGIN PAGE --- */
-        #login-page {
-    height: 100vh; 
-    display: flex; 
-    justify-content: center; 
-    align-items: center;
-    /* Eto ang secret: Dark gradient sa ibabaw ng image */
-    background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.7)), 
-                url('assets/background.webp') center/cover no-repeat;
-    position: fixed; 
-    width: 100%; 
-    z-index: 2000;
-}
-
-        .login-box {
-            background: white; padding: 35px; border-radius: 15px;
-            text-align: center; width: 320px; box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-        }
-
-        .pass-container { position: relative; margin: 15px 0; }
-        .pass-container input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .pass-container i { position: absolute; right: 15px; top: 15px; cursor: pointer; color: #718096; }
-
-        .login-box button {
-    width: 100%; 
-    padding: 12px; 
-    /* Green Theme Colors */
-    background: #38a169; /* Emerald/Forest Green */
-    color: white; 
-    border: none; 
-    border-radius: 8px; 
-    cursor: pointer; 
-    font-weight: bold;
-    font-size: 1rem;
-    transition: 0.3s;
-    /* Green Glow Shadow */
-    box-shadow: 0 4px 12px rgba(56, 161, 105, 0.3); 
-}
-        .login-box button:hover {
-    background: #2f855a; /* Mas madilim na green pag na-hover */
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(56, 161, 105, 0.4);
-}
-
-       /* --- SIDEBAR UPDATED --- */
-#sidebar {
-    width: var(--sidebar-width); 
-    background: var(--primary); /* Off-white background */
-    height: 100vh; 
-    position: fixed; 
+    /* --- LAYOUT & CONTENT --- */
+    .content { 
+        margin-left: var(--sidebar-width); 
+        padding: 25px 40px; 
+        transition: var(--transition); 
+    }
+    .content.expanded { margin-left: var(--sidebar-min); }
+     /* --- SEARCH BOX FIX --- */
+.search-box { 
+    padding: 10px 20px; 
     transition: var(--transition); 
-    z-index: 1000; 
-    overflow: hidden;
-    
-    /* Eto yung Shadow na dinagdag natin */
-    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.05); 
-    border-right: 1px solid #e2e8f0; 
-}
-        #sidebar.collapsed { width: var(--sidebar-min); }
-
-        .sidebar-brand {
-    height: 80px; display: flex; align-items: center; padding: 0 20px;
-    color: var(--dark-text); cursor: pointer; white-space: nowrap;
+    overflow: hidden; /* Para hindi lumampas ang text box */
 }
 
-        /* Palitan ang dating .z-icon ng ganito */
-.sidebar-logo {
-    width: 40px;          /* Tamang laki para sa icon */
-    height: 40px;
-    object-fit: contain;  /* Para hindi ma-stretch ang picture */
-    transition: var(--transition);
-    min-width: 40px;      /* Para hindi lumiit masyado pag nag-collapse */
-}
-
-/* Optional: Dagdag na spacing para sa text sa tabi ng logo */
-.sidebar-brand span {
-    margin-left: 10px;
-    font-weight: bold;
-    white-space: nowrap;
-}
-
-        /*.sidebar-brand span {
-            margin-left: 15px; font-weight: bold; font-size: 1.2rem;
-            transition: opacity 0.2s;
-        }
-        */
-        #sidebar.collapsed .sidebar-brand span, 
-        #sidebar.collapsed .search-box { opacity: 0; pointer-events: none; }
-
-        .search-box { padding: 10px 20px; transition: var(--transition); }
-        .search-inner {
-    background: #edf2f7; /* Light gray box sa loob ng sidebar */
+.search-inner {
+    background: rgba(0,0,0,0.05); /* Bagong dynamic gray background */
     border-radius: 10px;
-    display: flex; align-items: center; padding: 12px;
+    display: flex; 
+    align-items: center; 
+    padding: 12px;
+    min-width: 40px; /* Sukat para sa icon */
 }
+
 .search-inner input {
     background: transparent; 
     border: none; 
-    color: #1a202c; /* Dark text para sa search */
+    color: var(--text-main); 
     margin-left: 10px; 
     outline: none; 
     width: 100%;
+    transition: var(--transition);
 }
 
 .search-inner i { 
-    color: #718096; /* Gray icon para lilitaw sa off-white */
+    color: var(--text-sub); 
+    min-width: 20px;
+    text-align: center;
 }
 
-        .nav-item {
-    display: flex; align-items: center; padding: 18px 25px;
-    color: #718096; /* Muted gray text */
-    text-decoration: none; cursor: pointer; transition: 0.2s;
-}
-        .nav-item.active {
-    background: #ebf8ff; /* Light blue tint pag active */
-    color: var(--accent);
-    border-left: 4px solid var(--accent);
-}
-        .nav-item:hover { 
-    background: #edf2f7; 
-    color: var(--accent); 
-}
-       .nav-item i { font-size: 1.3rem; min-width: 35px; }
-        #sidebar.collapsed .nav-item span { display: none; }
-        
-        /* Table & Filter Styles */
-.data-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); margin-top: 20px; }
-.filter-bar { 
-    display: flex; 
-    align-items: center; 
-    gap: 15px; 
-    margin-bottom: 20px; 
-    background: #fff; 
-    padding: 15px; 
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-}
-.filter-bar input[type="date"] { padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-family: inherit; }
-.info-badge { background: #edf2f7; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; color: #4a5568; font-weight: 600; }
-.total-badge {
-    background: #38a169; 
-    color: white;
-    padding: 5px 15px;
-    border-radius: 20px;
-    font-weight: bold;
-    font-size: 0.9rem;
-}
-
-table { width: 100%; border-collapse: collapse; }
-th { text-align: left; padding: 12px; background: #f8fafc; color: #64748b; font-size: 0.8rem; text-transform: uppercase; border-bottom: 2px solid #edf2f7; }
-td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
-.text-blue { color: #3182ce; font-weight: bold; }
-
-        /* --- PROFILE FIXED CLICK LOGIC --- */
-        .profile-wrapper {
-            position: fixed; top: 20px; right: 35px; z-index: 1500;
-        }
-
-        .profile-circle {
-    width: 40px; 
-    height: 40px; 
-    border-radius: 50%;
-    /* Palitan ang URL ng path ng iyong SVG */
-    background: url('assets/visor.svg') center/cover no-repeat;
-    background-color: #edf2f7; /* Background color para sa icon */
-    border: 2px solid white; 
-    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+/* --- COLLAPSE LOGIC PARA SA SEARCH --- */
+#sidebar.collapsed .search-box {
     cursor: pointer;
+    padding: 10px 0 !important; /* Binawasan ang padding sa gilid para mag-center */
+    display: flex;
+    justify-content: center;
 }
-        .profile-circle:active { transform: scale(0.95); }
 
-        .dropdown-menu {
-            position: absolute; top: 50px; right: 0;
-            background: white; min-width: 220px; border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            display: none; /* Default hidden, controlled by JS */
-            padding: 8px;
-        }
-
-        /* Show class for JS */
-        .dropdown-menu.show { display: block; animation: slideDown 0.2s ease; }
-
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .user-info-header {
-            padding: 12px; border-bottom: 1px solid #edf2f7; margin-bottom: 5px;
-        }
-        .user-info-header p { 
-    margin: 0; 
-    font-weight: bold; 
-    font-size: 14px; 
-    color: #1a202c; /* Pinalitan ang var(--primary) ng Dark */
+#sidebar.collapsed .search-inner {
+    justify-content: center;
+    width: 45px; /* Fixed width para maging pabilog o square na sakto sa gitna */
+    height: 45px;
+    padding: 0;
+    background: rgba(56, 161, 105, 0.1); 
+    border-radius: 10px;
 }
-        .user-info-header small { color: #718096; }
 
-        .dropdown-item {
-            padding: 12px; border-radius: 8px; color: #2d3748;
-            cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px;
-            transition: 0.2s;
-        }
-        .dropdown-item:hover { background: #f7fafc; color: var(--accent); }
-
-        /* CONTENT AREA */
-        .content { margin-left: var(--sidebar-width); padding: 25px 40px; transition: var(--transition); }
-        .content.expanded { margin-left: var(--sidebar-min); }
-
-        #greet { 
-    font-size: 1.2rem; 
-    font-weight: 700; 
-    color: #1a202c; /* Gawin nating solid dark gray/black ito */
-    margin: 0; 
-    line-height: 32px; 
+#sidebar.collapsed .search-inner i {
+    margin: 0; /* Alisin ang margin para sentrong-sentro ang icon */
 }
-        .sub-text { font-size: 0.95rem; color: #718096; margin: 5px 0 30px 0; }
 
-        body.dark-mode { background-color: #121212; color: white; }
-        .dark-mode #greet { color: white; }
-        .dark-mode .dropdown-menu { background: #2d3748; color: white; }
-        .dark-mode .dropdown-item { color: white; }
-        .dark-mode .dropdown-item:hover { background: #4a5568; }
+#sidebar.collapsed .search-inner input {
+    opacity: 0;
+    width: 0;
+    margin: 0;
+    padding: 0;
+    display: none; /* Mas safe na i-none para hindi makaabala sa click */
+}
 
-        #main-app { display: none; }
-    </style>
+    /* --- STATS GRID --- */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    .stat-card {
+        background: var(--bg-card);
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        border-left: 5px solid var(--accent);
+    }
+    .stat-card h4 { 
+        margin: 0; 
+        color: var(--text-sub); 
+        font-size: 0.85rem; 
+        text-transform: uppercase; 
+        letter-spacing: 0.5px;
+    }
+    .stat-card .value { 
+        font-size: 1.8rem; 
+        font-weight: 800; 
+        color: var(--text-main); 
+        margin: 10px 0; 
+    }
+    .stat-card .label { 
+        font-size: 0.8rem; 
+        color: var(--text-sub); 
+        font-weight: 500;
+    }
+
+    /* --- CHART --- */
+    .chart-container {
+        background: var(--bg-card);
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        height: 350px;
+    }
+
+    /* --- SIDEBAR --- */
+    #sidebar {
+        width: var(--sidebar-width); 
+        background: var(--primary);
+        height: 100vh; 
+        position: fixed; 
+        transition: var(--transition); 
+        z-index: 1000; 
+        overflow: hidden;
+        box-shadow: 4px 0 15px rgba(0, 0, 0, 0.05); 
+        border-right: 1px solid var(--border-color); 
+    }
+    #sidebar.collapsed { width: var(--sidebar-min); }
+
+    .sidebar-brand {
+        height: 80px; display: flex; align-items: center; padding: 0 20px;
+        color: var(--dark-text); cursor: pointer; white-space: nowrap;
+    }
+    .sidebar-logo {
+        width: 40px; height: 40px; object-fit: contain; min-width: 40px;
+    }
+    .nav-item {
+        display: flex; align-items: center; padding: 18px 25px;
+        color: var(--text-sub); text-decoration: none; cursor: pointer; transition: 0.2s;
+    }
+    .nav-item.active {
+        background: rgba(56, 161, 105, 0.1);
+        color: var(--accent);
+        border-left: 4px solid var(--accent);
+    }
+    .nav-item:hover { background: rgba(0,0,0,0.05); color: var(--accent); }
+    .nav-item i { font-size: 1.3rem; min-width: 35px; }
+    #sidebar.collapsed .nav-item span { display: none; }
+    #sidebar.collapsed .sidebar-brand span { opacity: 0; pointer-events: none; }
+
+    /* --- TABLES & FILTERS --- */
+    .data-card { background: var(--bg-card); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); margin-top: 20px; }
+    .filter-bar { 
+        display: flex; align-items: center; gap: 15px; margin-bottom: 20px; 
+        background: var(--bg-card); padding: 15px; border-radius: 10px;
+        border: 1px solid var(--border-color);
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 12px; background: rgba(0,0,0,0.02); color: var(--text-sub); font-size: 0.8rem; text-transform: uppercase; border-bottom: 2px solid var(--border-color); }
+    td { padding: 12px; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; color: var(--text-main); }
+    .text-blue { color: #3182ce; font-weight: bold; }
+
+    /* --- PROFILE & DROPDOWN --- */
+    .profile-wrapper { position: fixed; top: 20px; right: 35px; z-index: 1500; }
+    .profile-circle {
+        width: 40px; height: 40px; border-radius: 50%;
+        background: url('assets/visor.svg') center/cover no-repeat #edf2f7;
+        border: 2px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.15); cursor: pointer;
+    }
+    .dropdown-menu {
+        position: absolute; top: 50px; right: 0;
+        background: var(--bg-card); min-width: 220px; border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15); display: none; padding: 8px; border: 1px solid var(--border-color);
+    }
+    .dropdown-menu.show { display: block; animation: slideDown 0.2s ease; }
+    .dropdown-item { padding: 12px; border-radius: 8px; color: var(--text-main); cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; }
+    .dropdown-item:hover { background: rgba(0,0,0,0.05); color: var(--accent); }
+
+    /* --- LOGIN PAGE --- */
+    #login-page {
+        height: 100vh; display: flex; justify-content: center; align-items: center;
+        background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.7)), url('assets/background.webp') center/cover no-repeat;
+        position: fixed; width: 100%; z-index: 2000;
+    }
+    .login-box { background: white; padding: 35px; border-radius: 15px; text-align: center; width: 320px; color: #1a202c; }
+    .login-box input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+    .login-box button { width: 100%; padding: 12px; background: #38a169; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+
+      /* --- PRINT PAGE --- */
+  @media print {
+    /* 1. Itago ang lahat ng hindi kailangan */
+    #sidebar, .sidebar, .profile-wrapper, .btn-export, .btn-print {
+        display: none !important;
+    }
+
+    /* 2. Tanggalin ang malalaking margin sa papel */
+    @page {
+        margin: 0.5cm !important; /* Pinaliit para mas maraming magkasya */
+    }
+
+    /* 3. "Force" to fit in one page */
+    html, body {
+        height: 99%; /* Iwasan ang pag-overflow sa Page 2 */
+        overflow: hidden;
+        font-size: 9px !important; /* Pinaliit ang font para sa buong page */
+    }
+
+    .content, #cont {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+    }
+
+    /* 4. Siksikan ang Table Rows */
+    table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        line-height: 1 !important; /* Pinaliit ang space sa pagitan ng lines */
+    }
+
+    th, td {
+        padding: 3px 5px !important; /* Sobrang nipis na padding */
+        border: 1px solid #000 !important;
+    }
+
+    /* 5. Title at Header adjustments */
+    h1#greet { font-size: 16px !important; margin: 0 !important; }
+    .sub-text { font-size: 10px !important; margin-bottom: 10px !important; }
+    
+    .filter-bar {
+        padding: 5px 0 !important;
+        margin-bottom: 10px !important;
+        border: none !important;
+    }
+
+    /* Iwasan ang page break sa loob ng table */
+    .data-card {
+        page-break-inside: avoid !important;
+    }
+}
+</style>
 </head>
 <body>
-
-    <div id="login-page">
-        <div class="login-box">
-            <img src="assets/abnlogo.png" alt="Logo" style="width: 80px;">
-            <h2 style="margin: 10px 0 25px;">ABN Utilities</h2>
-            <div class="pass-container">
-                <input type="password" id="passCode" placeholder="Enter Access Code">
-                <i class="fas fa-eye" id="togglePass" onclick="togglePassView()"></i>
-            </div>
-            <button onclick="login()">SIGN IN</button>
-        </div>
-    </div>
-
-    <div id="main-app">
+<div id="main-app">
         <div id="sidebar">
             <div class="sidebar-brand" onclick="toggleSide()">
     <img src="assets/abnlogo.png" alt="Logo" class="sidebar-logo">
     <span>ABN UTILITIES</span>
 </div>
-            <div class="search-box">
-                <div class="search-inner">
-                    <i class="fas fa-search" style="color: #a0aec0;"></i>
-                    <input type="text" placeholder="Search parameters...">
-                </div>
-            </div>
+            <div class="search-box" onclick="expandSidebarForSearch()">
+    <div class="search-inner">
+        <i class="fas fa-search" style="color: #a0aec0;"></i>
+        <input type="text" id="sidebarSearch" placeholder="Search parameters..." oninput="handleSidebarSearch()">
+    </div>
+</div>
             <div style="margin-top: 10px;">
     <div class="nav-item active" onclick="loadDashboard()"><i class="fas fa-th-large"></i> <span>Dashboard</span></div>
     <div class="nav-item" onclick="openGPMCalculator()"><i class="fas fa-calculator"></i> <span>GPM Calculator</span></div>
@@ -389,14 +352,7 @@ td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
         const SUPABASE_URL = 'https://qbeacrpoyfacgmbzxjcu.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFiZWFjcnBveWZhY2dtYnp4amN1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2NTM5NTIsImV4cCI6MjA2NDIyOTk1Mn0.6kfxKLJxidW4BcqsMJte61AtzydrTW-1ZJIJytiUBt4';
        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        const db = {
-    "abn2026": { n: "Sir Carl Bryan", r: "Department Head", p: "visor.svg" },
-    "abn20261": { n: "A. Ortega", r: "Supervisor", p: "visor1.svg" },
-    "abn20262": { n: "A. Calisay", r: "Supervisor", p: "visor2.svg" },
-    "abn20263": { n: "A. Apuang", r: "Supervisor", p: "visor3.svg" },
-    "abn20264": { n: "J. Reyes", r: "Supervisor", p: "visor4.svg" }
-};
-        // Initialize Firebase
+     // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
         
@@ -417,7 +373,7 @@ function updateSidebarActive(index) {
 
     content.innerHTML = `
         <div style="margin-bottom: 20px;">
-            <h1 id="greet" style="font-size: 1.5rem;">GPM & Deepwell Monitoring</h1>
+            <h1 id="greet" style="font-size: 1.2rem;">GPM & Deepwell Monitoring</h1>
             <p class="sub-text" style="margin:0;">System logs for Flow Rate, Pump Status, and Frequencies.</p>
         </div>
 
@@ -433,13 +389,13 @@ function updateSidebarActive(index) {
                 <select id="shiftFilter" onchange="fetchGPMLogs()" 
                         style="padding: 6px 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-family: inherit; background: white;">
                     <option value="ALL">All Shifts</option>
-                    <option value="Dayshift">Dayshift</option>
-                    <option value="Nightshift">Nightshift</option>
+                    <option value="Morning">Dayshift (Morning)</option>
+                    <option value="Nigth">Nightshift (Nigth)</option> 
                 </select>
             </div>
 
             <div style="margin-left: auto; display: flex; gap: 10px; align-items: center;">
-                <span class="total-badge" id="dailyAvgGPM">Avg: 0.00 GPM</span>
+                <span class="total-badge" id="dailyAvgGPM">Logs: 0 | Latest: 0.00 GPM</span>
             </div>
         </div>
 
@@ -452,7 +408,7 @@ function updateSidebarActive(index) {
                         <th>CWS Status</th>
                         <th>Deepwell 9</th>
                         <th>Deepwell 10</th>
-                        <th>Operator</th>
+                        <th style="min-width: 150px;">Operator & Action</th>
                     </tr>
                 </thead>
                 <tbody id="gpmTableBody">
@@ -462,13 +418,12 @@ function updateSidebarActive(index) {
         </div>
     `;
 
-    fetchGPMLogs(); // Tatawagin na natin nang walang parameters dahil kukunin sa ID
+    fetchGPMLogs();
 }
-        async function fetchGPMLogs() {
+      async function fetchGPMLogs() {
     const tbody = document.getElementById('gpmTableBody');
-    const avgDisplay = document.getElementById('dailyAvgGPM');
+    const badgeDisplay = document.getElementById('dailyAvgGPM');
     
-    // Kunin ang values mula sa UI
     const selectedDate = document.getElementById('gpmDateFilter').value;
     const selectedShift = document.getElementById('shiftFilter').value;
 
@@ -476,17 +431,16 @@ function updateSidebarActive(index) {
 
     tbody.innerHTML = "<tr><td colspan='6' style='text-align:center; padding: 40px;'>Filtering data...</td></tr>";
 
+    // Gawing local time ang start at end para match sa database query
     const startOfDay = `${selectedDate}T00:00:00.000Z`;
     const endOfDay = `${selectedDate}T23:59:59.999Z`;
 
-    // 1. Simulan ang query
     let query = supabaseClient
         .from('gpm_readings')
         .select('*')
         .gte('created_at', startOfDay)
         .lte('created_at', endOfDay);
 
-    // 2. Dagdag na filter kung hindi "ALL" ang shift
     if (selectedShift !== "ALL") {
         query = query.eq('shift', selectedShift);
     }
@@ -499,18 +453,16 @@ function updateSidebarActive(index) {
     }
 
     if (!data || data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 30px; color: #a0aec0;">No records found for this selection.</td></tr>`;
-        avgDisplay.innerText = "Avg: 0.00 GPM";
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 30px; color: #a0aec0;">No records found.</td></tr>`;
+        badgeDisplay.innerText = "No Data";
+        badgeDisplay.style.background = "#cbd5e0"; 
         return;
     }
 
     let rows = "";
-    let totalGPM = 0;
-
     data.forEach(log => {
         const time = new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         const gpmVal = parseFloat(log.gpm).toFixed(2);
-        totalGPM += parseFloat(log.gpm);
 
         const dw9Status = log.deepwell9_active 
             ? `<span style="color:#48bb78;">● ON</span> <small>${log.deepwell9_frequency}Hz</small>` 
@@ -520,6 +472,7 @@ function updateSidebarActive(index) {
             ? `<span style="color:#48bb78;">● ON</span> <small>${log.deepwell10_frequency}Hz</small>` 
             : `<span style="color:#a0aec0;">○ OFF</span>`;
 
+        // DITO ANG POSIBLENG ERROR: Siguraduhin na malinis ang pagkaka-copy nito
         rows += `
             <tr>
                 <td><b>${time}</b></td>
@@ -527,53 +480,134 @@ function updateSidebarActive(index) {
                 <td><small>${log.cws_status}</small></td>
                 <td>${dw9Status}</td>
                 <td>${dw10Status}</td>
-                <td><b>${log.operator}</b><br><small style="color:#718096;">${log.shift}</small></td>
+                <td>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <b>${log.operator}</b><br>
+                            <small style="color:#718096;">${log.shift}</small>
+                        </div>
+               <button onclick="deleteGPMLog('${log.id}', event)" 
+        style="background: none; border: none; color: #e53e3e; cursor: pointer; padding: 5px 10px;">
+    <i class="fas fa-trash-alt"></i>
+</button>
+                        </button>
+                    </div>
+                </td>
             </tr>
         `;
     });
 
     tbody.innerHTML = rows;
-    avgDisplay.innerText = `Avg: ${(totalGPM / data.length).toFixed(2)} GPM`;
+
+    const totalCount = data.length;
+    const latestGPM = parseFloat(data[0].gpm).toFixed(2);
+    
+    badgeDisplay.innerHTML = `LOGS: ${totalCount} | LATEST: ${latestGPM} GPM`;
+    badgeDisplay.style.background = (parseFloat(latestGPM) < 100) ? "#e53e3e" : "#38a169";
 }
+        async function deleteGPMLog(logId, e) {
+    if (!logId || logId === 'undefined') {
+        alert("Error: Missing ID!");
+        return;
+    }
+
+    const confirmDelete = confirm("Sigurado ka bang buburahin ang record na ito?");
+    if (!confirmDelete) return;
+
+    try {
+        // 1. Burahin sa Supabase
+        const { data, error, status } = await supabaseClient
+            .from('gpm_readings')
+            .delete()
+            .eq('id', logId);
+
+        if (error) throw error;
+
+        // Debugging: 204 means success delete sa Supabase
+        console.log("Supabase Status:", status);
+
+        // 2. SUCCESS! Burahin agad sa mata mo (UI)
+        const row = e.target.closest('tr');
+        if (row) {
+            row.style.transition = "0.3s";
+            row.style.opacity = "0";
+            row.style.background = "#fff5f5";
+            setTimeout(() => row.remove(), 300);
+        }
+
+        alert("Record deleted permanently!");
+
+    } catch (err) {
+        console.error("Delete Failed:", err);
+        alert("Failed to delete: " + err.message);
         
+        // Pag nag-error, i-refresh ang logs para bumalik 'yung UI sa tama
+        fetchGPMLogs();
+    }
+}
 function openPowerMonitor() {
     updateSidebarActive(2);
     const today = new Date().toISOString().split('T')[0];
     const content = document.getElementById('cont');
 
     content.innerHTML = `
-        <div style="margin-bottom: 20px;">
-            <h1 id="greet" style="font-size: 1.5rem;">Power Consumption</h1>
-            <p class="sub-text" style="margin:0;">Live utility tracking and historical logs.</p>
+    <div style="margin-bottom: 20px;">
+        <h1 id="greet" style="font-size: 1.2rem;">Power Consumption</h1>
+        <p class="sub-text" style="margin:0;">Live utility tracking and historical logs.</p>
+    </div>
+
+    <div class="filter-bar" style="display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 15px; border-radius: 10px; background: var(--bg-card); border: 1px solid var(--border-color); margin-bottom: 20px;">
+        
+        <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 0.9rem; color: var(--text-sub); font-weight: 600;">Filter Date:</span>
+                <input type="date" id="dateFilter" value="${today}" onchange="fetchPowerData(this.value)" 
+                       style="padding: 6px 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-card); color: var(--text-main); font-family: inherit;">
+            </div>
+            <span id="opBadge" class="info-badge">Operator: ---</span>
+            <span id="grandTotalDisplay" style="font-weight: bold; font-size: 0.95rem;">Total: 0.00 kWh</span>
         </div>
 
-        <div class="filter-bar">
-            <span style="font-size: 0.9rem; color: #4a5568; font-weight: 600;">Filter Date:</span>
-            <input type="date" id="dateFilter" value="${today}" onchange="fetchPowerData(this.value)" 
-                   style="padding: 6px 10px; border: 1px solid #cbd5e0; border-radius: 6px;">
-            
-            <span class="info-badge" id="opBadge">Operator: ---</span>
-            <span class="total-badge" id="grandTotalDisplay">Total: 0.00 kWh</span>
+        <div style="display: flex; gap: 8px;">
+            <button onclick="exportPowerToExcel()" class="btn-export" style="padding: 8px 12px; font-size: 0.8rem; background: #2f855a; color: white; border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                <i class="fas fa-file-excel"></i> Export Excel
+            </button>
+            <button onclick="window.print()" class="btn-print" style="padding: 8px 12px; font-size: 0.8rem; background: #4a5568; color: white; border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                <i class="fas fa-print"></i> Print Report
+            </button>
         </div>
+    </div>
 
-        <div class="data-card">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Equipment Name</th>
-                        <th>Previous (kWh)</th>
-                        <th>Current (kWh)</th>
-                        <th>Usage (kWh)</th>
-                    </tr>
-                </thead>
-                <tbody id="powerBody">
-                    <tr><td colspan="4">Loading data...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    `;
+    <div class="data-card">
+        <table>
+            <thead>
+                <tr>
+                    <th>Equipment Name</th>
+                    <th>Previous (kWh)</th>
+                    <th>Current (kWh)</th>
+                    <th>Usage (kWh)</th>
+                </tr>
+            </thead>
+            <tbody id="powerBody">
+                <tr><td colspan="4">Loading data...</td></tr>
+            </tbody>
+        </table>
+    </div>
+`;
     
     fetchPowerData(today);
+}
+        function exportPowerToExcel() {
+    const table = document.querySelector(".data-card table");
+    const dateSelected = document.getElementById('dateFilter').value;
+    const operator = document.getElementById('opBadge').innerText;
+    const total = document.getElementById('grandTotalDisplay').innerText;
+
+    // Convert table to worksheet
+    const wb = XLSX.utils.table_to_book(table, { sheet: "Power Consumption" });
+    
+    // Download file
+    XLSX.writeFile(wb, `Power_Report_${dateSelected}.xlsx`);
 }
 
 function fetchPowerData(selectedDate) {
@@ -780,7 +814,8 @@ function fetchCoalDelivery(date) {
     const content = document.getElementById('cont');
     const userCode = localStorage.getItem('userCode');
     const userName = db[userCode] ? db[userCode].n : "User";
-
+    const sInput = document.getElementById('sidebarSearch');
+    if(sInput) sInput.value = "";
     // Dynamic Greeting
     const hour = new Date().getHours();
     let greetText = "Magandang Araw";
@@ -793,12 +828,12 @@ function fetchCoalDelivery(date) {
     const yDate = yesterday.toISOString().split('T')[0];
 
     content.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <h1 id="greet">${greetText}, ${userName}! 👋</h1>
-                <p class="sub-text">Narito ang summary ng plant performance ngayong araw.</p>
-            </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <div>
+            <h1 id="greet" style="font-size: 1.2rem; margin: 0; line-height: 1.2;">${greetText}, ${userName}! 👋</h1>
+            <p class="sub-text" style="font-size: 0.85rem; margin: 2px 0 0 0;">Narito ang summary ng plant performance ngayong araw.</p>
         </div>
+    </div>
 
         <div class="stats-grid">
             <div class="stat-card">
@@ -825,9 +860,10 @@ function fetchCoalDelivery(date) {
         </div>
     `;
 
+   setTimeout(() => {
     fetchDashboardData(yDate);
-    checkTodayStatus();
-        fetchLatestGPM();// Bagong function para i-check kung may entry na today
+    fetchLatestGPM(); // Tawagin dito
+}, 150);
 }
 
 // Function para i-check kung nag-input na ang operator today
@@ -857,72 +893,74 @@ async function fetchLatestGPM() {
     const gpmDisplay = document.getElementById('latestGPM');
     const timeDisplay = document.getElementById('gpmTime');
     
-    // Safety check: baka wala pa sa screen ang element
-    if (!gpmDisplay) return;
+    try {
+        // Kunin ang pinaka-latest na record (kahit anong date)
+        const { data, error } = await supabaseClient
+            .from('gpm_readings')
+            .select('gpm, created_at')
+            .order('created_at', { ascending: false })
+            .limit(1);
 
-    const { data, error } = await supabaseClient
-        .from('gpm_readings') 
-        .select('gpm, created_at') // 'gpm' ang gamit mo sa .select()
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
+        if (error) throw error;
 
-    if (error) {
-        console.error("Supabase Error:", error);
-        return;
-    }
+        if (data && data.length > 0) {
+            const latest = data[0];
+            const readingDate = new Date(latest.created_at);
+            const today = new Date();
 
-    if (data) {
-        const value = parseFloat(data.gpm).toFixed(2);
-        const time = new Date(data.created_at).toLocaleTimeString([], { 
-            hour: '2-digit', 
-            minute: '2-digit' 
-        });
+            // I-format ang Time
+            const timeStr = readingDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            // I-check kung "Today" o "Ibang Date"
+            const isToday = readingDate.toDateString() === today.toDateString();
+            
+            const dateStr = isToday 
+                ? "Today" 
+                : readingDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
-        gpmDisplay.innerText = `${value} GPM`;
-        timeDisplay.innerHTML = `<i class="far fa-clock"></i> ${time}`;
-        
-        // --- ETO ANG FIX ---
-        // Imbes na var(--primary), gagamit tayo ng solid na kulay para laging kita.
-        if (value < 150) {
-            gpmDisplay.style.color = "#e53e3e"; // Red kung low flow
+            // Display ang GPM at ang Date/Time
+            gpmDisplay.innerText = parseFloat(latest.gpm).toFixed(2) + " GPM";
+            timeDisplay.innerHTML = `<i class="far fa-clock"></i> ${timeStr} | <span style="color: ${isToday ? '#48bb78' : '#e53e3e'}; font-weight: bold;">${dateStr}</span>`;
+            
         } else {
-            gpmDisplay.style.color = "#1a202c"; // Dark Gray/Black kung normal
+            gpmDisplay.innerText = "No Data";
+            timeDisplay.innerText = "No records found in database";
         }
+    } catch (err) {
+        console.error("Error fetching latest GPM:", err);
+        gpmDisplay.innerText = "Error";
     }
 }
 async function fetchDashboardData(yDate) {
-    // 1. Kunin ang Yesterday's Total (Existing logic mo)
+    // 1. Kunin ang Yesterday's Total
     database.ref('readings/' + yDate).once('value', (snapshot) => {
         const data = snapshot.val();
         let total = 0;
-        let count = 0;
         if (data) {
             Object.keys(data).forEach(key => {
                 if(key !== 'metadata') {
                     total += parseFloat(data[key].usage) || 0;
-                    count++;
                 }
             });
         }
-        document.getElementById('yestTotal').innerText = total.toLocaleString(undefined, {minimumFractionDigits: 2}) + " kWh";
+        const yestElem = document.getElementById('yestTotal');
+        if (yestElem) {
+            yestElem.innerText = total.toLocaleString(undefined, {minimumFractionDigits: 2}) + " kWh";
+        }
     });
 
     // 2. LOGIC PARA SA LAST 7 DAYS CHART
     const labels = [];
-    const chartData = [];
     const datePromises = [];
 
-    // Loop para makuha ang huling 7 araw
     for (let i = 6; i >= 0; i--) {
         const d = new Date();
         d.setDate(d.getDate() - i);
         const dateStr = d.toISOString().split('T')[0];
-        const dayName = d.toLocaleDateString('en-US', { weekday: 'short' }); // Mon, Tue, etc.
+        const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
         
         labels.push(dayName);
         
-        // Gawa ng "promise" para sa bawat araw
         const promise = database.ref('readings/' + dateStr).once('value').then(snap => {
             const dayReadings = snap.val();
             let dayTotal = 0;
@@ -936,22 +974,28 @@ async function fetchDashboardData(yDate) {
         datePromises.push(promise);
     }
 
-    // Hintayin matapos lahat ng pag-fetch bago i-render ang Chart
+    // Hintayin matapos ang fetch
     const results = await Promise.all(datePromises);
 
-    // 3. I-render na ang Chart gamit ang REAL DATA
-    const ctx = document.getElementById('usageChart').getContext('2d');
+    // --- SAFETY CHECK DITO ---
+    const canvas = document.getElementById('usageChart');
+    if (!canvas) {
+        console.warn("Usage Chart element missing. User likely navigated away.");
+        return; // Itigil ang function, huwag mag-error
+    }
+
+    const ctx = canvas.getContext('2d');
     
-    // Check kung may existing chart na para hindi mag-overlap
+    // I-render na ang Chart
     if (window.myUsageChart) { window.myUsageChart.destroy(); }
 
     window.myUsageChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: labels, // ['Mon', 'Tue'...]
+            labels: labels,
             datasets: [{
                 label: 'Daily Consumption (kWh)',
-                data: results, // [1200, 1500...] real data mula sa Firebase
+                data: results,
                 borderColor: '#3182ce',
                 backgroundColor: 'rgba(49, 130, 206, 0.1)',
                 fill: true,
@@ -990,82 +1034,105 @@ async function fetchDashboardData(yDate) {
         function toggleDarkMode() {
             document.body.classList.toggle('dark-mode');
         }
-        
-        function logout() {
-    // Linisin ang memory
-    localStorage.removeItem('isLoggedIn');
+       function logout() {
+    // Linisin ang lahat ng bakas ng user
     localStorage.removeItem('userCode');
-    
-    // I-refresh para bumalik sa login screen
-    location.reload();
+    localStorage.removeItem('isLoggedIn'); // Kung ginagamit mo pa ito
+    window.location.href = 'login.html';
 }
         // PAG-CHECK KUNG NAKA-LOG IN NA DATI
 window.onload = function() {
-    const isLoggedIn = localStorage.getItem('isLoggedIn');
     const userCode = localStorage.getItem('userCode');
-    if (document.getElementById('login-page').style.display !== 'none') {
-    document.getElementById('passCode').focus();
-}
-    if (isLoggedIn === 'true' && db[userCode]) {
-        // Skip login page
-        document.getElementById('login-page').style.display = 'none';
-        document.getElementById('main-app').style.display = 'block';
-        
-        // --- ETO ANG DAGDAG: SET DYNAMIC PROFILE PIC PARA SA REFRESH ---
-        // Kukunin nito ang filename (hal. visor1.svg) mula sa db base sa userCode
-        const profilePath = 'assets/' + db[userCode].p;
+
+    // 1. SECURITY REDIRECT: Kung walang naka-login, bounce agad sa login.html
+    if (!userCode || !db[userCode]) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    // 2. SETUP USER PROFILE
+    const user = db[userCode];
+    const profilePath = 'assets/' + user.p;
+    
+    if (document.getElementById('profileBtn')) {
         document.getElementById('profileBtn').style.backgroundImage = `url('${profilePath}')`;
-        
-        // I-load ang user data (Pangalan at Role)
-        document.getElementById('pName').innerText = db[userCode].n;
-        document.getElementById('pRole').innerText = db[userCode].r;
+    }
+    document.getElementById('pName').innerText = user.n;
+    document.getElementById('pRole').innerText = user.r;
 
-        // --- REALTIME SUBSCRIPTION ---
-        // --- SA LOOB NG window.onload ---
-const gpmSubscription = supabaseClient
-  .channel('custom-all-channel')
-  .on('postgres_changes', 
-      { event: 'INSERT', schema: 'public', table: 'gpm_readings' }, 
-      payload => {
-          console.log('New GPM detected!', payload.new);
-          
-          // 1. I-update ang GPM Value sa card
-          if(document.getElementById('latestGPM')) fetchLatestGPM(); 
-          
-          // 2. I-update ang "Updated for today" status (ITO ANG BAGO)
-          if(document.getElementById('updateStatus')) checkTodayStatus();
-          
-          // 3. I-refresh ang table kung nasa GPM page
-          if(document.getElementById('gpmTableBody')) fetchGPMLogs(); 
-      }
-  )
-  .subscribe();
-
-        // --- SECURITY: IDLE TIMER ---
-        let idleTime = 0;
-        document.onmousemove = () => idleTime = 0;
-        document.onkeypress = () => idleTime = 0; // Dagdag para pati keyboard activity
-        setInterval(() => {
-            idleTime++;
-            if (idleTime >= 30) { 
-                logout(); 
+    // 3. REALTIME SUBSCRIPTION (Supabase)
+    // Mananatili ito dito para laging nakikinig ang dashboard sa updates
+    const gpmSubscription = supabaseClient
+        .channel('custom-all-channel')
+        .on('postgres_changes', 
+            { event: 'INSERT', schema: 'public', table: 'gpm_readings' }, 
+            payload => {
+                console.log('New GPM detected!', payload.new);
+                if(document.getElementById('latestGPM')) fetchLatestGPM(); 
+                if(document.getElementById('updateStatus')) checkTodayStatus();
+                if(document.getElementById('gpmTableBody')) fetchGPMLogs(); 
             }
-        }, 60000);
+        )
+        .subscribe();
 
-        // Diretsong Dashboard
-        loadDashboard();
-    }
+    // 4. SECURITY: IDLE TIMER (30 Minutes)
+    let idleTime = 0;
+    document.onmousemove = () => idleTime = 0;
+    document.onkeypress = () => idleTime = 0;
+    setInterval(() => {
+        idleTime++;
+        if (idleTime >= 30) { 
+            logout(); 
+        }
+    }, 60000);
+
+    // 5. LOAD INITIAL PAGE
+    loadDashboard();
 };
-        // Pakikinggan natin ang keyboard press sa passcode input
-document.getElementById('passCode').addEventListener('keyup', function(event) {
-    // 13 ang key code ng 'Enter', pero mas modern ang event.key === 'Enter'
-    if (event.key === 'Enter') {
-        // Pipigilan natin ang default behavior (para hindi mag-refresh ang page)
-        event.preventDefault();
-        // Tatawagin na natin ang login function mo
-        login();
+    
+        function expandSidebarForSearch() {
+    const sidebar = document.getElementById('sidebar');
+    const content = document.querySelector('.content');
+    const searchInput = document.getElementById('sidebarSearch');
+
+    // Kung naka-collapsed ang sidebar, buksan ito
+    if (sidebar.classList.contains('collapsed')) {
+        sidebar.classList.remove('collapsed');
+        content.classList.remove('expanded');
+        
+        // Bigyan ng konting delay bago mag-focus para tapos na ang animation
+        setTimeout(() => {
+            searchInput.focus();
+        }, 300);
+    } else {
+        // Kung bukas na, focus agad sa input
+        searchInput.focus();
     }
-});
+}
+        function handleSidebarSearch() {
+    const searchValue = document.getElementById('sidebarSearch').value.toLowerCase();
+    
+    // Hanapin ang kahit anong table body na kasalukuyang naka-display
+    const tableBody = document.querySelector('tbody');
+    
+    if (!tableBody) return; // Wag gumalaw kung walang table
+
+    const rows = tableBody.getElementsByTagName('tr');
+
+    for (let i = 0; i < rows.length; i++) {
+        const rowText = rows[i].textContent.toLowerCase();
+        
+        // Kung ang tinype mo ay nahanap sa loob ng text ng row
+        if (rowText.includes(searchValue)) {
+            rows[i].style.display = ""; // Ipakita
+        } else {
+            // Itago ang row kung hindi match, maliban na lang kung "No data" ang message
+            if (!rowText.includes("no readings found") && !rowText.includes("loading")) {
+                rows[i].style.display = "none"; 
+            }
+        }
+    }
+}
     </script>
 </body>
 </html>
