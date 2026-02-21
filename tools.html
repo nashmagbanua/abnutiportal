@@ -2,94 +2,141 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Utility Tools | ABN</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ABN Tools | Operator Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
             --primary: #48bb78;
+            --accent: #4299e1;
             --bg: #1a202c;
-            --card-glass: rgba(255, 255, 255, 0.1);
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
         }
 
-        body {
-            margin: 0; font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('assets/background.webp');
-            background-size: cover; background-attachment: fixed;
-            color: white; padding: 20px;
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; padding-bottom: 50px; }
+
+        /* --- HEADER --- */
+        .app-header {
+            padding: 30px 20px;
+            background: linear-gradient(135deg, rgba(72,187,120,0.2), rgba(66,153,225,0.1));
+            border-bottom: 1px solid var(--border);
+        }
+        .user-info { display: flex; align-items: center; gap: 15px; }
+        .user-avatar { width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--primary); background: #2d3748; }
+
+        /* --- SECTIONS --- */
+        .section-title {
+            padding: 25px 20px 10px;
+            font-size: 1.2rem; font-weight: bold; color: var(--primary);
+            display: flex; align-items: center; gap: 10px;
+            text-transform: uppercase; letter-spacing: 1px;
         }
 
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        
-        /* Profile Circle sa Tools Page */
-        #profileBtn {
-            width: 45px; height: 45px; border-radius: 50%;
-            background-size: cover; border: 2px solid var(--primary);
-        }
-
-        .tools-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        .grid-container {
+            padding: 0 20px;
+            display: grid; grid-template-columns: repeat(2, 1fr);
             gap: 15px;
         }
 
-        .tool-card {
-            background: var(--card-glass); backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
-            padding: 30px 20px; border-radius: 20px;
-            text-align: center; cursor: pointer; transition: 0.3s;
+        /* --- CARDS --- */
+        .card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            padding: 20px 10px;
+            border-radius: 18px;
+            text-align: center;
+            text-decoration: none;
+            color: white;
+            transition: 0.2s;
+            display: flex; flex-direction: column; align-items: center; gap: 12px;
+        }
+        .card:active { transform: scale(0.92); background: rgba(255,255,255,0.1); }
+        .card i { font-size: 1.8rem; }
+        .card span { font-size: 0.85rem; font-weight: 500; }
+
+        /* Color Coding */
+        .logbook-card i { color: #f6e05e; } /* Yellow for logs */
+        .tool-card i { color: var(--accent); } /* Blue for tools */
+
+        .logout-container { padding: 40px 20px; }
+        .logout-btn {
+            width: 100%; padding: 15px; border: 1px solid #f56565;
+            background: transparent; color: #f56565; border-radius: 12px;
+            font-weight: bold; cursor: pointer;
         }
 
-        .tool-card:active { transform: scale(0.95); background: rgba(72, 187, 120, 0.2); }
-        .tool-card i { font-size: 2.5rem; color: var(--primary); margin-bottom: 15px; }
-        .tool-card h3 { margin: 0; font-size: 1.1rem; }
+        @media (min-width: 768px) {
+            .grid-container { grid-template-columns: repeat(4, 1fr); }
+            .app-header, .section-title, .grid-container, .logout-container { max-width: 800px; margin: 0 auto; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div>
-            <h2 style="margin:0;">Utilities <span style="color:var(--primary);">Tools</span></h2>
-            <small id="welcomeName">Loading user...</small>
+    <div class="app-header">
+        <div class="user-info">
+            <img src="" id="displayAvatar" class="user-avatar">
+            <div>
+                <div id="displayName" style="font-size: 1.2rem; font-weight: bold;">Operator</div>
+                <div id="displayRole" style="font-size: 0.8rem; color: #a0aec0;">MANTECH</div>
+            </div>
         </div>
-        <div id="profileBtn"></div>
     </div>
 
-    <div class="tools-grid">
-        <div class="tool-card" onclick="location.href='gpm-entry.html'">
-            <i class="fas fa-tint"></i>
-            <h3>GPM Reading</h3>
-        </div>
-        <div class="tool-card" onclick="location.href='power-entry.html'">
-            <i class="fas fa-bolt"></i>
-            <h3>Power Check</h3>
-        </div>
-        <div class="tool-card" onclick="location.href='logbook.html'">
-            <i class="fas fa-book"></i>
-            <h3>Shift Log</h3>
-        </div>
-        <div class="tool-card" onclick="logout()" style="border-color: #f56565;">
-            <i class="fas fa-sign-out-alt" style="color:#f56565;"></i>
-            <h3 style="color:#f56565;">Logout</h3>
-        </div>
+    <div class="section-title"><i class="fas fa-book"></i> Digital Logbooks</div>
+    <div class="grid-container">
+        <a href="#" class="card logbook-card" onclick="alert('Boiler Logbook: Coming Soon')">
+            <i class="fas fa-fire"></i><span>Boiler Log</span>
+        </a>
+        <a href="#" class="card logbook-card" onclick="alert('WTP Logbook: Coming Soon')">
+            <i class="fas fa-faucet"></i><span>WTP Log</span>
+        </a>
+        <a href="#" class="card logbook-card" onclick="alert('Ref Logbook: Coming Soon')">
+            <i class="fas fa-snowflake"></i><span>Ref Log</span>
+        </a>
+        <a href="#" class="card logbook-card" onclick="alert('CDA Logbook: Coming Soon')">
+            <i class="fas fa-wind"></i><span>CDA Log</span>
+        </a>
+        <a href="#" class="card logbook-card" onclick="alert('WWTP Logbook: Coming Soon')">
+            <i class="fas fa-recycle"></i><span>WWTP Log</span>
+        </a>
+    </div>
+
+    <div class="section-title"><i class="fas fa-tools"></i> Utility Tools</div>
+    <div class="grid-container">
+        <a href="https://gpmcalculatorv2.vercel.app/" target="_blank" class="card tool-card">
+            <i class="fas fa-calculator"></i><span>GPM Calc</span>
+        </a>
+        <a href="https://abnpowercon.vercel.app/" target="_blank" class="card tool-card">
+            <i class="fas fa-bolt"></i><span>PowerCon</span>
+        </a>
+        <a href="https://abnchemical.vercel.app/" target="_blank" class="card tool-card">
+            <i class="fas fa-flask"></i><span>Chemicals</span>
+        </a>
+        <a href="https://coaldelivery.vercel.app/" target="_blank" class="card tool-card">
+            <i class="fas fa-truck"></i><span>Coal Delivery</span>
+        </a>
+        <a href="https://abncoaldumping.vercel.app/" target="_blank" class="card tool-card">
+            <i class="fas fa-dumpster"></i><span>Coal Dumping</span>
+        </a>
+    </div>
+
+    <div class="logout-container">
+        <button class="logout-btn" onclick="logout()">LOGOUT SESSION</button>
     </div>
 
     <script>
-        window.onload = function() {
-            const userName = localStorage.getItem('userName');
-            const userAvatar = localStorage.getItem('userAvatar');
-
-            if (!userName) window.location.href = 'login.html';
-
-            document.getElementById('welcomeName').innerText = "Operator: " + userName;
-            
-            if (userAvatar) {
-                document.getElementById('profileBtn').style.backgroundImage = `url('assets/${userAvatar}')`;
-            }
-        };
+        // Load Profile Data
+        document.getElementById('displayName').innerText = localStorage.getItem('userName') || "Guest User";
+        document.getElementById('displayRole').innerText = localStorage.getItem('userRole') || "Operator";
+        const avatar = localStorage.getItem('userAvatar') || 'avatar1.svg';
+        document.getElementById('displayAvatar').src = 'assets/' + avatar;
 
         function logout() {
             localStorage.clear();
-            window.location.href = 'login.html';
+            window.location.href = "index.html";
         }
     </script>
 </body>
