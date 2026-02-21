@@ -1042,32 +1042,34 @@ async function fetchDashboardData(yDate) {
 }
         // PAG-CHECK KUNG NAKA-LOG IN NA DATI
 window.onload = function() {
+    // 1. Kunin ang data mula sa localStorage (na sinave ng login.html)
     const userCode = localStorage.getItem('userCode');
+    const userName = localStorage.getItem('userName');
+    const userRole = localStorage.getItem('userRole');
+    const userAvatar = localStorage.getItem('userAvatar');
 
-    // 1. SECURITY REDIRECT: Kung walang naka-login, bounce agad sa login.html
-    if (!userCode || !db[userCode]) {
+    // 2. Security Check: Kung walang data, balik sa login page
+    if (!userCode) {
         window.location.href = 'login.html';
         return;
     }
 
-    // 2. SETUP USER PROFILE
-    const user = db[userCode];
-    const profilePath = 'assets/' + user.p;
+    // 3. I-display ang User Info (Pangalan, Role, at Avatar)
+    // Hindi na natin kailangan ang db[userCode] dito!
+    if (document.getElementById('pName')) document.getElementById('pName').innerText = userName;
+    if (document.getElementById('pRole')) document.getElementById('pRole').innerText = userRole;
     
     if (document.getElementById('profileBtn')) {
+        const profilePath = 'assets/avatars/' + userAvatar;
         document.getElementById('profileBtn').style.backgroundImage = `url('${profilePath}')`;
     }
-    document.getElementById('pName').innerText = user.n;
-    document.getElementById('pRole').innerText = user.r;
 
-    // 3. REALTIME SUBSCRIPTION (Supabase)
-    // Mananatili ito dito para laging nakikinig ang dashboard sa updates
+    // 4. Supabase Realtime Subscription (Mananatili ito)
     const gpmSubscription = supabaseClient
         .channel('custom-all-channel')
         .on('postgres_changes', 
             { event: 'INSERT', schema: 'public', table: 'gpm_readings' }, 
             payload => {
-                console.log('New GPM detected!', payload.new);
                 if(document.getElementById('latestGPM')) fetchLatestGPM(); 
                 if(document.getElementById('updateStatus')) checkTodayStatus();
                 if(document.getElementById('gpmTableBody')) fetchGPMLogs(); 
@@ -1075,18 +1077,15 @@ window.onload = function() {
         )
         .subscribe();
 
-    // 4. SECURITY: IDLE TIMER (30 Minutes)
+    // 5. Idle Timer
     let idleTime = 0;
     document.onmousemove = () => idleTime = 0;
     document.onkeypress = () => idleTime = 0;
     setInterval(() => {
         idleTime++;
-        if (idleTime >= 30) { 
-            logout(); 
-        }
+        if (idleTime >= 30) { logout(); }
     }, 60000);
 
-    // 5. LOAD INITIAL PAGE
     loadDashboard();
 };
     
