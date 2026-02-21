@@ -33,7 +33,15 @@
         nav.scrolled { background: rgba(26, 32, 44, 0.95); padding: 10px 5%; border-bottom: 1px solid var(--border); }
 
         .logo-container { display: flex; align-items: center; gap: 10px; }
-        .nav-logo { height: 40px; width: auto; filter: drop-shadow(0 0 5px rgba(255,255,255,0.2)); }
+        .nav-logo { 
+    height: 40px; 
+    width: 40px; /* Gawin nating square ang container para perfect circle ang border-radius */
+    background-color: white; /* Ito ang "pupuno" sa butas na AB */
+    border-radius: 50%;      /* Gagawin itong bilog */
+    padding: 2px;            /* Konting allowance para hindi sagad sa edge yung logo */
+    object-fit: contain;     /* Siguradong hindi mapipitpit yung logo sa loob */
+    filter: drop-shadow(0 0 5px rgba(255,255,255,0.2)); 
+}
         .logo-text { font-weight: bold; font-size: 1.2rem; letter-spacing: 1px; }
 
         .nav-links { display: none; } /* Hidden on mobile by default */
