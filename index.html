@@ -1241,7 +1241,29 @@ async function resetPassword(id) {
         alert("Password for ID " + id + " has been reset to: " + newPass);
     }
 }
+async function approveUser(id) {
+    // 1. Confirmation box para hindi aksidente ang pag-approve
+    if (confirm("Approve this operator for system access?")) {
+        
+        // 2. Update ang 'is_approved' column sa Supabase
+        const { error } = await supabaseClient
+            .from('profiles')
+            .update({ is_approved: true })
+            .eq('company_id', id);
 
+        if (error) {
+            alert("Approval Failed: " + error.message);
+        } else {
+            alert("Operator " + id + " is now APPROVED!");
+            
+            // 3. I-refresh ang listahan para mawala ang approve button 
+            // at maging 'ACTIVE' ang status badge
+            if (typeof fetchUsers === "function") {
+                fetchUsers();
+            }
+        }
+    }
+}
 // --- FUNCTION PARA SA PAG-DELETE NG USER ---
 async function deleteUser(id) {
     if (confirm("Are you sure you want to PERMANENTLY delete this operator?")) {
