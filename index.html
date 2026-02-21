@@ -1190,29 +1190,33 @@ window.onload = function() {
 
     // 2. Palitan ang laman ng #cont ng Table UI
     const content = document.getElementById('cont');
+    
+    // Gagamit tayo ng CSS variable para sa text color para sumunod sa theme
     content.innerHTML = `
-        <div style="padding: 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 style="margin: 0; color: var(--primary);"><i class="fas fa-users-cog"></i> User Management</h2>
-                <button class="login-btn" style="width: auto; padding: 10px 20px;" onclick="fetchUsers()">
+        <div style="padding: 20px; color: var(--text-color, #ffffff);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
+                <h2 style="margin: 0; color: var(--primary); font-size: 1.5rem; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-users-cog"></i> <span>User Management</span>
+                </h2>
+                <button class="login-btn" style="width: auto; padding: 10px 20px; margin: 0; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" onclick="fetchUsers()">
                     <i class="fas fa-sync-alt"></i> Refresh
                 </button>
             </div>
             
-            <div class="glass-box" style="max-width: 100%; animation: none; padding: 20px; background: rgba(255,255,255,0.02);">
+            <div class="glass-box" style="max-width: 100%; animation: none; padding: 20px; background: var(--card-bg, rgba(255,255,255,0.05)); border: 1px solid var(--border-color, rgba(255,255,255,0.1)); border-radius: 15px;">
                 <div style="overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
-                        <thead style="border-bottom: 2px solid var(--primary); color: var(--primary);">
-                            <tr>
-                                <th style="padding: 12px;">Operator</th>
+                    <table style="width: 100%; border-collapse: collapse; text-align: left; min-width: 600px;">
+                        <thead style="border-bottom: 2px solid var(--primary);">
+                            <tr style="color: var(--primary);">
+                                <th style="padding: 15px;">Operator</th>
                                 <th>ID</th>
                                 <th>Role</th>
                                 <th>Status</th>
                                 <th style="text-align: center;">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="userTableBody">
-                            <tr><td colspan="5" style="text-align:center; padding:20px;">Loading users...</td></tr>
+                        <tbody id="userTableBody" style="color: inherit;">
+                            <tr><td colspan="5" style="text-align:center; padding:30px; opacity: 0.6;">Loading operators...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1220,7 +1224,7 @@ window.onload = function() {
         </div>
     `;
 
-    // 3. Tawagin na yung fetchUsers function para kunin ang data sa Supabase
+    // 3. Tawagin na yung fetchUsers function
     fetchUsers();
 }
         // --- FUNCTION PARA SA RESET PASSWORD ---
