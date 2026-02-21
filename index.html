@@ -306,6 +306,9 @@
     <div class="nav-item" onclick="openChemicals()"><i class="fas fa-flask"></i> <span>Chemicals</span></div>
     <div class="nav-item" onclick="openCoalDelivery()"><i class="fas fa-truck"></i> <span>Coal Delivery</span></div>
     <div class="nav-item" onclick="openCoalDumping()"><i class="fas fa-truck-loading"></i> <span>Coal Dumping</span></div>
+    <div class="nav-item" id="nav-users" onclick="loadUserManagement(this)">
+    <i class="fas fa-user-shield"></i> <span>Manage Operators</span>
+</div>
 </div>
 </div>
 
@@ -1137,6 +1140,88 @@ window.onload = function() {
             }
         }
     }
+}
+        async function fetchUsers() {
+    const { data, error } = await supabaseClient
+        .from('profiles')
+        .select('*')
+        .order('is_approved', { ascending: true }); // Para maunang lumitaw yung mga pending
+
+    const tbody = document.getElementById('userTableBody');
+    if(!tbody) return; // Guard clause kung wala pa sa screen yung table
+
+    if (error) {
+        tbody.innerHTML = `<tr><td colspan="5" style="color:red; text-align:center;">Error: ${error.message}</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = ""; 
+
+    data.forEach(user => {
+        const isPending = !user.is_approved;
+        tbody.innerHTML += `
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.3s;">
+                <td style="padding: 12px; display: flex; align-items: center; gap: 10px;">
+                    <img src="assets/${user.avatar_url}" style="width: 30px; height: 30px; border-radius: 50%;">
+                    <span>${user.full_name}</span>
+                </td>
+                <td>${user.company_id}</td>
+                <td style="font-size: 0.8rem; opacity: 0.7;">${user.role}</td>
+                <td>
+                    <span style="padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; background: ${isPending ? 'rgba(245,101,101,0.2)' : 'rgba(72,187,120,0.2)'}; color: ${isPending ? '#f56565' : '#48bb78'};">
+                        ${isPending ? 'PENDING' : 'ACTIVE'}
+                    </span>
+                </td>
+                <td style="text-align: center;">
+                    <div style="display: flex; gap: 5px; justify-content: center;">
+                        ${isPending ? `<button onclick="approveUser('${user.company_id}')" style="background:#48bb78; border:none; color:white; padding: 5px 8px; border-radius: 4px; cursor:pointer;"><i class="fas fa-check"></i></button>` : ''}
+                        <button onclick="resetPassword('${user.company_id}')" style="background:#4299e1; border:none; color:white; padding: 5px 8px; border-radius: 4px; cursor:pointer;"><i class="fas fa-key"></i></button>
+                        <button onclick="deleteUser('${user.company_id}')" style="background:#f56565; border:none; color:white; padding: 5px 8px; border-radius: 4px; cursor:pointer;"><i class="fas fa-trash"></i></button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+}
+        function loadUserManagement(element) {
+    // 1. Gawing active yung pinindot na menu sa sidebar
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    element.classList.add('active');
+
+    // 2. Palitan ang laman ng #cont ng Table UI
+    const content = document.getElementById('cont');
+    content.innerHTML = `
+        <div style="padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0; color: var(--primary);"><i class="fas fa-users-cog"></i> User Management</h2>
+                <button class="login-btn" style="width: auto; padding: 10px 20px;" onclick="fetchUsers()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+            
+            <div class="glass-box" style="max-width: 100%; animation: none; padding: 20px; background: rgba(255,255,255,0.02);">
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <thead style="border-bottom: 2px solid var(--primary); color: var(--primary);">
+                            <tr>
+                                <th style="padding: 12px;">Operator</th>
+                                <th>ID</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th style="text-align: center;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody">
+                            <tr><td colspan="5" style="text-align:center; padding:20px;">Loading users...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // 3. Tawagin na yung fetchUsers function para kunin ang data sa Supabase
+    fetchUsers();
 }
     </script>
 </body>
