@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ABN Utilities | Digital Portal</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -278,40 +275,71 @@
             selectedAvatar = name;
         }
 
-        async function handleRegister() {
-            const id = document.getElementById('regID').value;
-            const name = document.getElementById('regName').value;
-            const dob = document.getElementById('regDOB').value;
-            const role = document.getElementById('regRole').value;
-            const pass = document.getElementById('regPass').value;
+       async function handleRegister() {
+    const id = document.getElementById('regID').value;
+    const name = document.getElementById('regName').value;
+    const dob = document.getElementById('regDOB').value;
+    const role = document.getElementById('regRole').value;
+    const pass = document.getElementById('regPass').value;
 
-            if(!id || !name || !selectedAvatar || !pass || !dob) return alert("Please fill all fields!");
+    if(!id || !name || !selectedAvatar || !pass || !dob) return alert("Please fill all fields!");
 
-            const { error } = await supabaseClient.from('profiles').insert([
-                { company_id: id, full_name: name, dob: dob, role: role, avatar_url: selectedAvatar, password: pass }
-            ]);
-
-            if(error) alert(error.message);
-            else { alert("Account created!"); toggleForms(); }
+    const { error } = await supabaseClient.from('profiles').insert([
+        { 
+            company_id: id, 
+            full_name: name, 
+            dob: dob, 
+            role: role, 
+            avatar_url: selectedAvatar, 
+            password: pass,
+            is_approved: false // <--- ITO ANG PINAKA-IMPORTANTE
         }
+    ]);
+
+    if(error) {
+        alert("Registration Error: " + error.message);
+    } else { 
+        // Iniba natin ang alert para alam ng operator na hindi pa siya makaka-login agad
+        alert("Account created successfully! 📝 Please wait for the Supervisor (Visor) to approve your account before logging in."); 
+        toggleForms(); 
+    }
+}
 
         async function handleLogin() {
-            const id = document.getElementById('loginID').value;
-            const pass = document.getElementById('loginPass').value;
+    const id = document.getElementById('loginID').value;
+    const pass = document.getElementById('loginPass').value;
 
-            // Admin Bypass
-            if (id === "090909" && pass === "090909") {
-                saveSession('090909', 'System Admin', 'supervisor', 'avatar1.svg');
-                window.location.href = "index.html"; return;
-            }
+    // 1. Admin Bypass (Laging pasok kahit walang approval)
+    if (id === "090909" && pass === "090909") {
+        saveSession('090909', 'System Admin', 'supervisor', 'avatar1.svg');
+        window.location.href = "index.html"; 
+        return;
+    }
 
-            const { data, error } = await supabaseClient.from('profiles').select('*').eq('company_id', id).eq('password', pass).single();
+    // 2. Kunin ang data sa Supabase
+    const { data, error } = await supabaseClient
+        .from('profiles')
+        .select('*')
+        .eq('company_id', id)
+        .eq('password', pass)
+        .single();
 
-            if (data) {
-                saveSession(data.company_id, data.full_name, data.role, data.avatar_url);
-                window.location.href = (data.role === 'supervisor') ? "index.html" : "tools.html";
-            } else { alert("Invalid Credentials!"); }
+    if (data) {
+        // --- ITO YUNG DINAGDAG NATIN (SECURITY GATE) ---
+        if (data.is_approved === false) {
+            alert("⚠️ ACCESS PENDING: Your account is not yet approved by the Visor. Please wait for confirmation.");
+            return; // Hihinto dito, hindi siya makakatuloy sa tools.html
         }
+        // ----------------------------------------------
+
+        // 3. Kung approved na, save session at pasok!
+        saveSession(data.company_id, data.full_name, data.role, data.avatar_url);
+        window.location.href = (data.role === 'supervisor') ? "index.html" : "tools.html";
+        
+    } else { 
+        alert("Invalid ID or Password!"); 
+    }
+}
 
         function saveSession(id, name, role, avatar) {
             localStorage.setItem('userCode', id);
