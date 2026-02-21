@@ -1223,6 +1223,41 @@ window.onload = function() {
     // 3. Tawagin na yung fetchUsers function para kunin ang data sa Supabase
     fetchUsers();
 }
+        // --- FUNCTION PARA SA RESET PASSWORD ---
+async function resetPassword(id) {
+    const newPass = prompt("Enter new password for this operator:", "123456");
+    
+    if (newPass === null) return; // Pag pinindot ang 'Cancel'
+    if (newPass.trim() === "") return alert("Password cannot be empty!");
+
+    const { error } = await supabaseClient
+        .from('profiles')
+        .update({ password: newPass })
+        .eq('company_id', id);
+
+    if (error) {
+        alert("Error resetting password: " + error.message);
+    } else {
+        alert("Password for ID " + id + " has been reset to: " + newPass);
+    }
+}
+
+// --- FUNCTION PARA SA PAG-DELETE NG USER ---
+async function deleteUser(id) {
+    if (confirm("Are you sure you want to PERMANENTLY delete this operator?")) {
+        const { error } = await supabaseClient
+            .from('profiles')
+            .delete()
+            .eq('company_id', id);
+
+        if (error) {
+            alert("Error deleting user: " + error.message);
+        } else {
+            alert("User deleted successfully.");
+            fetchUsers(); // I-refresh ang table para mawala na siya sa listahan
+        }
+    }
+}
     </script>
 </body>
 </html>
