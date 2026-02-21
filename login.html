@@ -126,16 +126,22 @@
     </nav>
 
     <section class="hero">
-        <div class="info-side">
-            <h1>Digital Logsheet</h1>
-            <p style="font-size: 1.2rem; line-height: 1.6; color: #cbd5e0;">
-                Our mission is to eliminate manual paperwork and provide real-time data transparency 
-                across all utility areas for a more sustainable and efficient operation.
-            </p>
-            <button class="login-btn" style="width: 200px;" onclick="document.getElementById('about').scrollIntoView()">Explore Areas</button>
+    <div class="info-side">
+        <h1 style="letter-spacing: -1px;">Digital Logsheet</h1>
+        
+        <div style="max-width: 550px;">
+            <p style="font-size: 1.15rem; line-height: 1.7; color: #e2e8f0; font-weight: 300; margin-bottom: 25px;">
+    <span style="color: var(--primary); font-weight: 600;">Empowering Utility Management through Digital Transformation.</span> 
+    Our mission is to transition from legacy manual documentation to a centralized, real-time data ecosystem—ensuring operational accuracy and <span style="color: white; border-bottom: 1px solid var(--primary);">eliminating paper waste</span>. 
+    By <strong style="color: white;">automating repetitive workloads</strong>, we enable our team to focus on technical excellence while driving sustainable energy performance.
+</p>
+            <button class="login-btn" style="width: 220px; display: flex; align-items: center; justify-content: center; gap: 10px;" onclick="document.getElementById('about').scrollIntoView()">
+            Explore Areas <i class="fas fa-arrow-right" style="font-size: 0.8rem;"></i>
+        </button>
+            </div>
         </div>
-
-        <div class="login-side">
+ 
+  <div class="login-side">
             <div id="login-form" class="glass-box">
                 <h2 style="text-align:center;">Welcome Back</h2>
                 <div class="input-group">
@@ -210,40 +216,57 @@
     </section>
 
     <section class="about-section" id="about">
-        <h2 style="text-align:center; font-size: 2.5rem;">Utility Areas</h2>
-        <div class="grid-areas">
-            <div class="area-card">
-                <i class="fas fa-fire"></i>
-                <h3>Boiler System</h3>
-                <p>Monitoring steam production and fuel efficiency for plant processing.</p>
-            </div>
-            <div class="area-card">
-                <i class="fas fa-snowflake"></i>
-                <h3>Refrigeration</h3>
-                <p>Management of cold storage temperatures and ammonia system safety.</p>
-            </div>
-            <div class="area-card">
-                <i class="fas fa-wind"></i>
-                <h3>CDA System</h3>
-                <p>Compressed Dry Air supply monitoring for pneumatic machinery.</p>
-            </div>
-            <div class="area-card">
-                <i class="fas fa-tint"></i>
-                <h3>WTP / WWTP</h3>
-                <p>Water treatment and waste management to ensure environmental compliance.</p>
-            </div>
-            <div class="area-card">
-                <i class="fas fa-flask"></i>
-                <h3>Dry Chemical</h3>
-                <p>Tracking chemical inventory for water and boiler treatment.</p>
-            </div>
-            <div class="area-card">
-                <i class="fas fa-database"></i>
-                <h3>CWS</h3>
-                <p>Combined Water Storage monitoring for plant-wide consumption.</p>
-            </div>
+    <h2 style="text-align:center; font-size: 2.5rem; margin-bottom: 40px;">Utility Areas</h2>
+    <div class="grid-areas">
+        <div class="area-card">
+            <i class="fas fa-fire"></i>
+            <h3>Boiler System</h3>
+            <p>Monitoring steam production and fuel efficiency for plant processing.</p>
         </div>
-    </section>
+
+        <div class="area-card">
+            <i class="fas fa-snowflake"></i>
+            <h3>Refrigeration</h3>
+            <p>Management of cold storage temperatures and ammonia system safety.</p>
+        </div>
+
+        <div class="area-card">
+            <i class="fas fa-wind"></i>
+            <h3>CDA System</h3>
+            <p>Compressed Dry Air supply monitoring for pneumatic machinery.</p>
+        </div>
+
+        <div class="area-card">
+            <i class="fas fa-database"></i>
+            <h3>CWS</h3>
+            <p>Combined Water Storage monitoring and <strong>Deepwell pump</strong> adjustments.</p>
+        </div>
+
+        <div class="area-card" style="border-top: 3px solid #4299e1;">
+            <i class="fas fa-faucet" style="color: #4299e1;"></i>
+            <h3>WTP</h3>
+            <p>Managing <strong>Reverse Osmosis (RO)</strong> and purification for production water supply.</p>
+        </div>
+
+        <div class="area-card" style="border-top: 3px solid #f56565;">
+            <i class="fas fa-recycle" style="color: #f56565;"></i>
+            <h3>WWTP</h3>
+            <p>Handling industrial effluent to ensure 100% <strong>environmental compliance</strong>.</p>
+        </div>
+
+        <div class="area-card">
+            <i class="fas fa-flask"></i>
+            <h3>Dry & Wet Chemical</h3>
+            <p>Inventory management for Boiler, WTP, and WWTP treatment chemicals.</p>
+        </div>
+
+        <div class="area-card">
+            <i class="fas fa-bolt"></i>
+            <h3>Power System</h3>
+            <p>Monitoring total kWh consumption and peak demand for the entire facility.</p>
+        </div>
+    </div>
+</section>
 
     <script>
     // 1. SUPABASE CONFIGURATION
