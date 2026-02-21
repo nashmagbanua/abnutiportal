@@ -808,13 +808,17 @@ function fetchCoalDelivery(date) {
                 }
             });
         });
-    function loadDashboard() {
+   function loadDashboard() {
     updateSidebarActive(0);
     const content = document.getElementById('cont');
+    
+    // 1. DITO NATIN KUKUNIN ANG DATA MULA SA LOCALSTORAGE (Para iwas 'db is not defined')
     const userCode = localStorage.getItem('userCode');
-    const userName = db[userCode] ? db[userCode].n : "User";
+    const userName = localStorage.getItem('userName') || "User"; // Default to "User" kung wala
+    
     const sInput = document.getElementById('sidebarSearch');
     if(sInput) sInput.value = "";
+
     // Dynamic Greeting
     const hour = new Date().getHours();
     let greetText = "Magandang Araw";
@@ -828,11 +832,11 @@ function fetchCoalDelivery(date) {
 
     content.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-        <div>
-            <h1 id="greet" style="font-size: 1.2rem; margin: 0; line-height: 1.2;">${greetText}, ${userName}! 👋</h1>
-            <p class="sub-text" style="font-size: 0.85rem; margin: 2px 0 0 0;">Narito ang summary ng plant performance ngayong araw.</p>
+            <div>
+                <h1 id="greet" style="font-size: 1.2rem; margin: 0; line-height: 1.2;">${greetText}, ${userName}! 👋</h1>
+                <p class="sub-text" style="font-size: 0.85rem; margin: 2px 0 0 0;">Narito ang summary ng plant performance ngayong araw.</p>
+            </div>
         </div>
-    </div>
 
         <div class="stats-grid">
             <div class="stat-card">
@@ -841,10 +845,12 @@ function fetchCoalDelivery(date) {
                 <div class="label"><i class="far fa-calendar-alt"></i> ${yDate}</div>
             </div>
             <div class="stat-card" style="border-left-color: #f6ad55;">
-    <h4>Latest GPM Reading</h4>
-    <div class="value" id="latestGPM">--</div>
-    <div class="label" id="gpmTime">Checking...</div>
-    <div id="updateStatus" style="font-size: 0.7rem; margin-top: 5px;"></div> <div id="todayProgress" style="display:none;"></div> </div>
+                <h4>Latest GPM Reading</h4>
+                <div class="value" id="latestGPM">--</div>
+                <div class="label" id="gpmTime">Checking...</div>
+                <div id="updateStatus" style="font-size: 0.7rem; margin-top: 5px;"></div> 
+                <div id="todayProgress" style="display:none;"></div> 
+            </div>
         </div>
 
         <div class="chart-container">
@@ -859,10 +865,11 @@ function fetchCoalDelivery(date) {
         </div>
     `;
 
-   setTimeout(() => {
-    fetchDashboardData(yDate);
-    fetchLatestGPM(); // Tawagin dito
-}, 150);
+    setTimeout(() => {
+        // Siguraduhin na ang mga functions na ito ay gumagamit na rin ng Supabase calls
+        if (typeof fetchDashboardData === "function") fetchDashboardData(yDate);
+        if (typeof fetchLatestGPM === "function") fetchLatestGPM(); 
+    }, 150);
 }
 
 // Function para i-check kung nag-input na ang operator today
