@@ -309,14 +309,7 @@
     const id = document.getElementById('loginID').value;
     const pass = document.getElementById('loginPass').value;
 
-    // 1. Admin Bypass (Laging pasok kahit walang approval)
-    if (id === "090909" && pass === "090909") {
-        saveSession('090909', 'System Admin', 'supervisor', 'avatar1.svg');
-        window.location.href = "index.html"; 
-        return;
-    }
-
-    // 2. Kunin ang data sa Supabase
+    // 1. Kunin ang data sa Supabase (Dito na dadaan lahat, pati Admin)
     const { data, error } = await supabaseClient
         .from('profiles')
         .select('*')
@@ -325,15 +318,17 @@
         .single();
 
     if (data) {
-        // --- ITO YUNG DINAGDAG NATIN (SECURITY GATE) ---
+        // 2. SECURITY GATE: I-check kung Approved
+        // (Note: Sa Supabase, siguraduhin na ang Admin/Supervisor ay 'is_approved: true')
         if (data.is_approved === false) {
-            alert("⚠️ ACCESS PENDING: Your account is not yet approved by the Visor. Please wait for confirmation.");
-            return; // Hihinto dito, hindi siya makakatuloy sa tools.html
+            alert("⚠️ ACCESS PENDING: Your account is not yet approved by the Visor.");
+            return; 
         }
-        // ----------------------------------------------
 
-        // 3. Kung approved na, save session at pasok!
+        // 3. Save session at i-redirect base sa role
         saveSession(data.company_id, data.full_name, data.role, data.avatar_url);
+        
+        // Kung supervisor, sa index.html (Dashboard). Kung mantech, sa tools.html.
         window.location.href = (data.role === 'supervisor') ? "index.html" : "tools.html";
         
     } else { 
