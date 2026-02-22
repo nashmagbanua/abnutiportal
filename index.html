@@ -1145,6 +1145,7 @@ window.onload = function() {
     const { data, error } = await supabaseClient
         .from('profiles')
         .select('*')
+        .neq('company_id', '090909')
         .order('is_approved', { ascending: true }); // Para maunang lumitaw yung mga pending
 
     const tbody = document.getElementById('userTableBody');
