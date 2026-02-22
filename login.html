@@ -135,85 +135,91 @@
             <a href="#" onclick="toggleForms()">Sign In</a>
         </div>
         </nav>
-        <section class="hero">
-        <div class="info-side">
-            <h1>Digital Utilities Operation (DUO)</h1>
-            <p>
+       <section class="hero">
+    <div class="info-side">
+        <h1>Digital Utilities Operation (DUO)</h1>
+        <p>
             <span style="color: var(--primary); font-weight: 600;">Empowering Utility Management.</span> 
-                Our mission is to transition from legacy manual documentation to a real-time data ecosystem—eliminating paper waste and automating workloads for technical excellence.
-            </p>
-            <button class="login-btn" style="max-width: 250px;" onclick="document.getElementById('about').scrollIntoView()">
-                Explore Areas <i class="fas fa-arrow-right" style="margin-left: 10px;"></i>
-            </button>
-        </div>
-        
-/* --- LOGIN SECTION --- */ 
-        <div class="login-side">
+            Our mission is to transition from legacy manual documentation to a real-time data ecosystem—eliminating paper waste and automating workloads for technical excellence.
+        </p>
+        <button class="login-btn" style="max-width: 250px;" onclick="document.getElementById('about').scrollIntoView()">
+            Explore Areas <i class="fas fa-arrow-right" style="margin-left: 10px;"></i>
+        </button>
+    </div>
+    
+    <div class="login-side">
         <div id="login-form" class="glass-box">
-        <h2 style="text-align:center; margin-top:0;">Welcome Back</h2>
-        <div class="input-group">
-        <label>Company ID</label>
-        <input type="text" id="loginID" placeholder="Enter ID">
-        </div>
-    
-        <div class="input-group">
-        <label>Password</label>
-        <div style="position: relative;">
-        <input type="password" id="loginPass" placeholder="••••••••">
+            <h2 style="text-align:center; margin-top:0;">Welcome Back</h2>
             
-        <i class="fas fa-eye toggle-pass" 
-        style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: gray;" 
-        onclick="togglePassword('loginPass', this)">
-        </i>
-        </div>
-        </div>
-/* --- End LOGIN SECTION --- */ 
-    
-/* --- Sign in SECTION --- */ 
-        <button class="login-btn" onclick="handleLogin()">SIGN IN</button>
-        <p style="text-align:center; font-size: 0.85rem; margin-top: 20px; cursor:pointer;" onclick="toggleForms()">No account? <span style="color:var(--primary)">Register</span></p>
-        </div>
-        <div id="register-form" class="glass-box" style="display:none;">
-        <h2 style="text-align:center; margin-top:0;">Create Account</h2>
-        <div class="input-group">
-        <label>Full Name</label>
-        <input type="text" id="regName" placeholder="Juan Dela Cruz">
-        </div>
-        <div style="display:flex; gap:10px; margin-bottom:15px;" id="regRow">
-        <div style="flex:1">
-            <label style="font-size:0.8rem; color:gray;">Your Company ID</label>
-            <input type="text" id="regID" placeholder="0000" style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:10px; color:white;">
+            <div class="input-group">
+                <label>Company ID</label>
+                <input type="text" id="loginID" placeholder="Enter ID">
             </div>
-        <div style="flex:1">
-            <label style="font-size:0.8rem; color:gray;">Role</label>
-            <select id="regRole" style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:10px; color:white;">
-                    <option value="mantech" style="background:#2d3748;">Mantech</option>
-                    <option value="opscrew" style="background:#2d3748;">OpsCrew</option>
-                    <option value="supervisor" style="background:#2d3748;">Supervisor</option>
-            </select>
-        </div>
-        </div>
-        <div class="input-group">
-            <label>Birthday</label>
-             <input type="date" id="regDOB">
+
+            <div class="input-group">
+                <label>Password</label>
+                <div style="position: relative;">
+                    <input type="password" id="loginPass" placeholder="••••••••">
+                    <i class="fas fa-eye toggle-pass" 
+                       style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: gray;" 
+                       onclick="togglePassword('loginPass', this)">
+                    </i>
                 </div>
-                <label style="font-size: 0.8rem; color:gray; display:block; margin-bottom:10px;">Select Avatar</label>
-                <div class="avatar-grid" id="avatarGrid"></div>
-                <div class="input-group">
-        <label>Password</label>
-        <div style="position: relative;">
-        <input type="password" id="regPass" placeholder="••••••••">
-        <i class="fas fa-eye toggle-pass" 
-           style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: gray;" 
-           onclick="togglePassword('regPass', this)">
-        </i>
+            </div>
+
+            <button class="login-btn" onclick="handleLogin()">SIGN IN</button>
+            <p style="text-align:center; font-size: 0.85rem; margin-top: 20px; cursor:pointer;" onclick="toggleForms()">
+                No account? <span style="color:var(--primary)">Register</span>
+            </p>
         </div>
+
+        <div id="register-form" class="glass-box" style="display:none;">
+            <h2 style="text-align:center; margin-top:0;">Create Account</h2>
+            
+            <div class="input-group">
+                <label>Full Name</label>
+                <input type="text" id="regName" placeholder="Juan Dela Cruz">
+            </div>
+
+            <div style="display:flex; gap:10px; margin-bottom:15px;" id="regRow">
+                <div style="flex:1">
+                    <label style="font-size:0.8rem; color:gray;">Company ID</label>
+                    <input type="text" id="regID" placeholder="0000">
+                </div>
+                <div style="flex:1">
+                    <label style="font-size:0.8rem; color:gray;">Role</label>
+                    <select id="regRole">
+                        <option value="mantech">Mantech</option>
+                        <option value="opscrew">OpsCrew</option>
+                        <option value="supervisor">Supervisor</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Birthday</label>
+                <input type="date" id="regDOB">
+            </div>
+
+            <label style="font-size: 0.8rem; color:gray; display:block; margin-bottom:10px;">Select Avatar</label>
+            <div class="avatar-grid" id="avatarGrid"></div>
+
+            <div class="input-group">
+                <label>Password</label>
+                <div style="position: relative;">
+                    <input type="password" id="regPass" placeholder="••••••••">
+                    <i class="fas fa-eye toggle-pass" 
+                       style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: gray;" 
+                       onclick="togglePassword('regPass', this)">
+                    </i>
+                </div>
+            </div>
+
+            <button class="login-btn" onclick="handleRegister()">REGISTER</button>
+            <p style="text-align:center; font-size: 0.85rem; margin-top: 15px; cursor:pointer;" onclick="toggleForms()">Back to Login</p>
         </div>
-        <button class="login-btn" onclick="handleRegister()">REGISTER</button>
-        <p style="text-align:center; font-size: 0.85rem; margin-top: 15px; cursor:pointer;" onclick="toggleForms()">Back to Login</p>
-        </div>
-        </div>
-        </section>
+    </div>
+</section>
 /* --- END Sign in SECTION --- */ 
     
 /* --- Utilities Area with Description SECTION --- */ 
