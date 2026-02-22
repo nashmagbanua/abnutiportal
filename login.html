@@ -121,7 +121,7 @@
         .avatar-item.selected { border-color: var(--primary); transform: scale(1.1); }
         </style>
     
-// --- HTML And LOGO SECTION --- 
+/* --- HTML And LOGO SECTION --- */ 
         </head>
         <body>
         <nav id="navbar">
@@ -147,7 +147,7 @@
             </button>
         </div>
         
-// --- LOGIN SECTION --- 
+/* --- LOGIN SECTION --- */ 
         <div class="login-side">
         <div id="login-form" class="glass-box">
         <h2 style="text-align:center; margin-top:0;">Welcome Back</h2>
@@ -167,9 +167,9 @@
         </i>
         </div>
         </div>
-// --- End LOGIN SECTION --- 
+/* --- End LOGIN SECTION --- */ 
     
-// --- Sign in SECTION --- 
+/* --- Sign in SECTION --- */ 
         <button class="login-btn" onclick="handleLogin()">SIGN IN</button>
         <p style="text-align:center; font-size: 0.85rem; margin-top: 20px; cursor:pointer;" onclick="toggleForms()">No account? <span style="color:var(--primary)">Register</span></p>
         </div>
@@ -214,9 +214,9 @@
         </div>
         </div>
         </section>
-// --- END Sign in SECTION --- 
+/* --- END Sign in SECTION --- */ 
     
-// --- Utilities Area with Description SECTION --- 
+/* --- Utilities Area with Description SECTION --- */ 
         <section class="about-section" id="about">
         <h2 style="text-align:center; font-size: 2rem; margin: 0 0 10px 0;">Utility Areas</h2>
         <p style="text-align:center; color:#a0aec0; margin-bottom:40px;">Specialized monitoring for plant-wide reliability.</p>
@@ -232,9 +232,9 @@
             <div class="area-card"><i class="fas fa-bolt"></i><h3>Power</h3><p>kWh consumption & peak demand analytics.</p></div>
         </div>
         </section>
-// --- END Utilities Area with Description SECTION --- 
+/* --- END Utilities Area with Description SECTION --- */ 
     
-// --- Start of Java Script --- 
+/* --- Start of Java Script --- */ 
             
         <script>
 // SUPABASE config 
@@ -312,7 +312,7 @@
     }
     }
 
-// --- Login SECTION ---
+/* --- Login SECTION ---*/ 
     async function handleLogin() {
     const id = document.getElementById('loginID').value;
     const pass = document.getElementById('loginPass').value;
@@ -338,7 +338,7 @@
         alert("Invalid ID or Password!"); 
         }
         }
-// --- END Login SECTION ---
+/* --- END Login SECTION ---*/ 
             
         function saveSession(id, name, role, avatar) {
             localStorage.setItem('userCode', id);
