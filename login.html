@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ABN Utilities | Digital Portal</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+      <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -24,7 +27,7 @@
             color: white; overflow-x: hidden;
         }
 
-        /* --- NAVIGATION --- */
+/* --- NAVIGATION --- */
         nav {
             position: fixed; top: 0; width: 100%; padding: 15px 5%;
             display: flex; justify-content: space-between; align-items: center;
@@ -45,7 +48,7 @@
             .logo-text { font-size: 1.5rem; }
         }
 
-        /* --- HERO & LOGIN SECTION --- */
+/* --- HERO & LOGIN SECTION --- */
         .hero { 
             min-height: 100vh; display: flex; flex-direction: column; 
             align-items: center; justify-content: center; padding: 100px 5% 50px;
@@ -72,7 +75,7 @@
             .login-side { flex: 0.8; justify-content: flex-end; }
         }
 
-        /* --- INPUTS & BUTTONS --- */
+/* --- INPUTS & BUTTONS --- */
         .input-group { margin-bottom: 18px; position: relative; text-align: left; }
         .input-group label { display: block; margin-bottom: 6px; font-size: 0.85rem; color: #a0aec0; }
         .input-group input, .input-group select {
@@ -87,7 +90,7 @@
         }
         .login-btn:hover { background: var(--primary-dark); transform: translateY(-2px); }
 
-        /* --- AREAS SECTION --- */
+/* --- AREAS SECTION --- */
         .about-section { padding: 80px 5%; background: var(--bg-dark); }
         .grid-areas {
             display: grid; grid-template-columns: 1fr; gap: 20px; margin-top: 40px;
@@ -105,7 +108,7 @@
         .area-card h3 { margin: 10px 0; font-size: 1.2rem; }
         .area-card p { font-size: 0.85rem; color: #a0aec0; line-height: 1.5; }
 
-        /* --- REGISTER FORM EXTRA --- */
+/* --- REGISTER FORM EXTRA ---*/ 
         #register-form { max-height: 85vh; overflow-y: auto; }
         #register-form::-webkit-scrollbar { width: 4px; }
         #register-form::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
@@ -116,100 +119,105 @@
         }
         .avatar-item { width: 100%; cursor: pointer; border-radius: 50%; border: 2px solid transparent; transition: 0.2s; }
         .avatar-item.selected { border-color: var(--primary); transform: scale(1.1); }
-    </style>
-</head>
-<body>
-
-    <nav id="navbar">
+        </style>
+    
+// --- HTML And LOGO SECTION --- 
+        </head>
+        <body>
+        <nav id="navbar">
         <div class="logo-container">
-            <img src="assets/abnlogo.png" alt="Logo" class="nav-logo">
-            <div class="logo-text">ABN <span style="color: var(--primary);">UTILITIES</span></div>
+        <img src="assets/abnlogo.png" alt="Logo" class="nav-logo">
+        <div class="logo-text">ABN <span style="color: var(--primary);">UTILITIES</span></div>
         </div>
         <div class="nav-links">
             <a href="#">Home</a>
             <a href="#about">Areas</a>
             <a href="#" onclick="toggleForms()">Sign In</a>
         </div>
-    </nav>
-
-    <section class="hero">
+        </nav>
+        <section class="hero">
         <div class="info-side">
             <h1>Digital Utilities Operation (DUO)</h1>
             <p>
-                <span style="color: var(--primary); font-weight: 600;">Empowering Utility Management.</span> 
+            <span style="color: var(--primary); font-weight: 600;">Empowering Utility Management.</span> 
                 Our mission is to transition from legacy manual documentation to a real-time data ecosystem—eliminating paper waste and automating workloads for technical excellence.
             </p>
             <button class="login-btn" style="max-width: 250px;" onclick="document.getElementById('about').scrollIntoView()">
                 Explore Areas <i class="fas fa-arrow-right" style="margin-left: 10px;"></i>
             </button>
         </div>
-
+        
+// --- LOGIN SECTION --- 
         <div class="login-side">
-<div id="login-form" class="glass-box">
-    <h2 style="text-align:center; margin-top:0;">Welcome Back</h2>
-    <div class="input-group">
+        <div id="login-form" class="glass-box">
+        <h2 style="text-align:center; margin-top:0;">Welcome Back</h2>
+        <div class="input-group">
         <label>Company ID</label>
         <input type="text" id="loginID" placeholder="Enter ID">
-    </div>
+        </div>
     
-    <div class="input-group">
+        <div class="input-group">
         <label>Password</label>
         <div style="position: relative;">
-            <input type="password" id="loginPass" placeholder="••••••••">
+        <input type="password" id="loginPass" placeholder="••••••••">
             
-            <i class="fas fa-eye toggle-pass" 
-               style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: gray;" 
-               onclick="togglePassword('loginPass', this)">
-            </i>
+        <i class="fas fa-eye toggle-pass" 
+        style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: gray;" 
+        onclick="togglePassword('loginPass', this)">
+        </i>
         </div>
-    </div>
+        </div>
+// --- End LOGIN SECTION --- 
     
-    <button class="login-btn" onclick="handleLogin()">SIGN IN</button>
-    <p style="text-align:center; font-size: 0.85rem; margin-top: 20px; cursor:pointer;" onclick="toggleForms()">No account? <span style="color:var(--primary)">Register</span></p>
-</div>
-            <div id="register-form" class="glass-box" style="display:none;">
-                <h2 style="text-align:center; margin-top:0;">Create Account</h2>
-                <div class="input-group">
-                    <label>Full Name</label>
-                    <input type="text" id="regName" placeholder="Juan Dela Cruz">
-                </div>
-                <div style="display:flex; gap:10px; margin-bottom:15px;" id="regRow">
-                    <div style="flex:1">
-                        <label style="font-size:0.8rem; color:gray;">Your Company ID</label>
-                        <input type="text" id="regID" placeholder="0000" style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:10px; color:white;">
-                    </div>
-                    <div style="flex:1">
-                        <label style="font-size:0.8rem; color:gray;">Role</label>
-                        <select id="regRole" style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:10px; color:white;">
-                            <option value="mantech" style="background:#2d3748;">Mantech</option>
-                            <option value="opscrew" style="background:#2d3748;">OpsCrew</option>
-                            <option value="supervisor" style="background:#2d3748;">Supervisor</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label>Birthday</label>
-                    <input type="date" id="regDOB">
+// --- Sign in SECTION --- 
+        <button class="login-btn" onclick="handleLogin()">SIGN IN</button>
+        <p style="text-align:center; font-size: 0.85rem; margin-top: 20px; cursor:pointer;" onclick="toggleForms()">No account? <span style="color:var(--primary)">Register</span></p>
+        </div>
+        <div id="register-form" class="glass-box" style="display:none;">
+        <h2 style="text-align:center; margin-top:0;">Create Account</h2>
+        <div class="input-group">
+        <label>Full Name</label>
+        <input type="text" id="regName" placeholder="Juan Dela Cruz">
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:15px;" id="regRow">
+        <div style="flex:1">
+            <label style="font-size:0.8rem; color:gray;">Your Company ID</label>
+            <input type="text" id="regID" placeholder="0000" style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:10px; color:white;">
+            </div>
+        <div style="flex:1">
+            <label style="font-size:0.8rem; color:gray;">Role</label>
+            <select id="regRole" style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:10px; color:white;">
+                    <option value="mantech" style="background:#2d3748;">Mantech</option>
+                    <option value="opscrew" style="background:#2d3748;">OpsCrew</option>
+                    <option value="supervisor" style="background:#2d3748;">Supervisor</option>
+            </select>
+        </div>
+        </div>
+        <div class="input-group">
+            <label>Birthday</label>
+             <input type="date" id="regDOB">
                 </div>
                 <label style="font-size: 0.8rem; color:gray; display:block; margin-bottom:10px;">Select Avatar</label>
                 <div class="avatar-grid" id="avatarGrid"></div>
                 <div class="input-group">
-    <label>Password</label>
-    <div style="position: relative;">
+        <label>Password</label>
+        <div style="position: relative;">
         <input type="password" id="regPass" placeholder="••••••••">
         <i class="fas fa-eye toggle-pass" 
            style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: gray;" 
            onclick="togglePassword('regPass', this)">
         </i>
-    </div>
-</div>
-                <button class="login-btn" onclick="handleRegister()">REGISTER</button>
-                <p style="text-align:center; font-size: 0.85rem; margin-top: 15px; cursor:pointer;" onclick="toggleForms()">Back to Login</p>
-            </div>
         </div>
-    </section>
-
-    <section class="about-section" id="about">
+        </div>
+        <button class="login-btn" onclick="handleRegister()">REGISTER</button>
+        <p style="text-align:center; font-size: 0.85rem; margin-top: 15px; cursor:pointer;" onclick="toggleForms()">Back to Login</p>
+        </div>
+        </div>
+        </section>
+// --- END Sign in SECTION --- 
+    
+// --- Utilities Area with Description SECTION --- 
+        <section class="about-section" id="about">
         <h2 style="text-align:center; font-size: 2rem; margin: 0 0 10px 0;">Utility Areas</h2>
         <p style="text-align:center; color:#a0aec0; margin-bottom:40px;">Specialized monitoring for plant-wide reliability.</p>
         
@@ -223,67 +231,68 @@
             <div class="area-card"><i class="fas fa-flask"></i><h3>Chemicals</h3><p>Dry & Wet chemical inventory tracking.</p></div>
             <div class="area-card"><i class="fas fa-bolt"></i><h3>Power</h3><p>kWh consumption & peak demand analytics.</p></div>
         </div>
-    </section>
-
-    <script>
-        // SUPABASE
+        </section>
+// --- END Utilities Area with Description SECTION --- 
+    
+// --- Start of Java Script --- 
+            
+        <script>
+// SUPABASE config 
         const SB_URL = "https://qbeacrpoyfacgmbzxjcu.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFiZWFjcnBveWZhY2dtYnp4amN1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2NTM5NTIsImV4cCI6MjA2NDIyOTk1Mn0.6kfxKLJxidW4BcqsMJte61AtzydrTW-1ZJIJytiUBt4";
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
-        // UI LOGIC
+// UI LOGIC
         window.addEventListener('scroll', () => {
-            const nav = document.getElementById('navbar');
-            if (window.scrollY > 50) nav.classList.add('scrolled');
-            else nav.classList.remove('scrolled');
+        const nav = document.getElementById('navbar');
+        if (window.scrollY > 50) nav.classList.add('scrolled');
+        else nav.classList.remove('scrolled');
         });
-
-        function togglePassword(id, el) {
-    const input = document.getElementById(id);
-    if (input.type === 'password') {
+            
+    function togglePassword(id, el) {
+     const input = document.getElementById(id);
+     if (input.type === 'password') {
         input.type = 'text';
         el.classList.replace('fa-eye', 'fa-eye-slash');
-    } else {
+        } else {
         input.type = 'password';
         el.classList.replace('fa-eye-slash', 'fa-eye');
-    }
-}
-
-        function toggleForms() {
-            const login = document.getElementById('login-form');
-            const register = document.getElementById('register-form');
-            if(login.style.display === 'none') {
-                login.style.display = 'block'; register.style.display = 'none';
-            } else {
-                login.style.display = 'none'; register.style.display = 'block';
-                loadAvatars();
-            }
+        }
         }
 
-        function loadAvatars() {
-            const grid = document.getElementById('avatarGrid');
-            grid.innerHTML = "";
-            for(let i=1; i<=20; i++) {
-                grid.innerHTML += `<img src="assets/avatar${i}.svg" class="avatar-item" onclick="selectAvatar(this, 'avatar${i}.svg')">`;
-            }
+    function toggleForms() {
+     const login = document.getElementById('login-form');
+     const register = document.getElementById('register-form');
+     if(login.style.display === 'none') {
+        login.style.display = 'block'; register.style.display = 'none';
+        } else {
+        login.style.display = 'none'; register.style.display = 'block';
+        loadAvatars();
         }
-
-        let selectedAvatar = "";
-        function selectAvatar(el, name) {
-            document.querySelectorAll('.avatar-item').forEach(img => img.classList.remove('selected'));
-            el.classList.add('selected');
-            selectedAvatar = name;
         }
-
-       async function handleRegister() {
+// --- Avatar Selection SECTION ---
+    function loadAvatars() {
+     const grid = document.getElementById('avatarGrid');
+     grid.innerHTML = "";
+     for(let i=1; i<=20; i++) {
+        grid.innerHTML += `<img src="assets/avatar${i}.svg" class="avatar-item" onclick="selectAvatar(this, 'avatar${i}.svg')">`;
+        }
+        }
+     let selectedAvatar = "";
+    function selectAvatar(el, name) {
+        document.querySelectorAll('.avatar-item').forEach(img => img.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedAvatar = name;
+        }
+    
+// --- REgister SECTION ---
+    async function handleRegister() {
     const id = document.getElementById('regID').value;
     const name = document.getElementById('regName').value;
     const dob = document.getElementById('regDOB').value;
     const role = document.getElementById('regRole').value;
     const pass = document.getElementById('regPass').value;
-
     if(!id || !name || !selectedAvatar || !pass || !dob) return alert("Please fill all fields!");
-
     const { error } = await supabaseClient.from('profiles').insert([
         { 
             company_id: id, 
@@ -295,53 +304,48 @@
             is_approved: false // <--- ITO ANG PINAKA-IMPORTANTE
         }
     ]);
-
     if(error) {
         alert("Registration Error: " + error.message);
     } else { 
-        // Iniba natin ang alert para alam ng operator na hindi pa siya makaka-login agad
         alert("Account created successfully! 📝 Please wait for the Supervisor (Visor) to approve your account before logging in."); 
         toggleForms(); 
     }
-}
+    }
 
-        async function handleLogin() {
+// --- Login SECTION ---
+    async function handleLogin() {
     const id = document.getElementById('loginID').value;
     const pass = document.getElementById('loginPass').value;
-
-    // 1. Kunin ang data sa Supabase (Dito na dadaan lahat, pati Admin)
+// 1. Kunin ang data sa Supabase (Dito na dadaan lahat, pati Admin)
     const { data, error } = await supabaseClient
         .from('profiles')
         .select('*')
         .eq('company_id', id)
         .eq('password', pass)
         .single();
-
-    if (data) {
-        // 2. SECURITY GATE: I-check kung Approved
-        // (Note: Sa Supabase, siguraduhin na ang Admin/Supervisor ay 'is_approved: true')
+        if (data) {
+// 2. SECURITY GATE: I-check kung Approved
+// (Note: Sa Supabase, siguraduhin na ang Admin/Supervisor ay 'is_approved: true')
         if (data.is_approved === false) {
             alert("⚠️ ACCESS PENDING: Your account is not yet approved by the Visor.");
             return; 
         }
-
-        // 3. Save session at i-redirect base sa role
-        saveSession(data.company_id, data.full_name, data.role, data.avatar_url);
-        
-        // Kung supervisor, sa index.html (Dashboard). Kung mantech, sa tools.html.
+// 3. Save session at i-redirect base sa role
+        saveSession(data.company_id, data.full_name, data.role, data.avatar_url);     
+// Kung supervisor, sa index.html (Dashboard). Kung mantech, sa tools.html.
         window.location.href = (data.role === 'supervisor') ? "index.html" : "tools.html";
-        
-    } else { 
+        } else { 
         alert("Invalid ID or Password!"); 
-    }
-}
-
+        }
+        }
+// --- END Login SECTION ---
+            
         function saveSession(id, name, role, avatar) {
             localStorage.setItem('userCode', id);
             localStorage.setItem('userName', name);
             localStorage.setItem('userRole', role);
             localStorage.setItem('userAvatar', avatar);
         }
-    </script>
+</script>
 </body>
 </html>
