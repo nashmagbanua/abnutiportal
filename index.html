@@ -574,9 +574,11 @@ function openPowerMonitor() {
             <button onclick="exportPowerToExcel()" class="btn-export" style="padding: 8px 12px; font-size: 0.8rem; background: #2f855a; color: white; border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
                 <i class="fas fa-file-excel"></i> Export Excel
             </button>
-            <button onclick="window.print()" class="btn-print" style="padding: 8px 12px; font-size: 0.8rem; background: #4a5568; color: white; border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
-                <i class="fas fa-print"></i> Print Report
-            </button>
+            <button onclick="window.open('logsheet.html?date=' + app.state.filterDate, '_blank')" 
+        class="btn-print" 
+        style="padding: 8px 12px; font-size: 0.8rem; background: #2b6cb0; color: white; border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+    <i class="fas fa-print"></i> Print Logsheet
+</button>
         </div>
     </div>
 
