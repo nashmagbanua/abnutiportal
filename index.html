@@ -841,7 +841,7 @@ async function syncCoalData() {
     let totalInUseKg = 0;
     const standbyLogs = [];
     
-    // 1. Initialize 9 Yards (Laging back to default bago i-process ang fresh data)
+    // 1. Initialize 9 Yards
     for(let i=1; i<=9; i++) {
         currentYardData[i] = { 
             status: 'vacant', supplier: 'Empty', kg: 0, 
@@ -850,7 +850,7 @@ async function syncCoalData() {
         };
     }
 
-    // 2. Process Logs para sa Live Grid (9 Boxes)
+    // 2. Process Logs para sa Live Grid
     const processed = new Set();
     logs.forEach(log => {
         const y = String(log.coal_yard_no);
@@ -884,13 +884,45 @@ async function syncCoalData() {
         }
     });
 
-    // 3. Update the Summary & Grid (Dapat laging updated ang status sa taas)
+    // 3. Update the Summary & Grid (UI Updates)
     updateSummaryUI(totalStandbyKg, totalInUseKg);
     renderGridOnly();
     updatePriorityBanner(currentYardData, standbyLogs);
+    
+    // DASHBOARD UPDATE:
     if (typeof updateDashboardSidebar === "function") {
         updateDashboardSidebar();
     }
+
+    // 4. SMART TABLE UPDATE (Eto yung nawawala sa code mo boss):
+    const dateFromInput = document.getElementById('dateFrom');
+    const dateToInput = document.getElementById('dateTo');
+    const histDiv = document.getElementById('history-list');
+
+    // MGA CONDITIONS: Huwag i-refresh ang table kung may ginagawa si Sir sa search
+    const hasDateInput = (dateFromInput && dateFromInput.value) || (dateToInput && dateToInput.value);
+    const isSearching = histDiv && histDiv.innerHTML.includes("Searching records");
+    const hasSearchResults = histDiv && histDiv.innerHTML.includes("Grand Total:");
+
+    if (!hasDateInput && !isSearching && !hasSearchResults) {
+        // DEFAULT VIEW: FIFO List
+        const activeFIFO = logs.filter(l => l.remarks === 'standby' || l.remarks === 'in use')
+            .sort((a, b) => {
+                const dateA = new Date(`${a.date_arrived}T${a.time_arrived}`);
+                const dateB = new Date(`${b.date_arrived}T${b.time_arrived}`);
+                return dateA - dateB;
+            });
+        
+        if (typeof renderHistoryTable === "function") {
+            renderHistoryTable(activeFIFO);
+        }
+    }
+
+    // 5. Last Sync Timestamp
+    if(document.getElementById('last-update')) {
+        document.getElementById('last-update').innerText = "Last Sync: " + new Date().toLocaleTimeString();
+    }
+}
 
     // 4. Smart Table Update (Anti-Gulo Logic)
     const dateFromInput = document.getElementById('dateFrom');
@@ -1284,7 +1316,67 @@ function updatePriorityBanner(yardData, standbyLogs) {
          }
     }, 150);
 }
+function updateDashboardSidebar() {
+    const statusDiv = document.getElementById('dashboard-coal-status');
+    const vacantBadge = document.getElementById('vacantBadge');
+    const queueBar = document.getElementById('coal-queue-bar');
 
+    // Guard clause: Kung wala sa Dashboard page (halimbawa nasa Coal page), stop na.
+    if (!statusDiv) return;
+
+    const standbyList = [];
+    let vacantCount = 0;
+    
+    // 1. Kunin ang data mula sa currentYardData (Dapat processed na ito ng syncCoalData)
+    for (let i = 1; i <= 9; i++) {
+        const yard = currentYardData[i];
+        if (!yard) continue;
+        if (yard.status === 'vacant') vacantCount++;
+        else if (yard.status === 'standby') standbyList.push({ no: i, ...yard });
+    }
+
+    // 2. FIFO Sort para sa Priority
+    standbyList.sort((a, b) => new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`));
+    const nextYard = standbyList[0];
+
+    // 3. Render Next Priority (Yung malaking number sa card)
+    statusDiv.innerHTML = nextYard ? `
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div style="font-size: 3rem; font-weight: 900; color: #2d3748; line-height: 1;">${nextYard.no}</div>
+            <div style="line-height: 1.2;">
+                <div style="font-weight: 800; font-size: 0.9rem; color: #2b6cb0; text-transform: uppercase;">${nextYard.supplier}</div>
+                <div style="font-size: 0.8rem; font-weight: bold; color: #4a5568;">${nextYard.kg.toLocaleString()} kg</div>
+                <div style="font-size: 0.65rem; color: #a0aec0;">Arrived: ${nextYard.date}</div>
+            </div>
+        </div>
+    ` : `<div style="font-size: 1.1rem; color: #a0aec0; padding: 10px 0;">No Standby</div>`;
+
+    // 4. Render Vacant Badge (Yung maliit na label sa taas)
+    if (vacantBadge) {
+        vacantBadge.innerText = `${vacantCount} Vacant`;
+        vacantBadge.style.background = vacantCount > 0 ? '#c6f6d5' : '#fed7d7';
+        vacantBadge.style.color = vacantCount > 0 ? '#22543d' : '#822727';
+    }
+
+    // 5. Render Standby Queue Bar (Yung mahabang listahan sa ilalim)
+    if (queueBar) {
+        queueBar.innerHTML = `
+            <div style="background: white; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 15px;">
+                <div style="font-size: 0.65rem; font-weight: 900; color: #718096; text-transform: uppercase; writing-mode: vertical-lr; transform: rotate(180deg); border-left: 2px solid #cbd5e0; padding-left: 5px;">
+                    Standby Queue
+                </div>
+                <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; flex-grow: 1;">
+                    ${standbyList.length > 0 ? standbyList.map(s => `
+                        <div style="background: #edf2f7; border-radius: 8px; padding: 6px 12px; min-width: 90px; border-bottom: 3px solid #cbd5e0;">
+                            <div style="font-weight: 900; color: #2d3748; font-size: 1rem;">#${s.no}</div>
+                            <div style="font-size: 0.55rem; color: #718096; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${s.supplier}</div>
+                        </div>
+                    `).join('') : '<span style="color: #cbd5e0; font-size: 0.8rem;">No yards on standby</span>'}
+                </div>
+            </div>
+        `;
+    }
+}
 // Function para i-check kung nag-input na ang operator today
 async function checkTodayStatus() {
     const statusEl = document.getElementById('updateStatus');
