@@ -1342,7 +1342,7 @@ function updateDashboardSidebar() {
  // 5. Render Standby Queue Bar (Yung mahabang listahan sa ilalim)
     if (queueBar) {
     queueBar.innerHTML = `
-        <div style="background: white; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 12px;">
+        <div style="background: white; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 12px; width: 100%; box-sizing: border-box;">
             
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f7fafc; padding-bottom: 8px;">
                 <span style="font-size: 0.75rem; font-weight: 900; color: #718096; text-transform: uppercase; letter-spacing: 0.5px;">
@@ -1353,27 +1353,27 @@ function updateDashboardSidebar() {
                 </span>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 180px)); gap: 10px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; width: 100%;">
                 ${standbyList.map(s => `
-                    <div style="background: #f8fafc; border: 1px solid #edf2f7; border-radius: 8px; padding: 10px; border-top: 3px solid #4299e1;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-weight: 900; color: #1a202c; font-size: 1.1rem;">#${s.no}</span>
-                            <span style="color: #3182ce; font-size: 0.55rem; font-weight: bold;">FIFO</span>
+                    <div style="background: #f8fafc; border: 1px solid #edf2f7; border-radius: 8px; padding: 12px; border-top: 4px solid #4299e1; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <span style="font-weight: 900; color: #1a202c; font-size: 1.2rem;">#${s.no}</span>
+                            <span style="background: #ebf8ff; color: #3182ce; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; font-weight: 900;">FIFO</span>
                         </div>
-                        <div style="font-size: 0.7rem; color: #2d3748; font-weight: 800; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        <div style="font-size: 0.75rem; color: #2d3748; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${s.supplier}">
                             ${s.supplier}
                         </div>
-                        <div style="font-size: 0.6rem; color: #718096; margin-top: 2px;">
+                        <div style="font-size: 0.65rem; color: #718096; margin-top: 4px; display: flex; align-items: center; gap: 5px;">
                             <i class="far fa-calendar-alt"></i> ${s.date}
                         </div>
                     </div>
                 `).join('')}
                 
-                ${standbyList.length === 0 ? '<div style="color:#cbd5e0; font-size:0.8rem; padding:10px;">No yards on standby.</div>' : ''}
+                ${standbyList.length === 0 ? '<div style="grid-column: 1/-1; text-align: center; color:#cbd5e0; padding: 20px;">No yards on standby.</div>' : ''}
             </div>
         </div>
-        `;
-    }
+    `;
+}
 }
 // Function para i-check kung nag-input na ang operator today
 async function checkTodayStatus() {
