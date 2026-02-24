@@ -888,6 +888,9 @@ async function syncCoalData() {
     updateSummaryUI(totalStandbyKg, totalInUseKg);
     renderGridOnly();
     updatePriorityBanner(currentYardData, standbyLogs);
+    if (typeof updateDashboardSidebar === "function") {
+        updateDashboardSidebar();
+    }
 
     // 4. Smart Table Update (Anti-Gulo Logic)
     const dateFromInput = document.getElementById('dateFrom');
@@ -1204,14 +1207,12 @@ function updatePriorityBanner(yardData, standbyLogs) {
     updateSidebarActive(0);
     const content = document.getElementById('cont');
     
-    // 1. DITO NATIN KUKUNIN ANG DATA MULA SA LOCALSTORAGE (Para iwas 'db is not defined')
     const userCode = localStorage.getItem('userCode');
-    const userName = localStorage.getItem('userName') || "User"; // Default to "User" kung wala
+    const userName = localStorage.getItem('userName') || "User"; 
     
     const sInput = document.getElementById('sidebarSearch');
     if(sInput) sInput.value = "";
 
-    // Dynamic Greeting
     const hour = new Date().getHours();
     let greetText = "Magandang Araw";
     if (hour < 12) greetText = "Good Morning";
@@ -1230,22 +1231,35 @@ function updatePriorityBanner(yardData, standbyLogs) {
             </div>
         </div>
 
-        <div class="stats-grid">
+        <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px;">
+            
             <div class="stat-card">
                 <h4>Power Consumption (Yesterday)</h4>
                 <div class="value" id="yestTotal">0.00 kWh</div>
                 <div class="label"><i class="far fa-calendar-alt"></i> ${yDate}</div>
             </div>
+
             <div class="stat-card" style="border-left-color: #f6ad55;">
                 <h4>Latest GPM Reading</h4>
                 <div class="value" id="latestGPM">--</div>
                 <div class="label" id="gpmTime">Checking...</div>
                 <div id="updateStatus" style="font-size: 0.7rem; margin-top: 5px;"></div> 
-                <div id="todayProgress" style="display:none;"></div> 
+            </div>
+
+            <div class="stat-card" style="border-left-color: #2d3748;">
+                <h4 style="display: flex; justify-content: space-between;">
+                    Next Coal Priority 
+                    <span id="vacantBadge" style="font-size: 0.6rem; padding: 2px 6px; border-radius: 4px;"></span>
+                </h4>
+                <div id="dashboard-coal-status" style="margin-top: 5px;">
+                    <div class="value" style="font-size: 1.5rem; color: #cbd5e0;">Loading...</div>
+                </div>
             </div>
         </div>
 
-        <div class="chart-container">
+        <div id="coal-queue-bar" style="margin-top: 15px;"></div>
+
+        <div class="chart-container" style="margin-top: 20px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h4 style="margin:0;">Power Consumption Trend</h4>
                 <select onchange="updateChartRange(this.value)" style="padding: 5px; border-radius: 5px; border: 1px solid #ddd; font-size: 0.8rem;">
@@ -1257,10 +1271,17 @@ function updatePriorityBanner(yardData, standbyLogs) {
         </div>
     `;
 
+    // Delay para masiguro na rendered na ang HTML bago mag-fetch ng data
     setTimeout(() => {
-        // Siguraduhin na ang mga functions na ito ay gumagamit na rin ng Supabase calls
         if (typeof fetchDashboardData === "function") fetchDashboardData(yDate);
         if (typeof fetchLatestGPM === "function") fetchLatestGPM(); 
+        if (typeof checkTodayStatus === "function") checkTodayStatus();
+        
+        // Tawagin ang syncCoalData para i-process ang currentYardData
+        // At ang updateDashboardSidebar para i-render ang coal elements sa dashboard
+        if (typeof syncCoalData === "function") {
+            syncCoalData(); 
+         }
     }, 150);
 }
 
