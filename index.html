@@ -711,8 +711,15 @@ async function openCoalDelivery() {
     setInterval(syncCoalData, 30000); 
 }
 
+// 1. Helper Function para sa Shift (7AM-7PM Rule)
+function getShift(timeString) {
+    if (!timeString) return "";
+    const hour = parseInt(timeString.split(':')[0]);
+    return (hour >= 7 && hour < 19) ? "DS" : "NS";
+}
+
 async function syncCoalData() {
-    // Gamitin ang existing supabaseClient mo
+    // Tawagin ang existing supabaseClient mo
     const { data: logs, error } = await supabaseClient
         .from('delivery_logs')
         .select('*')
@@ -723,96 +730,128 @@ async function syncCoalData() {
         return;
     }
 
-    // --- Logic for Yard Statuses ---
     const yardStatuses = {};
+    let totalStandbyKg = 0;
+    let totalInUseKg = 0;
     const standbyLogs = [];
     
-    // Initialize 1-9
+    // Initialize lahat ng 9 yards
     for(let i=1; i<=9; i++) {
-        yardStatuses[i] = { status: 'vacant', supplier: 'Empty' };
+        yardStatuses[i] = { status: 'vacant', supplier: 'Empty', kg: 0, timeInfo: '--', shiftInfo: '' };
     }
 
     const processed = new Set();
     logs.forEach(log => {
         const y = String(log.coal_yard_no);
         if (!processed.has(y)) {
-            // Priority ang 'in use' at 'standby' na logs
             if (log.remarks === 'in use' || log.remarks === 'standby') {
+                // Kunin ang shift base sa remark
+                const shift = log.remarks === 'in use' ? getShift(log.time_in_use) : getShift(log.time_arrived);
+                const timeStr = log.remarks === 'in use' ? `${log.date_in_use} ${log.time_in_use}` : `${log.date_arrived} ${log.time_arrived}`;
+                
                 yardStatuses[y] = { 
                     status: log.remarks, 
                     supplier: log.supplier_name,
-                    arrival: `${log.date_arrived}T${log.time_arrived}` 
+                    kg: log.coal_kg || 0,
+                    timeInfo: timeStr,
+                    shiftInfo: shift
                 };
-                if (log.remarks === 'standby') standbyLogs.push(log);
+
+                // Add to Summary
+                if (log.remarks === 'standby') {
+                    standbyLogs.push(log);
+                    totalStandbyKg += (log.coal_kg || 0);
+                } else {
+                    totalInUseKg += (log.coal_kg || 0);
+                }
+            } else if (log.remarks === 'used up') {
+                // Record kung kailan naubos at anong shift
+                yardStatuses[y].timeInfo = `Finished: ${log.date_used_up} ${log.time_used_up}`;
+                yardStatuses[y].shiftInfo = getShift(log.time_used_up);
+                yardStatuses[y].status = 'used up'; // Para mag-green box pa rin
             }
             processed.add(y);
         }
     });
 
-    // --- RULE: Yard 9 Priority then FIFO ---
-    let prioText = "All Yards Clear";
-    let isUrgent = false;
+    // --- 2. Update Summary Bar ---
+    const summaryHtml = `
+        <div id="coal-summary" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+            <div style="background: #ebf8ff; border-left: 6px solid #3182ce; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                <small style="color: #2b6cb0; font-weight: bold; text-transform: uppercase; font-size: 0.7rem;">Total Standby Inventory</small>
+                <div style="font-size: 1.5rem; font-weight: 900; color: #2c5282;">${totalStandbyKg.toLocaleString()} <span style="font-size: 0.8rem;">kg</span></div>
+            </div>
+            <div style="background: #fffaf0; border-left: 6px solid #dd6b20; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                <small style="color: #9c4221; font-weight: bold; text-transform: uppercase; font-size: 0.7rem;">Current Consumption (In Use)</small>
+                <div style="font-size: 1.5rem; font-weight: 900; color: #7b341e;">${totalInUseKg.toLocaleString()} <span style="font-size: 0.8rem;">kg</span></div>
+            </div>
+        </div>
+    `;
 
-    // Check Yard 9 first (Obstruction Rule)
-    if (yardStatuses["9"].status === 'standby' || yardStatuses["9"].status === 'in use') {
-        prioText = `🚨 PRIO: YARD 9 (${yardStatuses["9"].supplier})`;
-        isUrgent = true;
-    } else if (standbyLogs.length > 0) {
-        // FIFO Rule for 1-8
-        const oldest = [...standbyLogs].sort((a, b) => {
-            const dA = new Date(`${a.date_arrived}T${a.time_arrived}`);
-            const dB = new Date(`${b.date_arrived}T${b.time_arrived}`);
-            return dA - dB;
-        })[0];
-        prioText = `NEXT PRIO: YARD ${oldest.coal_yard_no} (${oldest.supplier_name})`;
-    }
-
-    // --- Update UI ---
-    const banner = document.getElementById('prio-banner');
-    const prioTextEl = document.getElementById('prio-text');
-    
-    if (prioTextEl) prioTextEl.innerText = prioText;
-    if (document.getElementById('last-update')) {
-        document.getElementById('last-update').innerText = "Last sync: " + new Date().toLocaleTimeString();
-    }
-
-    if (banner) {
-        if (isUrgent) {
-            banner.style.background = "#fff5f5";
-            banner.style.color = "#c53030";
-            banner.style.borderColor = "#fc8181";
-            banner.classList.add('blink-urgent');
-        } else {
-            banner.style.background = "#f0fff4";
-            banner.style.color = "#276749";
-            banner.style.borderColor = "#9ae6b4";
-            banner.classList.remove('blink-urgent');
-        }
-    }
-
-    // --- Render Grid ---
+    // Hanapin ang container para isingit ang summary
     const grid = document.getElementById('yard-grid');
     if (grid) {
+        // Siguraduhin na ang summary ay nasa itaas ng grid
+        let existingSummary = document.getElementById('coal-summary');
+        if (existingSummary) existingSummary.remove();
+        grid.insertAdjacentHTML('beforebegin', summaryHtml);
+
+        // --- 3. Render 9-Yard Grid ---
         grid.innerHTML = '';
         for(let i=1; i<=9; i++) {
             const data = yardStatuses[i];
-            // Color mapping: Blue (Standby), Yellow (In Use), Green (Vacant)
-            const color = data.status === 'standby' ? '#3182ce' : (data.status === 'in use' ? '#d69e2e' : '#38a169');
             
+            // Color Coding
+            let bgColor = '#48bb78'; // Green (Vacant/Used Up)
+            if (data.status === 'standby') bgColor = '#3182ce'; // Blue
+            if (data.status === 'in use') bgColor = '#d69e2e';  // Yellow/Orange
+
+            const shiftDisplay = data.shiftInfo ? `<span style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 10px; font-size: 0.6rem; font-weight: bold;">${data.shiftInfo}</span>` : '';
+
             grid.innerHTML += `
-                <div style="background: ${color}; padding: 15px; border-radius: 10px; color: white; text-align: center; border-bottom: 4px solid rgba(0,0,0,0.2);">
-                    <div style="font-size: 0.7rem; opacity: 0.9;">COAL YARD</div>
-                    <div style="font-size: 1.8rem; font-weight: 800;">${i}</div>
-                    <div style="font-size: 0.75rem; font-weight: 600; margin: 5px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                        ${data.supplier}
+                <div style="background: ${bgColor}; padding: 15px; border-radius: 12px; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-bottom: 5px solid rgba(0,0,0,0.2); transition: all 0.3s;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <div style="font-size: 0.6rem; opacity: 0.8; font-weight: bold;">YARD</div>
+                            <div style="font-size: 2.2rem; font-weight: 900; line-height: 1;">${i}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 1rem; font-weight: bold;">${data.kg > 0 ? data.kg.toLocaleString() + ' kg' : '--'}</div>
+                            <div style="font-size: 0.6rem; background: rgba(0,0,0,0.2); padding: 3px 6px; border-radius: 4px; display: inline-block; margin-top: 4px;">
+                                ${data.status.toUpperCase()} ${shiftDisplay}
+                            </div>
+                        </div>
                     </div>
-                    <div style="font-size: 0.6rem; background: rgba(255,255,255,0.2); border-radius: 4px; padding: 2px 5px; display: inline-block; text-transform: uppercase;">
-                        ${data.status}
+                    
+                    <div style="margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 10px;">
+                        <div style="font-size: 0.8rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            ${data.supplier}
+                        </div>
+                        <div style="font-size: 0.6rem; opacity: 0.9; margin-top: 3px;">
+                            <i class="far fa-clock"></i> ${data.timeInfo}
+                        </div>
                     </div>
                 </div>
             `;
         }
     }
+
+    // --- 4. Update Priority Banner (Yard 9 Obstruction Logic) ---
+    let prioText = "All Yards Clear";
+    let isUrgent = false;
+
+    if (yardStatuses["9"].status === 'standby' || yardStatuses["9"].status === 'in use') {
+        prioText = `🚨 PRIO: YARD 9 (${yardStatuses["9"].supplier})`;
+        isUrgent = true;
+    } else if (standbyLogs.length > 0) {
+        const oldest = [...standbyLogs].sort((a,b) => new Date(`${a.date_arrived}T${a.time_arrived}`) - new Date(`${b.date_arrived}T${b.time_arrived}`))[0];
+        prioText = `NEXT PRIO: YARD ${oldest.coal_yard_no} (${oldest.supplier_name})`;
+    }
+
+    const banner = document.getElementById('prio-banner');
+    const prioTextEl = document.getElementById('prio-text');
+    if (prioTextEl) prioTextEl.innerText = prioText;
+    if (banner) isUrgent ? banner.classList.add('blink-urgent') : banner.classList.remove('blink-urgent');
 }
         function openCoalDumping() {
     updateSidebarActive(5);
