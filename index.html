@@ -959,9 +959,8 @@ async function syncCoalData() {
     if(document.getElementById('last-update')) {
         document.getElementById('last-update').innerText = "Last Sync: " + new Date().toLocaleTimeString();
     }
-}
 
-    function renderGridOnly() {
+function renderGridOnly() {
     const grid = document.getElementById('yard-grid');
     if (!grid) return;
 
