@@ -683,56 +683,109 @@ function fetchPowerData(selectedDate) {
         document.getElementById('polyStock').innerText = data.poly + " liters";
     });
 }
-        function openCoalDelivery() {
-    updateSidebarActive(4);
-    const content = document.getElementById('cont');
-    const today = new Date().toISOString().split('T')[0];
+       // --- COAL YARD MONITORING LOGIC ---
+async function openCoalDelivery() {
+    const cont = document.getElementById('cont');
     
-    content.innerHTML = `
-        <h1>Coal Delivery Logs</h1>
-        <div class="filter-bar">
-            <input type="date" id="coalDelDate" value="${today}" onchange="fetchCoalDelivery(this.value)">
-            <span class="total-badge" id="totalDelivered">Total: 0.00 MT</span>
-        </div>
-        <div class="data-card">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Time</th>
-                        <th>Plate No.</th>
-                        <th>Supplier</th>
-                        <th>Net Weight (MT)</th>
-                    </tr>
-                </thead>
-                <tbody id="coalDelBody"></tbody>
-            </table>
+    // 1. Layout ng Dashboard
+    cont.innerHTML = `
+        <div class="coal-container" style="padding: 20px; font-family: 'Segoe UI', sans-serif;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0; color: #2d3748;">Coal Yard Live Status</h2>
+                <div id="last-update" style="font-size: 0.8rem; color: #a0aec0;">Syncing...</div>
+            </div>
+
+            <div id="prio-banner" style="background: #edf2f7; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 25px; border: 2px solid #e2e8f0; transition: all 0.3s;">
+                <small style="text-transform: uppercase; letter-spacing: 1px; color: #718096;">Next Priority for Consumption</small>
+                <div id="prio-text" style="font-size: 1.8rem; font-weight: 900; color: #2d3748; margin-top: 5px;">Checking...</div>
+            </div>
+
+            <div id="yard-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                </div>
         </div>
     `;
-    fetchCoalDelivery(today);
+
+    // 2. Simulan ang Syncing
+    syncCoalData();
+    // Auto-refresh bawat 30 seconds
+    setInterval(syncCoalData, 30000); 
 }
 
-function fetchCoalDelivery(date) {
-    database.ref('coal/delivery/' + date).on('value', (snap) => {
-        const body = document.getElementById('coalDelBody');
-        let total = 0;
-        let rows = "";
-        if(!snap.exists()) {
-            body.innerHTML = "<tr><td colspan='4' style='text-align:center;'>No deliveries recorded.</td></tr>";
-            return;
+async function syncCoalData() {
+    const { data: logs, error } = await supabase
+        .from('delivery_logs')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    if (error) return console.error(error);
+
+    const yardStatuses = {};
+    const standbyLogs = [];
+    for(let i=1; i<=9; i++) yardStatuses[i] = { status: 'vacant', supplier: 'Empty' };
+
+    const processed = new Set();
+    logs.forEach(log => {
+        const y = String(log.coal_yard_no);
+        if (!processed.has(y)) {
+            if (log.remarks === 'in use' || log.remarks === 'standby') {
+                yardStatuses[y] = { status: log.remarks, supplier: log.supplier_name };
+                if (log.remarks === 'standby') standbyLogs.push(log);
+            }
+            processed.add(y);
         }
-        snap.forEach(child => {
-            const val = child.val();
-            total += parseFloat(val.weight);
-            rows += `<tr>
-                <td>${val.time}</td>
-                <td><b>${val.plate}</b></td>
-                <td>${val.supplier}</td>
-                <td class="text-blue">${val.weight} MT</td>
-            </tr>`;
-        });
-        body.innerHTML = rows;
-        document.getElementById('totalDelivered').innerText = `Total: ${total.toFixed(2)} MT`;
     });
+
+    // --- RULE 1: Yard 9 Priority Check ---
+    let prioText = "All Yards Clear";
+    let isUrgent = false;
+
+    if (yardStatuses["9"].status === 'standby' || yardStatuses["9"].status === 'in use') {
+        prioText = `🚨 YARD 9 (${yardStatuses["9"].supplier})`;
+        isUrgent = true;
+    } else {
+        // --- RULE 2: FIFO for other yards ---
+        if (standbyLogs.length > 0) {
+            const oldest = standbyLogs.sort((a,b) => new Date(a.created_at) - new Date(b.created_at))[0];
+            prioText = `YARD ${oldest.coal_yard_no} (${oldest.supplier_name})`;
+        }
+    }
+
+    // Update UI
+    const banner = document.getElementById('prio-banner');
+    document.getElementById('prio-text').innerText = prioText;
+    document.getElementById('last-update').innerText = "Last update: " + new Date().toLocaleTimeString();
+
+    if (isUrgent) {
+        banner.style.background = "#fff5f5";
+        banner.style.borderColor = "#feb2b2";
+        banner.style.color = "#c53030";
+        banner.classList.add('blink-urgent');
+    } else {
+        banner.style.background = "#f0fff4";
+        banner.style.borderColor = "#9ae6b4";
+        banner.style.color = "#276749";
+        banner.classList.remove('blink-urgent');
+    }
+
+    // Render Grid
+    const grid = document.getElementById('yard-grid');
+    grid.innerHTML = '';
+    for(let i=1; i<=9; i++) {
+        const data = yardStatuses[i];
+        const color = data.status === 'in use' ? '#ecc94b' : (data.status === 'standby' ? '#4299e1' : '#48bb78');
+        grid.innerHTML += `
+            <div style="background: ${color}; padding: 20px; border-radius: 12px; color: white; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <div style="font-size: 0.8rem; opacity: 0.8;">YARD</div>
+                <div style="font-size: 2rem; font-weight: bold;">${i}</div>
+                <div style="font-size: 0.7rem; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    ${data.supplier}
+                </div>
+                <div style="font-size: 0.6rem; text-transform: uppercase; margin-top: 5px; background: rgba(0,0,0,0.1); border-radius: 4px; padding: 2px;">
+                    ${data.status}
+                </div>
+            </div>
+        `;
+    }
 }
         function openCoalDumping() {
     updateSidebarActive(5);
