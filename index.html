@@ -1282,28 +1282,35 @@ function updatePriorityBanner(yardData, standbyLogs) {
 }
 function updateDashboardSidebar() {
     const statusDiv = document.getElementById('dashboard-coal-status');
-    const vacantBadge = document.getElementById('vacantBadge');
+    const vacantBadge = document.getElementById('vacantBadge'); // Safe to keep for reference
     const queueBar = document.getElementById('coal-queue-bar');
 
-    // Guard clause: Kung wala sa Dashboard page (halimbawa nasa Coal page), stop na.
-    if (!statusDiv) return;
+    // Guard clause: Kung wala sa Dashboard page, stop na.
+    if (!statusDiv || !queueBar) return;
 
     const standbyList = [];
-    let vacantCount = 0;
+    const inUseYards = [];
+    const vacantYards = [];
     
-    // 1. Kunin ang data mula sa currentYardData (Dapat processed na ito ng syncCoalData)
+    // 1. Kategorya ang lahat ng 9 na Yard (Para sa math accuracy)
     for (let i = 1; i <= 9; i++) {
         const yard = currentYardData[i];
         if (!yard) continue;
-        if (yard.status === 'vacant') vacantCount++;
-        else if (yard.status === 'standby') standbyList.push({ no: i, ...yard });
+        
+        if (yard.status === 'vacant') {
+            vacantYards.push("Y" + i);
+        } else if (yard.status === 'in use') {
+            inUseYards.push("Y" + i);
+        } else if (yard.status === 'standby') {
+            standbyList.push({ no: i, ...yard });
+        }
     }
 
     // 2. FIFO Sort para sa Priority
     standbyList.sort((a, b) => new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`));
     const nextYard = standbyList[0];
 
-    // 3. Render Next Priority (Yung malaking number sa card)
+    // 3. Render Next Priority Card (Upper Right Card)
     statusDiv.innerHTML = nextYard ? `
         <div style="display: flex; align-items: center; gap: 15px;">
             <div style="font-size: 3rem; font-weight: 900; color: #2d3748; line-height: 1;">${nextYard.no}</div>
@@ -1315,34 +1322,12 @@ function updateDashboardSidebar() {
         </div>
     ` : `<div style="font-size: 1.1rem; color: #a0aec0; padding: 10px 0;">No Standby</div>`;
 
-    // 4. Render Vacant Badge (Dynamic Text: Count + Yard Numbers)
-    if (vacantBadge) {
-        // Kunin natin ang lahat ng yard numbers na vacant
-        const vacantYards = [];
-        for (let i = 1; i <= 9; i++) {
-            if (currentYardData[i] && currentYardData[i].status === 'vacant') {
-                vacantYards.push("Y" + i); // Halimbawa: Y1, Y2
-            }
-        }
+    // Clean up the old badge since we're moving it to the bottom
+    if (vacantBadge) vacantBadge.style.display = 'none';
 
-        const vacantCount = vacantYards.length;
-        const vacantListText = vacantCount > 0 ? ` (${vacantYards.join(', ')})` : "";
-
-        vacantBadge.innerText = `${vacantCount} VACANT${vacantListText}`;
-        
-        // Dynamic Colors: Red pag puno na (0 vacant), Green pag may space pa
-        vacantBadge.style.background = vacantCount > 0 ? '#c6f6d5' : '#fed7d7';
-        vacantBadge.style.color = vacantCount > 0 ? '#22543d' : '#822727';
-        vacantBadge.style.fontWeight = "bold";
-        vacantBadge.style.padding = "4px 8px";
-        vacantBadge.style.borderRadius = "5px";
-        vacantBadge.style.fontSize = "0.7rem";
-    }
-    
- // 5. Render Standby Queue Bar (Yung mahabang listahan sa ilalim)
-    if (queueBar) {
+    // 4. Render Standby Queue Bar & Bottom Inventory Summary
     queueBar.innerHTML = `
-        <div style="background: white; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 12px; width: 100%; box-sizing: border-box;">
+        <div style="background: white; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 15px; width: 100%; box-sizing: border-box; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
             
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f7fafc; padding-bottom: 8px;">
                 <span style="font-size: 0.75rem; font-weight: 900; color: #718096; text-transform: uppercase; letter-spacing: 0.5px;">
@@ -1355,7 +1340,7 @@ function updateDashboardSidebar() {
 
             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; width: 100%;">
                 ${standbyList.map(s => `
-                    <div style="background: #f8fafc; border: 1px solid #edf2f7; border-radius: 8px; padding: 12px; border-top: 4px solid #4299e1; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                    <div style="background: #f8fafc; border: 1px solid #edf2f7; border-radius: 8px; padding: 12px; border-top: 4px solid #4299e1;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                             <span style="font-weight: 900; color: #1a202c; font-size: 1.2rem;">#${s.no}</span>
                             <span style="background: #ebf8ff; color: #3182ce; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; font-weight: 900;">FIFO</span>
@@ -1363,17 +1348,29 @@ function updateDashboardSidebar() {
                         <div style="font-size: 0.75rem; color: #2d3748; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${s.supplier}">
                             ${s.supplier}
                         </div>
-                        <div style="font-size: 0.65rem; color: #718096; margin-top: 4px; display: flex; align-items: center; gap: 5px;">
+                        <div style="font-size: 0.65rem; color: #718096; margin-top: 4px;">
                             <i class="far fa-calendar-alt"></i> ${s.date}
                         </div>
                     </div>
                 `).join('')}
+                ${standbyList.length === 0 ? '<div style="grid-column: 1/-1; text-align: center; color:#cbd5e0; padding: 10px;">No yards on standby.</div>' : ''}
+            </div>
+
+            <div style="display: flex; justify-content: center; gap: 12px; margin-top: 5px; padding-top: 12px; border-top: 1px dashed #e2e8f0; flex-wrap: wrap;">
                 
-                ${standbyList.length === 0 ? '<div style="grid-column: 1/-1; text-align: center; color:#cbd5e0; padding: 20px;">No yards on standby.</div>' : ''}
+                <div style="background: #fffaf0; color: #9c4221; border: 1px solid #feebc8; padding: 5px 15px; border-radius: 20px; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                    <span style="height: 10px; width: 10px; background: #ed8936; border-radius: 50%; display: inline-block; animation: pulse 2s infinite;"></span>
+                    IN USE: ${inUseYards.length > 0 ? inUseYards.join(', ') : 'NONE'}
+                </div>
+
+                <div style="background: #f0fff4; color: #22543d; border: 1px solid #c6f6d5; padding: 5px 15px; border-radius: 20px; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                    <span style="height: 10px; width: 10px; background: #38a169; border-radius: 50%; display: inline-block;"></span>
+                    VACANT: ${vacantYards.length > 0 ? vacantYards.join(', ') : 'NONE'}
+                </div>
+
             </div>
         </div>
     `;
-}
 }
 // Function para i-check kung nag-input na ang operator today
 async function checkTodayStatus() {
