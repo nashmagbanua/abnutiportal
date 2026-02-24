@@ -841,14 +841,16 @@ async function syncCoalData() {
     let totalInUseKg = 0;
     const standbyLogs = [];
     
-    // Kunin ang huling 10 na "used up" para sa History Table
-    const historyData = logs.filter(l => l.remarks === 'used up').slice(0, 10);
-
-    // Initialize 9 Yards
+    // 1. Initialize 9 Yards (Default State)
     for(let i=1; i<=9; i++) {
-        currentYardData[i] = { status: 'vacant', supplier: 'Empty', kg: 0, date: '--', time: '--', shift: '', operator: 'None', startedDate: '', startedTime: '' };
+        currentYardData[i] = { 
+            status: 'vacant', supplier: 'Empty', kg: 0, 
+            date: '--', time: '--', shift: '', 
+            operator: 'None', startedDate: '', startedTime: '' 
+        };
     }
 
+    // 2. Process Logs para sa Live Grid
     const processed = new Set();
     logs.forEach(log => {
         const y = String(log.coal_yard_no);
@@ -857,10 +859,10 @@ async function syncCoalData() {
             
             if (log.remarks === 'in use') {
                 d = log.date_in_use; t = log.time_in_use;
-                totalInUseKg += (log.coal_kg || 0);
+                totalInUseKg += (Number(log.coal_kg) || 0);
             } else if (log.remarks === 'standby') {
                 d = log.date_arrived; t = log.time_arrived;
-                totalStandbyKg += (log.coal_kg || 0);
+                totalStandbyKg += (Number(log.coal_kg) || 0);
                 standbyLogs.push(log);
             } else {
                 d = log.date_used_up; t = log.time_used_up;
@@ -869,12 +871,12 @@ async function syncCoalData() {
             currentYardData[y] = {
                 status: log.remarks === 'used up' ? 'vacant' : log.remarks,
                 supplier: log.supplier_name,
-                kg: log.coal_kg || 0,
+                kg: Number(log.coal_kg) || 0,
+                dr_no: log.dr_no, // Siguraduhing kasama ito
                 date: d,
                 time: t,
                 shift: getShift(t),
                 operator: op,
-                // Itago natin yung start time para sa elapsed calculation kung in use
                 startedDate: log.date_in_use,
                 startedTime: log.time_in_use
             };
@@ -882,15 +884,36 @@ async function syncCoalData() {
         }
     });
 
+    // 3. FIFO Logic para sa Default Table View
+    // Kukunin lang natin ang mga 'standby' at 'in use' para sa default list
+    const activeFIFO = logs.filter(l => l.remarks === 'standby' || l.remarks === 'in use')
+        .sort((a, b) => {
+            // Sort by Date Arrived then Time Arrived (FIFO)
+            const dateA = new Date(`${a.date_arrived}T${a.time_arrived}`);
+            const dateB = new Date(`${b.date_arrived}T${b.time_arrived}`);
+            return dateA - dateB;
+        });
+
+    // 4. Update the UI
     updateSummaryUI(totalStandbyKg, totalInUseKg);
     renderGridOnly();
     updatePriorityBanner(currentYardData, standbyLogs);
+
+    // 5. Smart Table Update: 
+    // Huwag i-update ang table kung ang user ay nag-search na (para hindi mawala ang results niya)
+    const histDiv = document.getElementById('history-list');
+    const isSearching = histDiv && histDiv.innerHTML.includes("Searching records");
+
+    if (!isSearching) {
+        renderHistoryTable(activeFIFO);
+    }
+
     if(document.getElementById('last-update')) {
         document.getElementById('last-update').innerText = "Last Sync: " + new Date().toLocaleTimeString();
     }
 }
 
-function renderGridOnly() {
+    function renderGridOnly() {
     const grid = document.getElementById('yard-grid');
     if (!grid) return;
 
@@ -961,56 +984,93 @@ function renderHistoryTable(history) {
     const histDiv = document.getElementById('history-list');
     if (!histDiv) return;
 
+    // 1. Calculations
+    const grandTotalKg = history.reduce((sum, item) => sum + (Number(item.coal_kg) || 0), 0);
+    const totalRecords = history.length;
+
     let tableHtml = `
         <div style="overflow-x: auto;">
-            <table style="width:100%; border-collapse:collapse; background:white; font-size:0.75rem; min-width:1100px; border:1px solid #e2e8f0;">
+            <table style="width:100%; border-collapse:collapse; background:white; font-size:0.75rem; min-width:1200px; border:1px solid #e2e8f0;">
                 <thead style="background:#2d3748; color:white; text-transform:uppercase; letter-spacing:0.5px;">
                     <tr>
-                        <th style="padding:12px; border:1px solid #4a5568;">Yard</th>
-                        <th style="padding:12px; border:1px solid #4a5568;">Supplier / CTP / OR</th>
-                        <th style="padding:12px; border:1px solid #4a5568;">Truck / Driver</th>
+                        <th style="padding:12px; border:1px solid #4a5568;">Yard / Operator</th>
+                        <th style="padding:12px; border:1px solid #4a5568;">Supplier / DR NO.</th>
                         <th style="padding:12px; border:1px solid #4a5568;">Arrival Info</th>
-                        <th style="padding:12px; border:1px solid #4a5568; background:#744210;">Consumption (In Use)</th>
-                        <th style="padding:12px; border:1px solid #4a5568; background:#22543d;">Finished (Used Up)</th>
-                        <th style="padding:12px; border:1px solid #4a5568;">Total KG</th>
+                        <th style="padding:12px; border:1px solid #4a5568; background:#744210;">In Use (Start)</th>
+                        <th style="padding:12px; border:1px solid #4a5568; background:#22543d;">Used Up (Finish)</th>
+                        <th style="padding:12px; border:1px solid #4a5568; background:#4a5568;">Consumed Time</th> <th style="padding:12px; border:1px solid #4a5568;">Net Weight</th>
                     </tr>
                 </thead>
                 <tbody>
     `;
 
     history.forEach(h => {
+        // --- 2. LOGIC PARA SA CONSUMED TIME ---
+        let consumedDisplay = "--";
+        if (h.date_in_use && h.date_used_up) {
+            const start = new Date(`${h.date_in_use}T${h.time_in_use}`);
+            const end = new Date(`${h.date_used_up}T${h.time_used_up}`);
+            const diffMs = end - start;
+
+            if (diffMs > 0) {
+                const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const mins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                
+                consumedDisplay = days > 0 
+                    ? `${days}d ${hours}h ${mins}m` 
+                    : `${hours}h ${mins}m`;
+            }
+        }
+
         tableHtml += `
             <tr style="border-bottom:1px solid #edf2f7; transition:0.2s;" onmouseover="this.style.backgroundColor='#f7fafc'" onmouseout="this.style.backgroundColor='transparent'">
-                <td style="padding:12px; text-align:center; font-weight:900; font-size:1rem; border:1px solid #edf2f7;">${h.coal_yard_no}</td>
-                <td style="padding:12px; border:1px solid #edf2f7;">
-                    <b style="color:#2d3748;">${h.supplier_name}</b><br>
-                    <span style="color:#718096;">CTP: ${h.ctp_no || '--'}</span><br>
-                    <span style="color:#718096;">OR: ${h.or_no || '--'}</span>
+                <td style="padding:12px; text-align:center; border:1px solid #edf2f7; background:#f8fafc;">
+                    <div style="font-weight:900; font-size:1.1rem; color:#2d3748;">${h.coal_yard_no}</div>
+                    <div style="font-size:0.6rem; color:#718096; text-transform:uppercase;">
+                        <i class="fas fa-user-edit"></i> ${h.operator_name || '---'}
+                    </div>
                 </td>
                 <td style="padding:12px; border:1px solid #edf2f7;">
-                    <b>${h.plate_no || '--'}</b><br>
-                    <small style="color:#718096;">${h.driver_name || '--'}</small>
+                    <b>${h.supplier_name || '---'}</b><br>
+                    <span style="color:#2b6cb0; font-size:0.7rem; font-weight:bold;">DR: ${h.dr_no || '--'}</span>
                 </td>
                 <td style="padding:12px; border:1px solid #edf2f7;">
-                    ${h.date_arrived}<br>${h.time_arrived}
+                    ${h.date_arrived}<br><small style="color:#a0aec0;">${h.time_arrived}</small>
                 </td>
                 <td style="padding:12px; border:1px solid #edf2f7; background:#fffaf0;">
-                    <b>${h.date_in_use || '--'}</b><br>${h.time_in_use || '--'}
+                    <b>${h.date_in_use || '--'}</b><br><small>${h.time_in_use || '--'}</small>
                 </td>
                 <td style="padding:12px; border:1px solid #edf2f7; background:#f0fff4;">
-                    <b>${h.date_used_up || '--'}</b><br>${h.time_used_up || '--'}
+                    <b>${h.date_used_up || '--'}</b><br><small>${h.time_used_up || '--'}</small>
                 </td>
-                <td style="padding:12px; border:1px solid #edf2f7; font-weight:bold; color:#2b6cb0; text-align:right;">
-                    ${(h.coal_kg || 0).toLocaleString()} kg
+                <td style="padding:12px; border:1px solid #edf2f7; text-align:center; font-weight:bold; color:#4a5568; background:#f7fafc;">
+                    ${consumedDisplay}
+                </td>
+                <td style="padding:12px; border:1px solid #edf2f7; font-weight:bold; color:#2d3748; text-align:right;">
+                    ${(Number(h.coal_kg) || 0).toLocaleString()} kg
                 </td>
             </tr>
         `;
     });
 
-    tableHtml += `</tbody></table></div>`;
+    tableHtml += `
+                </tbody>
+                <tfoot style="background: #edf2f7; border-top: 2px solid #2d3748;">
+                    <tr>
+                        <td colspan="3" style="padding: 15px; font-weight: bold;">Records: ${totalRecords}</td>
+                        <td colspan="3" style="padding: 15px; text-align: right; font-weight: bold; text-transform: uppercase;">Grand Total:</td>
+                        <td style="padding: 15px; text-align: right; font-weight: 900; color: #2b6cb0; font-size: 1rem; border-left: 2px solid #cbd5e0;">
+                            ${grandTotalKg.toLocaleString()} kg
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    `;
+
     histDiv.innerHTML = tableHtml;
 }
-
 // B. Para sa Priority Banner (FIFO at Yard 9 Rule)
 function updatePriorityBanner(yardData, standbyLogs) {
     let prioText = "All Yards Clear";
