@@ -826,6 +826,41 @@ function renderGridOnly() {
         `;
     }
 }
+        function updatePriorityBanner(yardData, standbyLogs) {
+    let prioText = "All Yards Clear";
+    let isUrgent = false;
+
+    // RULE 1: Yard 9 Priority (Obstruction)
+    // Kahit 'in use' o 'standby', basta may laman ang Yard 9, siya ang PRIO.
+    if (yardData["9"].status === 'standby' || yardData["9"].status === 'in use') {
+        prioText = `🚨 PRIO: YARD 9 (${yardData["9"].supplier})`;
+        isUrgent = true;
+    } 
+    // RULE 2: FIFO (Oldest Standby)
+    else if (standbyLogs.length > 0) {
+        const oldest = [...standbyLogs].sort((a, b) => {
+            const timeA = new Date(`${a.date_arrived}T${a.time_arrived}`);
+            const timeB = new Date(`${b.date_arrived}T${b.time_arrived}`);
+            return timeA - timeB;
+        })[0];
+        prioText = `NEXT PRIO: YARD ${oldest.coal_yard_no} (${oldest.supplier_name})`;
+    }
+
+    const banner = document.getElementById('prio-banner');
+    const prioTextEl = document.getElementById('prio-text');
+    
+    if (prioTextEl) prioTextEl.innerText = prioText;
+    
+    if (banner) {
+        if (isUrgent) {
+            banner.classList.add('blink-urgent');
+            banner.style.border = "4px solid #f56565";
+        } else {
+            banner.classList.remove('blink-urgent');
+            banner.style.border = "2px solid #e2e8f0";
+        }
+    }
+}
 
 // Helpers para sa UI
 function updateSummaryUI(standby, inuse) {
