@@ -712,79 +712,106 @@ async function openCoalDelivery() {
 }
 
 async function syncCoalData() {
-    const { data: logs, error } = await supabase
+    // Gamitin ang existing supabaseClient mo
+    const { data: logs, error } = await supabaseClient
         .from('delivery_logs')
         .select('*')
         .order('created_at', { ascending: false });
 
-    if (error) return console.error(error);
+    if (error) {
+        console.error('Supabase Error:', error);
+        return;
+    }
 
+    // --- Logic for Yard Statuses ---
     const yardStatuses = {};
     const standbyLogs = [];
-    for(let i=1; i<=9; i++) yardStatuses[i] = { status: 'vacant', supplier: 'Empty' };
+    
+    // Initialize 1-9
+    for(let i=1; i<=9; i++) {
+        yardStatuses[i] = { status: 'vacant', supplier: 'Empty' };
+    }
 
     const processed = new Set();
     logs.forEach(log => {
         const y = String(log.coal_yard_no);
         if (!processed.has(y)) {
+            // Priority ang 'in use' at 'standby' na logs
             if (log.remarks === 'in use' || log.remarks === 'standby') {
-                yardStatuses[y] = { status: log.remarks, supplier: log.supplier_name };
+                yardStatuses[y] = { 
+                    status: log.remarks, 
+                    supplier: log.supplier_name,
+                    arrival: `${log.date_arrived}T${log.time_arrived}` 
+                };
                 if (log.remarks === 'standby') standbyLogs.push(log);
             }
             processed.add(y);
         }
     });
 
-    // --- RULE 1: Yard 9 Priority Check ---
+    // --- RULE: Yard 9 Priority then FIFO ---
     let prioText = "All Yards Clear";
     let isUrgent = false;
 
+    // Check Yard 9 first (Obstruction Rule)
     if (yardStatuses["9"].status === 'standby' || yardStatuses["9"].status === 'in use') {
-        prioText = `🚨 YARD 9 (${yardStatuses["9"].supplier})`;
+        prioText = `🚨 PRIO: YARD 9 (${yardStatuses["9"].supplier})`;
         isUrgent = true;
-    } else {
-        // --- RULE 2: FIFO for other yards ---
-        if (standbyLogs.length > 0) {
-            const oldest = standbyLogs.sort((a,b) => new Date(a.created_at) - new Date(b.created_at))[0];
-            prioText = `YARD ${oldest.coal_yard_no} (${oldest.supplier_name})`;
+    } else if (standbyLogs.length > 0) {
+        // FIFO Rule for 1-8
+        const oldest = [...standbyLogs].sort((a, b) => {
+            const dA = new Date(`${a.date_arrived}T${a.time_arrived}`);
+            const dB = new Date(`${b.date_arrived}T${b.time_arrived}`);
+            return dA - dB;
+        })[0];
+        prioText = `NEXT PRIO: YARD ${oldest.coal_yard_no} (${oldest.supplier_name})`;
+    }
+
+    // --- Update UI ---
+    const banner = document.getElementById('prio-banner');
+    const prioTextEl = document.getElementById('prio-text');
+    
+    if (prioTextEl) prioTextEl.innerText = prioText;
+    if (document.getElementById('last-update')) {
+        document.getElementById('last-update').innerText = "Last sync: " + new Date().toLocaleTimeString();
+    }
+
+    if (banner) {
+        if (isUrgent) {
+            banner.style.background = "#fff5f5";
+            banner.style.color = "#c53030";
+            banner.style.borderColor = "#fc8181";
+            banner.classList.add('blink-urgent');
+        } else {
+            banner.style.background = "#f0fff4";
+            banner.style.color = "#276749";
+            banner.style.borderColor = "#9ae6b4";
+            banner.classList.remove('blink-urgent');
         }
     }
 
-    // Update UI
-    const banner = document.getElementById('prio-banner');
-    document.getElementById('prio-text').innerText = prioText;
-    document.getElementById('last-update').innerText = "Last update: " + new Date().toLocaleTimeString();
-
-    if (isUrgent) {
-        banner.style.background = "#fff5f5";
-        banner.style.borderColor = "#feb2b2";
-        banner.style.color = "#c53030";
-        banner.classList.add('blink-urgent');
-    } else {
-        banner.style.background = "#f0fff4";
-        banner.style.borderColor = "#9ae6b4";
-        banner.style.color = "#276749";
-        banner.classList.remove('blink-urgent');
-    }
-
-    // Render Grid
+    // --- Render Grid ---
     const grid = document.getElementById('yard-grid');
-    grid.innerHTML = '';
-    for(let i=1; i<=9; i++) {
-        const data = yardStatuses[i];
-        const color = data.status === 'in use' ? '#ecc94b' : (data.status === 'standby' ? '#4299e1' : '#48bb78');
-        grid.innerHTML += `
-            <div style="background: ${color}; padding: 20px; border-radius: 12px; color: white; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                <div style="font-size: 0.8rem; opacity: 0.8;">YARD</div>
-                <div style="font-size: 2rem; font-weight: bold;">${i}</div>
-                <div style="font-size: 0.7rem; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                    ${data.supplier}
+    if (grid) {
+        grid.innerHTML = '';
+        for(let i=1; i<=9; i++) {
+            const data = yardStatuses[i];
+            // Color mapping: Blue (Standby), Yellow (In Use), Green (Vacant)
+            const color = data.status === 'standby' ? '#3182ce' : (data.status === 'in use' ? '#d69e2e' : '#38a169');
+            
+            grid.innerHTML += `
+                <div style="background: ${color}; padding: 15px; border-radius: 10px; color: white; text-align: center; border-bottom: 4px solid rgba(0,0,0,0.2);">
+                    <div style="font-size: 0.7rem; opacity: 0.9;">COAL YARD</div>
+                    <div style="font-size: 1.8rem; font-weight: 800;">${i}</div>
+                    <div style="font-size: 0.75rem; font-weight: 600; margin: 5px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        ${data.supplier}
+                    </div>
+                    <div style="font-size: 0.6rem; background: rgba(255,255,255,0.2); border-radius: 4px; padding: 2px 5px; display: inline-block; text-transform: uppercase;">
+                        ${data.status}
+                    </div>
                 </div>
-                <div style="font-size: 0.6rem; text-transform: uppercase; margin-top: 5px; background: rgba(0,0,0,0.1); border-radius: 4px; padding: 2px;">
-                    ${data.status}
-                </div>
-            </div>
-        `;
+            `;
+        }
     }
 }
         function openCoalDumping() {
