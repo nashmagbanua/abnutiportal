@@ -690,62 +690,77 @@ async function openCoalDelivery() {
     
     cont.innerHTML = `
     <div class="coal-container" style="padding: 20px; font-family: 'Segoe UI', sans-serif; color: #2d3748;">
+        
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2 style="margin: 0;">Coal Yard Live Status</h2>
-            <div id="last-update" style="font-size: 0.8rem; color: #a0aec0;">Syncing...</div>
+            <h2 style="margin: 0; color: #2d3748; display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-industry"></i> Coal Yard Live Status
+            </h2>
+            <div id="last-update" style="font-size: 0.8rem; color: #a0aec0; background: #fff; padding: 5px 12px; border-radius: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                Syncing...
+            </div>
         </div>
 
         <div id="coal-summary"></div>
 
-        <div style="margin-bottom: 20px; display: flex; gap: 15px; background: #fff; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); align-items: center;">
-            <span style="font-weight: bold; font-size: 0.9rem;">Filter View:</span>
-            <label style="cursor:pointer"><input type="checkbox" class="yard-filter" value="vacant" checked onchange="renderGridOnly()"> Vacant</label>
-            <label style="cursor:pointer"><input type="checkbox" class="yard-filter" value="standby" checked onchange="renderGridOnly()"> Standby</label>
-            <label style="cursor:pointer"><input type="checkbox" class="yard-filter" value="in use" checked onchange="renderGridOnly()"> In Use</label>
+        <div style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+             <div style="display: flex; gap: 15px; background: #fff; padding: 10px 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); align-items: center;">
+                <span style="font-weight: bold; font-size: 0.8rem; color: #718096;">FILTER:</span>
+                <label style="cursor:pointer; font-size: 0.85rem;"><input type="checkbox" class="yard-filter" value="vacant" checked onchange="renderGridOnly()"> Vacant</label>
+                <label style="cursor:pointer; font-size: 0.85rem;"><input type="checkbox" class="yard-filter" value="standby" checked onchange="renderGridOnly()"> Standby</label>
+                <label style="cursor:pointer; font-size: 0.85rem;"><input type="checkbox" class="yard-filter" value="in use" checked onchange="renderGridOnly()"> In Use</label>
+            </div>
         </div>
 
-        <div id="prio-banner" style="background: #edf2f7; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 25px; border: 2px solid #e2e8f0; transition: all 0.3s;">
-            <small style="text-transform: uppercase; color: #718096; letter-spacing: 1px;">Next Priority for Consumption</small>
-            <div id="prio-text" style="font-size: 1.8rem; font-weight: 900; margin-top: 5px;">Checking...</div>
+        <div id="prio-banner" style="background: #edf2f7; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 20px; border: 2px solid #e2e8f0; transition: all 0.3s;">
+            <small style="text-transform: uppercase; color: #718096; letter-spacing: 1px; font-weight: bold;">Priority for Consumption</small>
+            <div id="prio-text" style="font-size: 1.5rem; font-weight: 900; margin-top: 5px; color: #2d3748;">Checking...</div>
         </div>
 
         <div id="yard-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;"></div>
 
-        <div style="margin-top: 50px; background: #fff; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-                <h3 style="margin: 0; font-size: 1.2rem; display: flex; align-items: center; gap: 10px;">
-                    <span style="background:#2d3748; color:white; padding:5px 10px; border-radius:5px;">📋</span> Delivery Archives
-                </h3>
+        <div style="margin-top: 50px; background: #fff; padding: 25px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-top: 5px solid #2d3748;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 25px; flex-wrap: wrap; gap: 20px;">
+                <div>
+                    <h3 style="margin: 0; font-size: 1.3rem; color: #1a202c; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-book" style="color: #4a5568;"></i> Master Logbook Archives
+                    </h3>
+                    <p style="margin: 5px 0 0 0; font-size: 0.8rem; color: #718096;">Search historical delivery and consumption records by date.</p>
+                </div>
                 
-                <div style="display: flex; gap: 10px; align-items: flex-end; background: #f7fafc; padding: 12px; border-radius: 10px; border: 1px solid #edf2f7;">
+                <div style="display: flex; gap: 12px; align-items: flex-end; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
                     <div>
-                        <small style="display:block; font-size:0.65rem; color:#718096; font-weight:bold; margin-bottom:4px;">START DATE:</small>
-                        <input type="date" id="dateFrom" style="padding: 6px; border-radius: 5px; border: 1px solid #cbd5e0; font-size: 0.85rem; color: #2d3748;">
+                        <label style="display:block; font-size:0.65rem; color:#4a5568; font-weight:bold; margin-bottom:4px;">FROM DATE:</label>
+                        <input type="date" id="dateFrom" style="padding: 8px; border-radius: 6px; border: 1px solid #cbd5e0; font-size: 0.9rem;">
                     </div>
                     <div>
-                        <small style="display:block; font-size:0.65rem; color:#718096; font-weight:bold; margin-bottom:4px;">END DATE:</small>
-                        <input type="date" id="dateTo" style="padding: 6px; border-radius: 5px; border: 1px solid #cbd5e0; font-size: 0.85rem; color: #2d3748;">
+                        <label style="display:block; font-size:0.65rem; color:#4a5568; font-weight:bold; margin-bottom:4px;">TO DATE:</label>
+                        <input type="date" id="dateTo" style="padding: 8px; border-radius: 6px; border: 1px solid #cbd5e0; font-size: 0.9rem;">
                     </div>
-                    <button onclick="fetchHistoryByDate()" style="background: #2d3748; color: white; border: none; padding: 8px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.2s;">
-                        <i class="fas fa-search"></i> Search
+                    <button onclick="fetchHistoryByDate()" style="background: #2d3748; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; transition: 0.2s;">
+                        <i class="fas fa-search"></i> SEARCH
                     </button>
-                    <button onclick="window.print()" style="background: #e2e8f0; color: #4a5568; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer;">
+                    <button onclick="window.print()" style="background: white; color: #2d3748; border: 1px solid #cbd5e0; padding: 10px 15px; border-radius: 8px; cursor: pointer;">
                         <i class="fas fa-print"></i>
                     </button>
                 </div>
             </div>
 
-            <div id="history-list" style="min-height: 100px;">
-                <p style="text-align: center; color: #a0aec0; font-style: italic; margin-top: 20px;">
-                    Select dates above to search historical consumption records.
-                </p>
+            <div id="history-list" style="min-height: 200px; border: 1px dashed #e2e8f0; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                <div style="text-align: center; color: #a0aec0;">
+                    <i class="far fa-calendar-alt" style="font-size: 3rem; margin-bottom: 10px; opacity: 0.3;"></i>
+                    <p>Select a date range and click Search to load logbook data.</p>
+                </div>
             </div>
         </div>
     </div>
     `;
 
+    // Initialize the live grid sync
     syncCoalData();
-    setInterval(syncCoalData, 30000); 
+    
+    // Auto-refresh every 30 seconds (GRID ONLY)
+    if (window.coalSyncInterval) clearInterval(window.coalSyncInterval);
+    window.coalSyncInterval = setInterval(syncCoalData, 30000); 
 }
         async function fetchHistoryByDate() {
     const from = document.getElementById('dateFrom').value;
@@ -753,35 +768,42 @@ async function openCoalDelivery() {
     const histDiv = document.getElementById('history-list');
 
     if (!from || !to) {
-        alert("Please select both Start and End dates, boss!");
+        alert("Pili muna ng Date Range, boss!");
         return;
     }
 
-    histDiv.innerHTML = `<div style="text-align:center; padding:20px;">
-        <i class="fas fa-spinner fa-spin"></i> Searching records from ${from} to ${to}...
-    </div>`;
+    // Loading state na may icon
+    histDiv.innerHTML = `
+        <div style="text-align:center; padding:40px; color:#718096;">
+            <i class="fas fa-spinner fa-spin fa-2x"></i><br>
+            <p style="margin-top:10px;">Searching Archives from ${from} to ${to}...</p>
+        </div>`;
 
-    // Query sa Supabase: Kunin lahat ng logs sa pagitan ng 'from' at 'to'
+    // Fetch lahat ng columns (CTP, OR, Plate, etc.)
     const { data: records, error } = await supabaseClient
         .from('delivery_logs')
-        .select('*')
-        .gte('date_arrived', from) // Greater than or equal to
-        .lte('date_arrived', to)   // Less than or equal to
+        .select('*') 
+        .gte('date_arrived', from) 
+        .lte('date_arrived', to)
         .order('date_arrived', { ascending: false })
         .order('time_arrived', { ascending: false });
 
     if (error) {
         console.error(error);
-        histDiv.innerHTML = "Error fetching data.";
+        histDiv.innerHTML = "<p style='color:red; text-align:center;'>Error loading data. Please check connection.</p>";
         return;
     }
 
     if (records.length === 0) {
-        histDiv.innerHTML = `<p style="text-align:center; padding:20px; color:#e53e3e;">No records found for the selected dates.</p>`;
+        histDiv.innerHTML = `
+            <div style="text-align:center; padding:40px; color:#e53e3e;">
+                <i class="fas fa-search-minus fa-2x"></i><br>
+                <p style="margin-top:10px;">No delivery logs found for these dates.</p>
+            </div>`;
         return;
     }
 
-    // Gamitin natin yung existing renderHistoryTable function mo para i-display ang results
+    // Tawagin ang renderer para sa malapad na table
     renderHistoryTable(records);
 }
 
@@ -941,54 +963,53 @@ function renderHistoryTable(history) {
     if (!histDiv) return;
 
     let tableHtml = `
-        <table style="width:100%; border-collapse:collapse; background:white; border-radius:10px; overflow:hidden; font-size:0.85rem; box-shadow:0 2px 4px rgba(0,0,0,0.05);">
-            <thead style="background:#f7fafc; border-bottom:2px solid #edf2f7;">
-                <tr>
-                    <th style="padding:12px; text-align:left; color:#4a5568;">Yard</th>
-                    <th style="padding:12px; text-align:left; color:#4a5568;">Supplier</th>
-                    <th style="padding:12px; text-align:left; color:#4a5568;">Weight</th>
-                    <th style="padding:12px; text-align:left; color:#4a5568;">Started</th>
-                    <th style="padding:12px; text-align:left; color:#4a5568;">Finished (Shift)</th>
-                </tr>
-            </thead>
-            <tbody>
+        <div style="overflow-x: auto;">
+            <table style="width:100%; border-collapse:collapse; background:white; font-size:0.75rem; min-width:1100px; border:1px solid #e2e8f0;">
+                <thead style="background:#2d3748; color:white; text-transform:uppercase; letter-spacing:0.5px;">
+                    <tr>
+                        <th style="padding:12px; border:1px solid #4a5568;">Yard</th>
+                        <th style="padding:12px; border:1px solid #4a5568;">Supplier / CTP / OR</th>
+                        <th style="padding:12px; border:1px solid #4a5568;">Truck / Driver</th>
+                        <th style="padding:12px; border:1px solid #4a5568;">Arrival Info</th>
+                        <th style="padding:12px; border:1px solid #4a5568; background:#744210;">Consumption (In Use)</th>
+                        <th style="padding:12px; border:1px solid #4a5568; background:#22543d;">Finished (Used Up)</th>
+                        <th style="padding:12px; border:1px solid #4a5568;">Total KG</th>
+                    </tr>
+                </thead>
+                <tbody>
     `;
 
     history.forEach(h => {
         tableHtml += `
-            <tr style="border-bottom:1px solid #edf2f7;">
-                <td style="padding:12px; font-weight:bold;">Yard ${h.coal_yard_no}</td>
-                <td style="padding:12px;">${h.supplier_name}</td>
-                <td style="padding:12px;">${h.coal_kg.toLocaleString()} kg</td>
-                <td style="padding:12px; color:#718096;">${h.date_in_use} ${h.time_in_use}</td>
-                <td style="padding:12px; font-weight:bold;">
-                    <span style="color:#38a169;">${h.date_used_up} ${h.time_used_up}</span>
-                    <span style="background:#edf2f7; padding:2px 5px; border-radius:4px; font-size:0.7rem; margin-left:5px;">${getShift(h.time_used_up)}</span>
+            <tr style="border-bottom:1px solid #edf2f7; transition:0.2s;" onmouseover="this.style.backgroundColor='#f7fafc'" onmouseout="this.style.backgroundColor='transparent'">
+                <td style="padding:12px; text-align:center; font-weight:900; font-size:1rem; border:1px solid #edf2f7;">${h.coal_yard_no}</td>
+                <td style="padding:12px; border:1px solid #edf2f7;">
+                    <b style="color:#2d3748;">${h.supplier_name}</b><br>
+                    <span style="color:#718096;">CTP: ${h.ctp_no || '--'}</span><br>
+                    <span style="color:#718096;">OR: ${h.or_no || '--'}</span>
+                </td>
+                <td style="padding:12px; border:1px solid #edf2f7;">
+                    <b>${h.plate_no || '--'}</b><br>
+                    <small style="color:#718096;">${h.driver_name || '--'}</small>
+                </td>
+                <td style="padding:12px; border:1px solid #edf2f7;">
+                    ${h.date_arrived}<br>${h.time_arrived}
+                </td>
+                <td style="padding:12px; border:1px solid #edf2f7; background:#fffaf0;">
+                    <b>${h.date_in_use || '--'}</b><br>${h.time_in_use || '--'}
+                </td>
+                <td style="padding:12px; border:1px solid #edf2f7; background:#f0fff4;">
+                    <b>${h.date_used_up || '--'}</b><br>${h.time_used_up || '--'}
+                </td>
+                <td style="padding:12px; border:1px solid #edf2f7; font-weight:bold; color:#2b6cb0; text-align:right;">
+                    ${(h.coal_kg || 0).toLocaleString()} kg
                 </td>
             </tr>
         `;
     });
 
-    tableHtml += `</tbody></table>`;
+    tableHtml += `</tbody></table></div>`;
     histDiv.innerHTML = tableHtml;
-}
-        // A. Para sa visual summary sa taas ng grid
-function updateSummaryUI(standby, inuse) {
-    const summary = document.getElementById('coal-summary');
-    if (summary) {
-        summary.innerHTML = `
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                <div style="background: #ebf8ff; border-left: 6px solid #3182ce; padding: 15px; border-radius: 10px;">
-                    <small style="color: #2b6cb0; font-weight: bold; text-transform: uppercase; font-size: 0.7rem;">Total Standby Inventory</small>
-                    <div style="font-size: 1.5rem; font-weight: 900; color: #2c5282;">${standby.toLocaleString()} <span style="font-size: 0.8rem;">kg</span></div>
-                </div>
-                <div style="background: #fffaf0; border-left: 6px solid #dd6b20; padding: 15px; border-radius: 10px;">
-                    <small style="color: #9c4221; font-weight: bold; text-transform: uppercase; font-size: 0.7rem;">Current Consumption (In Use)</small>
-                    <div style="font-size: 1.5rem; font-weight: 900; color: #7b341e;">${inuse.toLocaleString()} <span style="font-size: 0.8rem;">kg</span></div>
-                </div>
-            </div>
-        `;
-    }
 }
 
 // B. Para sa Priority Banner (FIFO at Yard 9 Rule)
