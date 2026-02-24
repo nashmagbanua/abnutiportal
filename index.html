@@ -687,23 +687,29 @@ function fetchPowerData(selectedDate) {
 async function openCoalDelivery() {
     const cont = document.getElementById('cont');
     
-    // 1. Layout ng Dashboard
+    // 1. Layout ng Dashboard ng coal delivery
     cont.innerHTML = `
-        <div class="coal-container" style="padding: 20px; font-family: 'Segoe UI', sans-serif;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 style="margin: 0; color: #2d3748;">Coal Yard Live Status</h2>
-                <div id="last-update" style="font-size: 0.8rem; color: #a0aec0;">Syncing...</div>
-            </div>
-
-            <div id="prio-banner" style="background: #edf2f7; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 25px; border: 2px solid #e2e8f0; transition: all 0.3s;">
-                <small style="text-transform: uppercase; letter-spacing: 1px; color: #718096;">Next Priority for Consumption</small>
-                <div id="prio-text" style="font-size: 1.8rem; font-weight: 900; color: #2d3748; margin-top: 5px;">Checking...</div>
-            </div>
-
-            <div id="yard-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
-                </div>
+    <div class="coal-container" style="padding: 20px; font-family: 'Segoe UI', sans-serif; color: #2d3748;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="margin: 0;">Coal Yard Live Status</h2>
+            <div id="last-update" style="font-size: 0.8rem; color: #a0aec0;">Syncing...</div>
         </div>
-    `;
+
+        <div style="margin-bottom: 20px; display: flex; gap: 15px; background: #fff; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+            <span style="font-weight: bold; font-size: 0.9rem;">Filter View:</span>
+            <label><input type="checkbox" class="yard-filter" value="vacant" checked onchange="renderGridOnly()"> Vacant</label>
+            <label><input type="checkbox" class="yard-filter" value="standby" checked onchange="renderGridOnly()"> Standby</label>
+            <label><input type="checkbox" class="yard-filter" value="in use" checked onchange="renderGridOnly()"> In Use</label>
+        </div>
+
+        <div id="prio-banner" style="background: #edf2f7; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 25px; border: 2px solid #e2e8f0;">
+            <small style="text-transform: uppercase; color: #718096;">Next Priority for Consumption</small>
+            <div id="prio-text" style="font-size: 1.8rem; font-weight: 900; margin-top: 5px;">Checking...</div>
+        </div>
+
+        <div id="yard-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;"></div>
+    </div>
+`;
 
     // 2. Simulan ang Syncing
     syncCoalData();
@@ -711,147 +717,131 @@ async function openCoalDelivery() {
     setInterval(syncCoalData, 30000); 
 }
 
-// 1. Helper Function para sa Shift (7AM-7PM Rule)
+// --- CONFIGURATION ---
+let currentYardData = {}; 
+
 function getShift(timeString) {
     if (!timeString) return "";
     const hour = parseInt(timeString.split(':')[0]);
-    return (hour >= 7 && hour < 19) ? "DS" : "NS";
+    return (hour >= 6 && hour < 18) ? "DS" : "NS";
 }
 
 async function syncCoalData() {
-    // Tawagin ang existing supabaseClient mo
     const { data: logs, error } = await supabaseClient
         .from('delivery_logs')
         .select('*')
         .order('created_at', { ascending: false });
 
-    if (error) {
-        console.error('Supabase Error:', error);
-        return;
-    }
+    if (error) return console.error('Supabase Error:', error);
 
-    const yardStatuses = {};
     let totalStandbyKg = 0;
     let totalInUseKg = 0;
     const standbyLogs = [];
-    
-    // Initialize lahat ng 9 yards
+
+    // Initialize 9 Yards
     for(let i=1; i<=9; i++) {
-        yardStatuses[i] = { status: 'vacant', supplier: 'Empty', kg: 0, timeInfo: '--', shiftInfo: '' };
+        currentYardData[i] = { status: 'vacant', supplier: 'Empty', kg: 0, date: '--', time: '--', shift: '', operator: 'None' };
     }
 
     const processed = new Set();
     logs.forEach(log => {
         const y = String(log.coal_yard_no);
         if (!processed.has(y)) {
-            if (log.remarks === 'in use' || log.remarks === 'standby') {
-                // Kunin ang shift base sa remark
-                const shift = log.remarks === 'in use' ? getShift(log.time_in_use) : getShift(log.time_arrived);
-                const timeStr = log.remarks === 'in use' ? `${log.date_in_use} ${log.time_in_use}` : `${log.date_arrived} ${log.time_arrived}`;
-                
-                yardStatuses[y] = { 
-                    status: log.remarks, 
-                    supplier: log.supplier_name,
-                    kg: log.coal_kg || 0,
-                    timeInfo: timeStr,
-                    shiftInfo: shift
-                };
-
-                // Add to Summary
-                if (log.remarks === 'standby') {
-                    standbyLogs.push(log);
-                    totalStandbyKg += (log.coal_kg || 0);
-                } else {
-                    totalInUseKg += (log.coal_kg || 0);
-                }
-            } else if (log.remarks === 'used up') {
-                // Record kung kailan naubos at anong shift
-                yardStatuses[y].timeInfo = `Finished: ${log.date_used_up} ${log.time_used_up}`;
-                yardStatuses[y].shiftInfo = getShift(log.time_used_up);
-                yardStatuses[y].status = 'used up'; // Para mag-green box pa rin
+            let d = '--', t = '--', op = log.operator_name || 'System';
+            
+            if (log.remarks === 'in use') {
+                d = log.date_in_use; t = log.time_in_use;
+                totalInUseKg += (log.coal_kg || 0);
+            } else if (log.remarks === 'standby') {
+                d = log.date_arrived; t = log.time_arrived;
+                totalStandbyKg += (log.coal_kg || 0);
+                standbyLogs.push(log);
+            } else {
+                d = log.date_used_up; t = log.time_used_up;
             }
+
+            currentYardData[y] = {
+                status: log.remarks === 'used up' ? 'vacant' : log.remarks,
+                supplier: log.supplier_name,
+                kg: log.coal_kg || 0,
+                date: d,
+                time: t,
+                shift: getShift(t),
+                operator: op
+            };
             processed.add(y);
         }
     });
 
-    // --- 2. Update Summary Bar ---
-    const summaryHtml = `
-        <div id="coal-summary" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-            <div style="background: #ebf8ff; border-left: 6px solid #3182ce; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                <small style="color: #2b6cb0; font-weight: bold; text-transform: uppercase; font-size: 0.7rem;">Total Standby Inventory</small>
-                <div style="font-size: 1.5rem; font-weight: 900; color: #2c5282;">${totalStandbyKg.toLocaleString()} <span style="font-size: 0.8rem;">kg</span></div>
-            </div>
-            <div style="background: #fffaf0; border-left: 6px solid #dd6b20; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                <small style="color: #9c4221; font-weight: bold; text-transform: uppercase; font-size: 0.7rem;">Current Consumption (In Use)</small>
-                <div style="font-size: 1.5rem; font-weight: 900; color: #7b341e;">${totalInUseKg.toLocaleString()} <span style="font-size: 0.8rem;">kg</span></div>
-            </div>
-        </div>
-    `;
+    updateSummaryUI(totalStandbyKg, totalInUseKg);
+    renderGridOnly();
+    updatePriorityBanner(currentYardData, standbyLogs);
+}
 
-    // Hanapin ang container para isingit ang summary
+function renderGridOnly() {
     const grid = document.getElementById('yard-grid');
-    if (grid) {
-        // Siguraduhin na ang summary ay nasa itaas ng grid
-        let existingSummary = document.getElementById('coal-summary');
-        if (existingSummary) existingSummary.remove();
-        grid.insertAdjacentHTML('beforebegin', summaryHtml);
+    if (!grid) return;
 
-        // --- 3. Render 9-Yard Grid ---
-        grid.innerHTML = '';
-        for(let i=1; i<=9; i++) {
-            const data = yardStatuses[i];
-            
-            // Color Coding
-            let bgColor = '#48bb78'; // Green (Vacant/Used Up)
-            if (data.status === 'standby') bgColor = '#3182ce'; // Blue
-            if (data.status === 'in use') bgColor = '#d69e2e';  // Yellow/Orange
+    // Kunin ang active filters mula sa checkboxes
+    const selectedFilters = Array.from(document.querySelectorAll('.yard-filter:checked')).map(cb => cb.value);
+    
+    grid.innerHTML = '';
+    for(let i=1; i<=9; i++) {
+        const data = currentYardData[i];
+        if (!selectedFilters.includes(data.status)) continue;
 
-            const shiftDisplay = data.shiftInfo ? `<span style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 10px; font-size: 0.6rem; font-weight: bold;">${data.shiftInfo}</span>` : '';
+        let bgColor = data.status === 'standby' ? '#3182ce' : (data.status === 'in use' ? '#d69e2e' : '#48bb78');
 
-            grid.innerHTML += `
-                <div style="background: ${bgColor}; padding: 15px; border-radius: 12px; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-bottom: 5px solid rgba(0,0,0,0.2); transition: all 0.3s;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <div>
-                            <div style="font-size: 0.6rem; opacity: 0.8; font-weight: bold;">YARD</div>
-                            <div style="font-size: 2.2rem; font-weight: 900; line-height: 1;">${i}</div>
-                        </div>
-                        <div style="text-align: right;">
-                            <div style="font-size: 1rem; font-weight: bold;">${data.kg > 0 ? data.kg.toLocaleString() + ' kg' : '--'}</div>
-                            <div style="font-size: 0.6rem; background: rgba(0,0,0,0.2); padding: 3px 6px; border-radius: 4px; display: inline-block; margin-top: 4px;">
-                                ${data.status.toUpperCase()} ${shiftDisplay}
-                            </div>
-                        </div>
+        grid.innerHTML += `
+            <div style="background: ${bgColor}; padding: 18px; border-radius: 12px; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s;">
+                <div style="display: flex; justify-content: space-between;">
+                    <div>
+                        <small style="font-weight: bold; opacity: 0.8;">YARD</small>
+                        <div style="font-size: 2.5rem; font-weight: 900; line-height: 1;">${i}</div>
                     </div>
-                    
-                    <div style="margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 10px;">
-                        <div style="font-size: 0.8rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                            ${data.supplier}
-                        </div>
-                        <div style="font-size: 0.6rem; opacity: 0.9; margin-top: 3px;">
-                            <i class="far fa-clock"></i> ${data.timeInfo}
+                    <div style="text-align: right;">
+                        <div style="font-size: 1.2rem; font-weight: bold;">${data.kg > 0 ? data.kg.toLocaleString() + ' kg' : '--'}</div>
+                        <div style="font-size: 0.65rem; background: rgba(0,0,0,0.2); padding: 3px 8px; border-radius: 5px; text-transform: uppercase;">
+                            ${data.status} <span style="margin-left:5px; border-left: 1px solid rgba(255,255,255,0.3); padding-left: 5px;">${data.shift}</span>
                         </div>
                     </div>
                 </div>
-            `;
-        }
+
+                <div style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 10px;">
+                    <div style="font-size: 0.9rem; font-weight: 800; margin-bottom: 5px;">${data.supplier}</div>
+                    
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="far fa-calendar-alt"></i>
+                        <div>
+                            <div style="font-size: 0.85rem; font-weight: bold;">${data.date}</div>
+                            <div style="font-size: 1.1rem; font-weight: 900; color: rgba(255,255,255,0.9);">${data.time}</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 8px; font-size: 0.65rem; opacity: 0.8; font-style: italic;">
+                        <i class="fas fa-user-edit"></i> Op: ${data.operator}
+                    </div>
+                </div>
+            </div>
+        `;
     }
+}
 
-    // --- 4. Update Priority Banner (Yard 9 Obstruction Logic) ---
-    let prioText = "All Yards Clear";
-    let isUrgent = false;
-
-    if (yardStatuses["9"].status === 'standby' || yardStatuses["9"].status === 'in use') {
-        prioText = `🚨 PRIO: YARD 9 (${yardStatuses["9"].supplier})`;
-        isUrgent = true;
-    } else if (standbyLogs.length > 0) {
-        const oldest = [...standbyLogs].sort((a,b) => new Date(`${a.date_arrived}T${a.time_arrived}`) - new Date(`${b.date_arrived}T${b.time_arrived}`))[0];
-        prioText = `NEXT PRIO: YARD ${oldest.coal_yard_no} (${oldest.supplier_name})`;
+// Helpers para sa UI
+function updateSummaryUI(standby, inuse) {
+    const summary = document.getElementById('coal-summary');
+    if (summary) {
+        summary.innerHTML = `
+            <div style="background: #ebf8ff; border-left: 6px solid #3182ce; padding: 15px; border-radius: 10px;">
+                <small style="color: #2b6cb0; font-weight: bold;">TOTAL STANDBY</small>
+                <div style="font-size: 1.5rem; font-weight: 900;">${standby.toLocaleString()} kg</div>
+            </div>
+            <div style="background: #fffaf0; border-left: 6px solid #dd6b20; padding: 15px; border-radius: 10px;">
+                <small style="color: #9c4221; font-weight: bold;">TOTAL IN USE</small>
+                <div style="font-size: 1.5rem; font-weight: 900;">${inuse.toLocaleString()} kg</div>
+            </div>
+        `;
     }
-
-    const banner = document.getElementById('prio-banner');
-    const prioTextEl = document.getElementById('prio-text');
-    if (prioTextEl) prioTextEl.innerText = prioText;
-    if (banner) isUrgent ? banner.classList.add('blink-urgent') : banner.classList.remove('blink-urgent');
 }
         function openCoalDumping() {
     updateSidebarActive(5);
