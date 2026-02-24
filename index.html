@@ -1298,9 +1298,9 @@ function updateDashboardSidebar() {
         if (!yard) continue;
         
         if (yard.status === 'vacant') {
-            vacantYards.push("Y" + i);
+            vacantYards.push("YARD" + i);
         } else if (yard.status === 'in use') {
-            inUseYards.push("Y" + i);
+            inUseYards.push("YARD" + i);
         } else if (yard.status === 'standby') {
             standbyList.push({ no: i, ...yard });
         }
