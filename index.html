@@ -1315,14 +1315,31 @@ function updateDashboardSidebar() {
         </div>
     ` : `<div style="font-size: 1.1rem; color: #a0aec0; padding: 10px 0;">No Standby</div>`;
 
-    // 4. Render Vacant Badge (Yung maliit na label sa taas)
+    // 4. Render Vacant Badge (Dynamic Text: Count + Yard Numbers)
     if (vacantBadge) {
-        vacantBadge.innerText = `${vacantCount} Vacant`;
+        // Kunin natin ang lahat ng yard numbers na vacant
+        const vacantYards = [];
+        for (let i = 1; i <= 9; i++) {
+            if (currentYardData[i] && currentYardData[i].status === 'vacant') {
+                vacantYards.push("Y" + i); // Halimbawa: Y1, Y2
+            }
+        }
+
+        const vacantCount = vacantYards.length;
+        const vacantListText = vacantCount > 0 ? ` (${vacantYards.join(', ')})` : "";
+
+        vacantBadge.innerText = `${vacantCount} VACANT${vacantListText}`;
+        
+        // Dynamic Colors: Red pag puno na (0 vacant), Green pag may space pa
         vacantBadge.style.background = vacantCount > 0 ? '#c6f6d5' : '#fed7d7';
         vacantBadge.style.color = vacantCount > 0 ? '#22543d' : '#822727';
+        vacantBadge.style.fontWeight = "bold";
+        vacantBadge.style.padding = "4px 8px";
+        vacantBadge.style.borderRadius = "5px";
+        vacantBadge.style.fontSize = "0.7rem";
     }
-
-    // 5. Render Standby Queue Bar (Yung mahabang listahan sa ilalim)
+    
+ // 5. Render Standby Queue Bar (Yung mahabang listahan sa ilalim)
     if (queueBar) {
         queueBar.innerHTML = `
             <div style="background: white; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 15px;">
@@ -1331,9 +1348,14 @@ function updateDashboardSidebar() {
                 </div>
                 <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; flex-grow: 1;">
                     ${standbyList.length > 0 ? standbyList.map(s => `
-                        <div style="background: #edf2f7; border-radius: 8px; padding: 6px 12px; min-width: 90px; border-bottom: 3px solid #cbd5e0;">
+                        <div style="background: #edf2f7; border-radius: 8px; padding: 6px 12px; min-width: 100px; border-bottom: 3px solid #cbd5e0;">
                             <div style="font-weight: 900; color: #2d3748; font-size: 1rem;">#${s.no}</div>
-                            <div style="font-size: 0.55rem; color: #718096; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${s.supplier}</div>
+                            <div style="font-size: 0.55rem; color: #2b6cb0; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                ${s.supplier}
+                            </div>
+                            <div style="font-size: 0.5rem; color: #a0aec0; margin-top: 2px;">
+                                <i class="far fa-clock"></i> ${s.date}
+                            </div>
                         </div>
                     `).join('') : '<span style="color: #cbd5e0; font-size: 0.8rem;">No yards on standby</span>'}
                 </div>
