@@ -841,7 +841,7 @@ async function syncCoalData() {
     let totalInUseKg = 0;
     const standbyLogs = [];
     
-    // 1. Initialize 9 Yards (Default State)
+    // 1. Initialize 9 Yards (Laging back to default bago i-process ang fresh data)
     for(let i=1; i<=9; i++) {
         currentYardData[i] = { 
             status: 'vacant', supplier: 'Empty', kg: 0, 
@@ -850,7 +850,7 @@ async function syncCoalData() {
         };
     }
 
-    // 2. Process Logs para sa Live Grid
+    // 2. Process Logs para sa Live Grid (9 Boxes)
     const processed = new Set();
     logs.forEach(log => {
         const y = String(log.coal_yard_no);
@@ -872,7 +872,7 @@ async function syncCoalData() {
                 status: log.remarks === 'used up' ? 'vacant' : log.remarks,
                 supplier: log.supplier_name,
                 kg: Number(log.coal_kg) || 0,
-                dr_no: log.dr_no, // Siguraduhing kasama ito
+                dr_no: log.dr_no, 
                 date: d,
                 time: t,
                 shift: getShift(t),
@@ -884,30 +884,43 @@ async function syncCoalData() {
         }
     });
 
-    // 3. FIFO Logic para sa Default Table View
-    // Kukunin lang natin ang mga 'standby' at 'in use' para sa default list
-    const activeFIFO = logs.filter(l => l.remarks === 'standby' || l.remarks === 'in use')
-        .sort((a, b) => {
-            // Sort by Date Arrived then Time Arrived (FIFO)
-            const dateA = new Date(`${a.date_arrived}T${a.time_arrived}`);
-            const dateB = new Date(`${b.date_arrived}T${b.time_arrived}`);
-            return dateA - dateB;
-        });
-
-    // 4. Update the UI
+    // 3. Update the Summary & Grid (Dapat laging updated ang status sa taas)
     updateSummaryUI(totalStandbyKg, totalInUseKg);
     renderGridOnly();
     updatePriorityBanner(currentYardData, standbyLogs);
 
-    // 5. Smart Table Update: 
-    // Huwag i-update ang table kung ang user ay nag-search na (para hindi mawala ang results niya)
+    // 4. Smart Table Update (Anti-Gulo Logic)
+    const dateFromInput = document.getElementById('dateFrom');
+    const dateToInput = document.getElementById('dateTo');
     const histDiv = document.getElementById('history-list');
+
+    // MGA CONDITIONS PARA HINDI MAG-REFRESH ANG TABLE:
+    // A. Kung may nakasulat na sa Date inputs (nag-seset pa lang si Sir)
+    const hasDateInput = (dateFromInput && dateFromInput.value) || (dateToInput && dateToInput.value);
+    
+    // B. Kung ang table ay kasalukuyang nagpapakita ng "Searching records..."
     const isSearching = histDiv && histDiv.innerHTML.includes("Searching records");
 
-    if (!isSearching) {
+    // C. Kung ang table ay may "Grand Total" na (ibig sabihin search results na ang nakikita)
+    const hasSearchResults = histDiv && histDiv.innerHTML.includes("Grand Total:");
+
+    if (!hasDateInput && !isSearching && !hasSearchResults) {
+        // DEFAULT VIEW: FIFO List (Standby at In Use lang ang ipapakita)
+        const activeFIFO = logs.filter(l => l.remarks === 'standby' || l.remarks === 'in use')
+            .sort((a, b) => {
+                const dateA = new Date(`${a.date_arrived}T${a.time_arrived}`);
+                const dateB = new Date(`${b.date_arrived}T${b.time_arrived}`);
+                return dateA - dateB;
+            });
+        
+        console.log("Auto-syncing default FIFO table...");
         renderHistoryTable(activeFIFO);
+    } else {
+        // SKIP REFRESH: Hayaan ang Archives kung ano ang huling ni-render
+        console.log("Archives is active or has search results. Skipping table auto-sync.");
     }
 
+    // 5. Last Update Timestamp
     if(document.getElementById('last-update')) {
         document.getElementById('last-update').innerText = "Last Sync: " + new Date().toLocaleTimeString();
     }
