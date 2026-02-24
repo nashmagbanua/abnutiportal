@@ -1341,25 +1341,37 @@ function updateDashboardSidebar() {
     
  // 5. Render Standby Queue Bar (Yung mahabang listahan sa ilalim)
     if (queueBar) {
-        queueBar.innerHTML = `
-            <div style="background: white; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 15px;">
-                <div style="font-size: 0.65rem; font-weight: 900; color: #718096; text-transform: uppercase; writing-mode: vertical-lr; transform: rotate(180deg); border-left: 2px solid #cbd5e0; padding-left: 5px;">
-                    Standby Queue
-                </div>
-                <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; flex-grow: 1;">
-                    ${standbyList.length > 0 ? standbyList.map(s => `
-                        <div style="background: #edf2f7; border-radius: 8px; padding: 6px 12px; min-width: 100px; border-bottom: 3px solid #cbd5e0;">
-                            <div style="font-weight: 900; color: #2d3748; font-size: 1rem;">#${s.no}</div>
-                            <div style="font-size: 0.55rem; color: #2b6cb0; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                ${s.supplier}
-                            </div>
-                            <div style="font-size: 0.5rem; color: #a0aec0; margin-top: 2px;">
-                                <i class="far fa-clock"></i> ${s.date}
-                            </div>
-                        </div>
-                    `).join('') : '<span style="color: #cbd5e0; font-size: 0.8rem;">No yards on standby</span>'}
-                </div>
+    queueBar.innerHTML = `
+        <div style="background: white; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 12px;">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f7fafc; padding-bottom: 8px;">
+                <span style="font-size: 0.75rem; font-weight: 900; color: #718096; text-transform: uppercase; letter-spacing: 0.5px;">
+                    <i class="fas fa-list-ol"></i> Standby Inventory Queue
+                </span>
+                <span style="font-size: 0.65rem; color: #a0aec0; font-weight: bold;">
+                    ${standbyList.length} Yards Waiting
+                </span>
             </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 180px)); gap: 10px;">
+                ${standbyList.map(s => `
+                    <div style="background: #f8fafc; border: 1px solid #edf2f7; border-radius: 8px; padding: 10px; border-top: 3px solid #4299e1;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-weight: 900; color: #1a202c; font-size: 1.1rem;">#${s.no}</span>
+                            <span style="color: #3182ce; font-size: 0.55rem; font-weight: bold;">FIFO</span>
+                        </div>
+                        <div style="font-size: 0.7rem; color: #2d3748; font-weight: 800; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            ${s.supplier}
+                        </div>
+                        <div style="font-size: 0.6rem; color: #718096; margin-top: 2px;">
+                            <i class="far fa-calendar-alt"></i> ${s.date}
+                        </div>
+                    </div>
+                `).join('')}
+                
+                ${standbyList.length === 0 ? '<div style="color:#cbd5e0; font-size:0.8rem; padding:10px;">No yards on standby.</div>' : ''}
+            </div>
+        </div>
         `;
     }
 }
