@@ -819,16 +819,14 @@ function renderGridOnly() {
         const data = currentYardData[i];
         if (!selectedFilters.includes(data.status)) continue;
 
-        // Color coding
+        // Color coding: Blue (Standby), Yellow (In Use), Green (Vacant)
         let bgColor = data.status === 'standby' ? '#3182ce' : (data.status === 'in use' ? '#d69e2e' : '#48bb78');
-        
-        // Check kung vacant para itago ang details
         const isVacant = data.status === 'vacant';
 
         grid.innerHTML += `
-            <div style="background: ${bgColor}; padding: 18px; border-radius: 12px; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-bottom: 5px solid rgba(0,0,0,0.2); min-height: 180px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div style="background: ${bgColor}; padding: 18px; border-radius: 12px; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-bottom: 5px solid rgba(0,0,0,0.2); min-height: 180px; position: relative; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;">
                 
-                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; z-index: 2;">
                     <div>
                         <small style="font-weight: bold; opacity: 0.8;">YARD</small>
                         <div style="font-size: 2.8rem; font-weight: 900; line-height: 1;">${i}</div>
@@ -846,7 +844,15 @@ function renderGridOnly() {
                     </div>
                 </div>
 
-                <div style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 10px; visibility: ${isVacant ? 'hidden' : 'visible'};">
+                ${isVacant ? `
+                    <div style="flex-grow: 1; display: flex; align-items: center; justify-content: center; opacity: 0.4; pointer-events: none;">
+                        <div style="border: 2px solid white; padding: 5px 15px; border-radius: 8px; font-weight: 900; font-size: 0.9rem; letter-spacing: 2px; text-transform: uppercase; transform: rotate(-5deg);">
+                            Ready for Delivery
+                        </div>
+                    </div>
+                ` : ''}
+
+                <div style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 10px; z-index: 2; ${isVacant ? 'display: none;' : ''}">
                     <div style="font-size: 0.9rem; font-weight: 800; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                         ${data.supplier}
                     </div>
@@ -864,11 +870,6 @@ function renderGridOnly() {
                     </div>
                 </div>
 
-                ${isVacant ? `
-                    <div style="position: absolute; bottom: 40px; left: 0; right: 0; text-align: center; opacity: 0.3; font-weight: bold; letter-spacing: 2px;">
-                        READY FOR DELIVERY
-                    </div>
-                ` : ''}
             </div>
         `;
     }
