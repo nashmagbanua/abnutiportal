@@ -843,12 +843,20 @@ async function syncCoalData() {
     let totalInUseKg = 0;
     const standbyLogs = [];
     
-    // 2. Initialize 9 Yards (Laging back to default)
+    // 2. Initialize 9 Yards (Laging back to default para malinis ang simula)
     for(let i=1; i<=9; i++) {
         currentYardData[i] = { 
-            status: 'vacant', supplier: 'Empty', kg: 0, 
-            date: '--', time: '--', shift: '', 
-            operator: 'None', startedDate: '', startedTime: '' 
+            status: 'vacant', 
+            supplier: 'Empty', 
+            kg: 0, 
+            dr_no: '--',      // Idagdag ito
+            ctp_no: '--',      // Idagdag ito
+            date: '--', 
+            time: '--', 
+            shift: '', 
+            operator: 'None', 
+            startedDate: '', 
+            startedTime: '' 
         };
     }
 
@@ -875,6 +883,7 @@ async function syncCoalData() {
                 supplier: log.supplier_name,
                 kg: Number(log.coal_kg) || 0,
                 dr_no: log.dr_no, 
+                ctp_no: log.ctp_no || '--',
                 date: d,
                 time: t,
                 shift: getShift(t),
@@ -1035,7 +1044,7 @@ function renderHistoryTable(history) {
             }
         }
 
-        tableHtml += `
+       tableHtml += `
             <tr style="border-bottom:1px solid #edf2f7; transition:0.2s;" onmouseover="this.style.backgroundColor='#f7fafc'" onmouseout="this.style.backgroundColor='transparent'">
                 <td style="padding:12px; text-align:center; border:1px solid #edf2f7; background:#f8fafc;">
                     <div style="font-weight:900; font-size:1.1rem; color:#2d3748;">${h.coal_yard_no}</div>
@@ -1043,10 +1052,19 @@ function renderHistoryTable(history) {
                         <i class="fas fa-user-edit"></i> ${h.operator_name || '---'}
                     </div>
                 </td>
+                
                 <td style="padding:12px; border:1px solid #edf2f7;">
-                    <b>${h.supplier_name || '---'}</b><br>
-                    <span style="color:#2b6cb0; font-size:0.7rem; font-weight:bold;">DR: ${h.dr_no || '--'}</span>
+                    <div style="font-weight:bold; color:#2d3748; margin-bottom: 4px;">${h.supplier_name || '---'}</div>
+                    <div style="display: flex; flex-direction: column; gap: 2px;">
+                        <span style="color:#2b6cb0; font-size:0.7rem; font-weight:bold;">
+                            <i class="fas fa-file-invoice" style="width:12px;"></i> DR: ${h.dr_no || '--'}
+                        </span>
+                        <span style="color:#b7791f; font-size:0.7rem; font-weight:bold;">
+                            <i class="fas fa-barcode" style="width:12px;"></i> CTP: ${h.ctp_no || '--'}
+                        </span>
+                    </div>
                 </td>
+
                 <td style="padding:12px; border:1px solid #edf2f7;">
                     ${h.date_arrived}<br><small style="color:#a0aec0;">${h.time_arrived}</small>
                 </td>
