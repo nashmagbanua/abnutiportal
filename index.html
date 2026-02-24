@@ -711,17 +711,78 @@ async function openCoalDelivery() {
 
         <div id="yard-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;"></div>
 
-        <div style="margin-top: 40px;">
-            <h3 style="font-size: 1.2rem; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
-                <span style="background:#2d3748; color:white; padding:5px 10px; border-radius:5px;">🕒</span> Recent Consumption History
-            </h3>
-            <div id="history-list"></div>
+        <div style="margin-top: 50px; background: #fff; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                <h3 style="margin: 0; font-size: 1.2rem; display: flex; align-items: center; gap: 10px;">
+                    <span style="background:#2d3748; color:white; padding:5px 10px; border-radius:5px;">📋</span> Delivery Archives
+                </h3>
+                
+                <div style="display: flex; gap: 10px; align-items: flex-end; background: #f7fafc; padding: 12px; border-radius: 10px; border: 1px solid #edf2f7;">
+                    <div>
+                        <small style="display:block; font-size:0.65rem; color:#718096; font-weight:bold; margin-bottom:4px;">START DATE:</small>
+                        <input type="date" id="dateFrom" style="padding: 6px; border-radius: 5px; border: 1px solid #cbd5e0; font-size: 0.85rem; color: #2d3748;">
+                    </div>
+                    <div>
+                        <small style="display:block; font-size:0.65rem; color:#718096; font-weight:bold; margin-bottom:4px;">END DATE:</small>
+                        <input type="date" id="dateTo" style="padding: 6px; border-radius: 5px; border: 1px solid #cbd5e0; font-size: 0.85rem; color: #2d3748;">
+                    </div>
+                    <button onclick="fetchHistoryByDate()" style="background: #2d3748; color: white; border: none; padding: 8px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.2s;">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                    <button onclick="window.print()" style="background: #e2e8f0; color: #4a5568; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer;">
+                        <i class="fas fa-print"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="history-list" style="min-height: 100px;">
+                <p style="text-align: center; color: #a0aec0; font-style: italic; margin-top: 20px;">
+                    Select dates above to search historical consumption records.
+                </p>
+            </div>
         </div>
     </div>
     `;
 
     syncCoalData();
     setInterval(syncCoalData, 30000); 
+}
+        async function fetchHistoryByDate() {
+    const from = document.getElementById('dateFrom').value;
+    const to = document.getElementById('dateTo').value;
+    const histDiv = document.getElementById('history-list');
+
+    if (!from || !to) {
+        alert("Please select both Start and End dates, boss!");
+        return;
+    }
+
+    histDiv.innerHTML = `<div style="text-align:center; padding:20px;">
+        <i class="fas fa-spinner fa-spin"></i> Searching records from ${from} to ${to}...
+    </div>`;
+
+    // Query sa Supabase: Kunin lahat ng logs sa pagitan ng 'from' at 'to'
+    const { data: records, error } = await supabaseClient
+        .from('delivery_logs')
+        .select('*')
+        .gte('date_arrived', from) // Greater than or equal to
+        .lte('date_arrived', to)   // Less than or equal to
+        .order('date_arrived', { ascending: false })
+        .order('time_arrived', { ascending: false });
+
+    if (error) {
+        console.error(error);
+        histDiv.innerHTML = "Error fetching data.";
+        return;
+    }
+
+    if (records.length === 0) {
+        histDiv.innerHTML = `<p style="text-align:center; padding:20px; color:#e53e3e;">No records found for the selected dates.</p>`;
+        return;
+    }
+
+    // Gamitin natin yung existing renderHistoryTable function mo para i-display ang results
+    renderHistoryTable(records);
 }
 
 // --- CONFIGURATION ---
