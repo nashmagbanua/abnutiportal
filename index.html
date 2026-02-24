@@ -885,7 +885,6 @@ async function syncCoalData() {
     updateSummaryUI(totalStandbyKg, totalInUseKg);
     renderGridOnly();
     updatePriorityBanner(currentYardData, standbyLogs);
-    renderHistoryTable(historyData); // New function call
     if(document.getElementById('last-update')) {
         document.getElementById('last-update').innerText = "Last Sync: " + new Date().toLocaleTimeString();
     }
@@ -1032,6 +1031,22 @@ function updatePriorityBanner(yardData, standbyLogs) {
         isUrgent ? banner.style.background = "#fff5f5" : banner.style.background = "#edf2f7";
         isUrgent ? banner.style.borderColor = "#f56565" : banner.style.borderColor = "#e2e8f0";
     }
+}
+        function updateSummaryUI(standby, inuse) {
+    const summary = document.getElementById('coal-summary');
+    if (!summary) return;
+    summary.innerHTML = `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+            <div style="background: #ebf8ff; border-left: 6px solid #3182ce; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                <small style="color: #2b6cb0; font-weight: bold; text-transform: uppercase; font-size: 0.7rem;">Total Standby Inventory</small>
+                <div style="font-size: 1.5rem; font-weight: 900; color: #2c5282;">${standby.toLocaleString()} <span style="font-size: 0.8rem;">kg</span></div>
+            </div>
+            <div style="background: #fffaf0; border-left: 6px solid #dd6b20; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                <small style="color: #9c4221; font-weight: bold; text-transform: uppercase; font-size: 0.7rem;">Current Consumption (In Use)</small>
+                <div style="font-size: 1.5rem; font-weight: 900; color: #7b341e;">${inuse.toLocaleString()} <span style="font-size: 0.8rem;">kg</span></div>
+            </div>
+        </div>
+    `;
 }
         function openCoalDumping() {
     updateSidebarActive(5);
