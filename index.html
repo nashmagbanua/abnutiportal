@@ -687,7 +687,6 @@ function fetchPowerData(selectedDate) {
 async function openCoalDelivery() {
     const cont = document.getElementById('cont');
     
-    // 1. Layout ng Dashboard ng coal delivery
     cont.innerHTML = `
     <div class="coal-container" style="padding: 20px; font-family: 'Segoe UI', sans-serif; color: #2d3748;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -695,33 +694,53 @@ async function openCoalDelivery() {
             <div id="last-update" style="font-size: 0.8rem; color: #a0aec0;">Syncing...</div>
         </div>
 
-        <div style="margin-bottom: 20px; display: flex; gap: 15px; background: #fff; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+        <div id="coal-summary"></div>
+
+        <div style="margin-bottom: 20px; display: flex; gap: 15px; background: #fff; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); align-items: center;">
             <span style="font-weight: bold; font-size: 0.9rem;">Filter View:</span>
-            <label><input type="checkbox" class="yard-filter" value="vacant" checked onchange="renderGridOnly()"> Vacant</label>
-            <label><input type="checkbox" class="yard-filter" value="standby" checked onchange="renderGridOnly()"> Standby</label>
-            <label><input type="checkbox" class="yard-filter" value="in use" checked onchange="renderGridOnly()"> In Use</label>
+            <label style="cursor:pointer"><input type="checkbox" class="yard-filter" value="vacant" checked onchange="renderGridOnly()"> Vacant</label>
+            <label style="cursor:pointer"><input type="checkbox" class="yard-filter" value="standby" checked onchange="renderGridOnly()"> Standby</label>
+            <label style="cursor:pointer"><input type="checkbox" class="yard-filter" value="in use" checked onchange="renderGridOnly()"> In Use</label>
         </div>
 
-        <div id="prio-banner" style="background: #edf2f7; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 25px; border: 2px solid #e2e8f0;">
-            <small style="text-transform: uppercase; color: #718096;">Next Priority for Consumption</small>
+        <div id="prio-banner" style="background: #edf2f7; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 25px; border: 2px solid #e2e8f0; transition: all 0.3s;">
+            <small style="text-transform: uppercase; color: #718096; letter-spacing: 1px;">Next Priority for Consumption</small>
             <div id="prio-text" style="font-size: 1.8rem; font-weight: 900; margin-top: 5px;">Checking...</div>
         </div>
 
         <div id="yard-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;"></div>
-    </div>
-`;
 
-    // 2. Simulan ang Syncing
+        <div style="margin-top: 40px;">
+            <h3 style="font-size: 1.2rem; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                <span style="background:#2d3748; color:white; padding:5px 10px; border-radius:5px;">🕒</span> Recent Consumption History
+            </h3>
+            <div id="history-list"></div>
+        </div>
+    </div>
+    `;
+
     syncCoalData();
-    // Auto-refresh bawat 30 seconds
     setInterval(syncCoalData, 30000); 
 }
 
 // --- CONFIGURATION ---
 let currentYardData = {}; 
 
+// 1. Helper: Gaano na katagal "In Use"
+function calculateElapsed(startDate, startTime) {
+    if (!startDate || !startTime || startDate === '--') return "";
+    const start = new Date(`${startDate}T${startTime}`);
+    const now = new Date();
+    const diffMs = now - start;
+    if (diffMs < 0) return "Starting...";
+    
+    const hrs = Math.floor(diffMs / 3600000);
+    const mins = Math.floor((diffMs % 3600000) / 60000);
+    return `${hrs}h ${mins}m running`;
+}
+
 function getShift(timeString) {
-    if (!timeString) return "";
+    if (!timeString || timeString === '--') return "";
     const hour = parseInt(timeString.split(':')[0]);
     return (hour >= 6 && hour < 18) ? "DS" : "NS";
 }
@@ -737,10 +756,13 @@ async function syncCoalData() {
     let totalStandbyKg = 0;
     let totalInUseKg = 0;
     const standbyLogs = [];
+    
+    // Kunin ang huling 10 na "used up" para sa History Table
+    const historyData = logs.filter(l => l.remarks === 'used up').slice(0, 10);
 
     // Initialize 9 Yards
     for(let i=1; i<=9; i++) {
-        currentYardData[i] = { status: 'vacant', supplier: 'Empty', kg: 0, date: '--', time: '--', shift: '', operator: 'None' };
+        currentYardData[i] = { status: 'vacant', supplier: 'Empty', kg: 0, date: '--', time: '--', shift: '', operator: 'None', startedDate: '', startedTime: '' };
     }
 
     const processed = new Set();
@@ -767,7 +789,10 @@ async function syncCoalData() {
                 date: d,
                 time: t,
                 shift: getShift(t),
-                operator: op
+                operator: op,
+                // Itago natin yung start time para sa elapsed calculation kung in use
+                startedDate: log.date_in_use,
+                startedTime: log.time_in_use
             };
             processed.add(y);
         }
@@ -776,13 +801,16 @@ async function syncCoalData() {
     updateSummaryUI(totalStandbyKg, totalInUseKg);
     renderGridOnly();
     updatePriorityBanner(currentYardData, standbyLogs);
+    renderHistoryTable(historyData); // New function call
+    if(document.getElementById('last-update')) {
+        document.getElementById('last-update').innerText = "Last Sync: " + new Date().toLocaleTimeString();
+    }
 }
 
 function renderGridOnly() {
     const grid = document.getElementById('yard-grid');
     if (!grid) return;
 
-    // Kunin ang active filters mula sa checkboxes
     const selectedFilters = Array.from(document.querySelectorAll('.yard-filter:checked')).map(cb => cb.value);
     
     grid.innerHTML = '';
@@ -791,9 +819,16 @@ function renderGridOnly() {
         if (!selectedFilters.includes(data.status)) continue;
 
         let bgColor = data.status === 'standby' ? '#3182ce' : (data.status === 'in use' ? '#d69e2e' : '#48bb78');
+        
+        // ELAPSED TIME DISPLAY kung "in use"
+        const elapsedHtml = data.status === 'in use' 
+            ? `<div style="font-size: 0.65rem; background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 4px; margin-top: 5px; display: inline-block; width: 100%;">
+                <i class="fas fa-stopwatch"></i> ${calculateElapsed(data.startedDate, data.startedTime)}
+               </div>` 
+            : '';
 
         grid.innerHTML += `
-            <div style="background: ${bgColor}; padding: 18px; border-radius: 12px; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s;">
+            <div style="background: ${bgColor}; padding: 18px; border-radius: 12px; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-bottom: 5px solid rgba(0,0,0,0.2);">
                 <div style="display: flex; justify-content: space-between;">
                     <div>
                         <small style="font-weight: bold; opacity: 0.8;">YARD</small>
@@ -802,23 +837,24 @@ function renderGridOnly() {
                     <div style="text-align: right;">
                         <div style="font-size: 1.2rem; font-weight: bold;">${data.kg > 0 ? data.kg.toLocaleString() + ' kg' : '--'}</div>
                         <div style="font-size: 0.65rem; background: rgba(0,0,0,0.2); padding: 3px 8px; border-radius: 5px; text-transform: uppercase;">
-                            ${data.status} <span style="margin-left:5px; border-left: 1px solid rgba(255,255,255,0.3); padding-left: 5px;">${data.shift}</span>
+                            ${data.status} | ${data.shift}
                         </div>
+                        ${elapsedHtml}
                     </div>
                 </div>
 
                 <div style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 10px;">
-                    <div style="font-size: 0.9rem; font-weight: 800; margin-bottom: 5px;">${data.supplier}</div>
+                    <div style="font-size: 0.9rem; font-weight: 800; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${data.supplier}</div>
                     
                     <div style="display: flex; align-items: center; gap: 10px;">
-                        <i class="far fa-calendar-alt"></i>
+                        <i class="far fa-clock"></i>
                         <div>
                             <div style="font-size: 0.85rem; font-weight: bold;">${data.date}</div>
                             <div style="font-size: 1.1rem; font-weight: 900; color: rgba(255,255,255,0.9);">${data.time}</div>
                         </div>
                     </div>
 
-                    <div style="margin-top: 8px; font-size: 0.65rem; opacity: 0.8; font-style: italic;">
+                    <div style="margin-top: 8px; font-size: 0.65rem; opacity: 0.8;">
                         <i class="fas fa-user-edit"></i> Op: ${data.operator}
                     </div>
                 </div>
@@ -826,57 +862,43 @@ function renderGridOnly() {
         `;
     }
 }
-        function updatePriorityBanner(yardData, standbyLogs) {
-    let prioText = "All Yards Clear";
-    let isUrgent = false;
 
-    // RULE 1: Yard 9 Priority (Obstruction)
-    // Kahit 'in use' o 'standby', basta may laman ang Yard 9, siya ang PRIO.
-    if (yardData["9"].status === 'standby' || yardData["9"].status === 'in use') {
-        prioText = `🚨 PRIO: YARD 9 (${yardData["9"].supplier})`;
-        isUrgent = true;
-    } 
-    // RULE 2: FIFO (Oldest Standby)
-    else if (standbyLogs.length > 0) {
-        const oldest = [...standbyLogs].sort((a, b) => {
-            const timeA = new Date(`${a.date_arrived}T${a.time_arrived}`);
-            const timeB = new Date(`${b.date_arrived}T${b.time_arrived}`);
-            return timeA - timeB;
-        })[0];
-        prioText = `NEXT PRIO: YARD ${oldest.coal_yard_no} (${oldest.supplier_name})`;
-    }
+// 2. New Function para sa History Table sa baba
+function renderHistoryTable(history) {
+    const histDiv = document.getElementById('history-list');
+    if (!histDiv) return;
 
-    const banner = document.getElementById('prio-banner');
-    const prioTextEl = document.getElementById('prio-text');
-    
-    if (prioTextEl) prioTextEl.innerText = prioText;
-    
-    if (banner) {
-        if (isUrgent) {
-            banner.classList.add('blink-urgent');
-            banner.style.border = "4px solid #f56565";
-        } else {
-            banner.classList.remove('blink-urgent');
-            banner.style.border = "2px solid #e2e8f0";
-        }
-    }
-}
+    let tableHtml = `
+        <table style="width:100%; border-collapse:collapse; background:white; border-radius:10px; overflow:hidden; font-size:0.85rem; box-shadow:0 2px 4px rgba(0,0,0,0.05);">
+            <thead style="background:#f7fafc; border-bottom:2px solid #edf2f7;">
+                <tr>
+                    <th style="padding:12px; text-align:left; color:#4a5568;">Yard</th>
+                    <th style="padding:12px; text-align:left; color:#4a5568;">Supplier</th>
+                    <th style="padding:12px; text-align:left; color:#4a5568;">Weight</th>
+                    <th style="padding:12px; text-align:left; color:#4a5568;">Started</th>
+                    <th style="padding:12px; text-align:left; color:#4a5568;">Finished (Shift)</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
 
-// Helpers para sa UI
-function updateSummaryUI(standby, inuse) {
-    const summary = document.getElementById('coal-summary');
-    if (summary) {
-        summary.innerHTML = `
-            <div style="background: #ebf8ff; border-left: 6px solid #3182ce; padding: 15px; border-radius: 10px;">
-                <small style="color: #2b6cb0; font-weight: bold;">TOTAL STANDBY</small>
-                <div style="font-size: 1.5rem; font-weight: 900;">${standby.toLocaleString()} kg</div>
-            </div>
-            <div style="background: #fffaf0; border-left: 6px solid #dd6b20; padding: 15px; border-radius: 10px;">
-                <small style="color: #9c4221; font-weight: bold;">TOTAL IN USE</small>
-                <div style="font-size: 1.5rem; font-weight: 900;">${inuse.toLocaleString()} kg</div>
-            </div>
+    history.forEach(h => {
+        tableHtml += `
+            <tr style="border-bottom:1px solid #edf2f7;">
+                <td style="padding:12px; font-weight:bold;">Yard ${h.coal_yard_no}</td>
+                <td style="padding:12px;">${h.supplier_name}</td>
+                <td style="padding:12px;">${h.coal_kg.toLocaleString()} kg</td>
+                <td style="padding:12px; color:#718096;">${h.date_in_use} ${h.time_in_use}</td>
+                <td style="padding:12px; font-weight:bold;">
+                    <span style="color:#38a169;">${h.date_used_up} ${h.time_used_up}</span>
+                    <span style="background:#edf2f7; padding:2px 5px; border-radius:4px; font-size:0.7rem; margin-left:5px;">${getShift(h.time_used_up)}</span>
+                </td>
+            </tr>
         `;
-    }
+    });
+
+    tableHtml += `</tbody></table>`;
+    histDiv.innerHTML = tableHtml;
 }
         function openCoalDumping() {
     updateSidebarActive(5);
