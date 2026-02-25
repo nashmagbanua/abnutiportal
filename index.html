@@ -1202,9 +1202,10 @@ function updatePriorityBanner(yardData, standbyLogs) {
                     <div class="space-y-4">
                         <div>
                             <label class="text-[8px] font-black uppercase ml-2 text-slate-500">Select Yard to Close</label>
-                            <select id="finalizeYardSelect" class="w-full bg-slate-800 border-none rounded-2xl p-4 text-[12px] font-black outline-none focus:ring-2 focus:ring-orange-500 mt-1">
-                                ${yards.map(y => `<option value="${y}">${y}</option>`).join('')}
-                            </select>
+                            // Hanapin ito sa openCoalDumping content string at palitan:
+<select id="finalizeYardSelect" onchange="refreshMasterLog()" class="w-full bg-slate-800 border-none rounded-2xl p-4 text-[12px] font-black outline-none focus:ring-2 focus:ring-orange-500 mt-1">
+    ${yards.map(y => `<option value="${y}">${y}</option>`).join('')}
+</select>
                         </div>
                         <div>
                             <label class="text-[8px] font-black uppercase ml-2 text-slate-500">Actual Total Weight (KG)</label>
@@ -1400,7 +1401,7 @@ async function updateInventoryStats(currentYard) {
         console.error("Inventory Link Error:", err.message);
     }
 }
-      async function triggerFinalize() {
+     async function triggerFinalize() {
     const selectedYard = document.getElementById('finalizeYardSelect').value;
     const yardNumberOnly = selectedYard.replace("CY", ""); 
     const actualWeight = parseFloat(document.getElementById('actualWeightInput').value);
@@ -1413,16 +1414,26 @@ async function updateInventoryStats(currentYard) {
     if (!confirm(`Finalize ${selectedYard}? Ito ay magiging 'used up' na sa record.`)) return;
 
     try {
-        // [Part A] I-update ang Bucket Logs to is_finalized: true
-        // (Dito mo ilalagay yung loop mo for daily_bucket_logs update)
+        // [Part A] I-update ang Bucket Logs to is_finalized: true para sa Yard na ito
+        // Para hindi na sila mabilang sa susunod na delivery
+        const { error: bucketError } = await supabaseClient
+            .from('daily_bucket_logs')
+            .update({ 
+                is_finalized: true,
+                kg_actual: actualWeight // Opsyonal: i-distribute ang actual weight kung gusto mo
+            })
+            .eq('yard_no', selectedYard)
+            .eq('is_finalized', false);
+
+        if (bucketError) throw bucketError;
 
         // [Part B] I-update ang Delivery Log to 'used up'
         const { error: deliveryError } = await supabaseClient
             .from('delivery_logs')
             .update({ 
-                date_used_up: new Date().toISOString().split('T')[0], // YYYY-MM-DD format gaya ng data mo
-                time_used_up: new Date().toLocaleTimeString('it-IT', { hour12: false }), // HH:mm:ss format
-                remarks: 'used up' // Lowercase para match sa history niyo
+                date_used_up: new Date().toISOString().split('T')[0],
+                time_used_up: new Date().toLocaleTimeString('it-IT', { hour12: false }),
+                remarks: 'used up'
             })
             .eq('coal_yard_no', yardNumberOnly)
             .eq('remarks', 'active delivery')
@@ -1430,10 +1441,14 @@ async function updateInventoryStats(currentYard) {
 
         if (deliveryError) throw deliveryError;
 
-        alert("Mission Success! Record is now marked as 'used up'.");
+        alert(`Success! ${selectedYard} closed and marked as used up.`);
+        
+        // Linisin ang input field at i-refresh ang UI
+        document.getElementById('actualWeightInput').value = '';
         refreshMasterLog();
+        
     } catch (err) {
-        alert("Error: " + err.message);
+        alert("Error during finalization: " + err.message);
     }
 }
        function login() {
