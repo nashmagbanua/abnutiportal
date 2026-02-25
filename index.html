@@ -1146,29 +1146,40 @@ function updatePriorityBanner(yardData, standbyLogs) {
     
     // Initial Layout with Stats and Tools
     content.innerHTML = `
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-black text-slate-800">Coal Dumping (Consumption)</h1>
-            <div id="syncIndicator" class="text-[10px] font-bold text-emerald-500 uppercase italic">● Live Cloud Connection</div>
+        <div class="mb-6">
+            <div class="flex items-center gap-3">
+                <h1 class="text-2xl font-black text-slate-800">Coal Dumping (Consumption)</h1>
+            </div>
+            <div id="syncIndicator" class="text-[9px] font-bold text-emerald-500 uppercase italic mt-1 tracking-wider opacity-80">
+                <span class="animate-pulse text-[12px]">●</span> Live Cloud Connection
+            </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-                <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Estimated (Today)</h4>
-                <div id="todayTotalKg" class="text-xl font-black text-slate-800">---</div>
-            </div>
-            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm border-l-4 border-l-emerald-500">
-                <h4 class="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-2">Actual (Today)</h4>
-                <div id="todayActualKg" class="text-xl font-black text-emerald-600">---</div>
-            </div>
-            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-                <h4 class="text-[9px] font-black text-orange-500 uppercase tracking-widest mb-2">Variance %</h4>
-                <div id="varianceDisplay" class="text-xl font-black text-orange-500">---</div>
-            </div>
-            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-                <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Active Yard</h4>
-                <div id="activeYardDisplay" class="text-xl font-black text-slate-800">---</div>
-            </div>
-        </div>
+    <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+        <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Estimated (Today)</h4>
+        <div id="todayTotalKg" class="text-xl font-black text-slate-800">---</div>
+        <div class="text-[8px] font-bold text-slate-400 mt-1 uppercase italic">Rate: 200kg / bucket</div>
+    </div>
+    
+    <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm border-l-4 border-l-emerald-500">
+        <h4 class="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-2">Actual (Today)</h4>
+        <div id="todayActualKg" class="text-xl font-black text-emerald-600">---</div>
+        <div id="actualBucketRate" class="text-[8px] font-bold text-emerald-500 mt-1 uppercase italic italic">Rate: ---- kg / bkt</div>
+    </div>
+
+    <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+        <h4 class="text-[9px] font-black text-orange-500 uppercase tracking-widest mb-2">Variance %</h4>
+        <div id="varianceDisplay" class="text-xl font-black text-orange-500">---</div>
+        <div class="text-[8px] font-bold text-slate-400 mt-1 uppercase italic">Diff from Estimate</div>
+    </div>
+
+    <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+        <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Active Yard</h4>
+        <div id="activeYardDisplay" class="text-xl font-black text-slate-800">---</div>
+        <div class="text-[8px] font-bold text-slate-400 mt-1 uppercase italic">Current Source</div>
+    </div>
+</div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-1 space-y-6">
@@ -1293,22 +1304,31 @@ function updatePriorityBanner(yardData, standbyLogs) {
         // 4. I-display ang Table
         logCont.innerHTML = filtered.length > 0 ? html : '<p class="text-center p-10 text-[10px] font-black text-slate-300 italic">No records for this shift.</p>';
         
-        // 5. Ngayon i-update ang Dashboard Stats (Dahil tapos na ang loop, may values na tayo)
+        // 5. Update Stats Cards
         document.getElementById('todayTotalKg').innerText = totalEstKg.toLocaleString() + " KG";
         
         const actDisplay = document.getElementById('todayActualKg');
         const varDisplay = document.getElementById('varianceDisplay');
+        const rateDisplay = document.getElementById('actualBucketRate'); // Bagong ID
 
         if (totalActKg > 0) {
             actDisplay.innerText = totalActKg.toLocaleString() + " KG";
+            
+            // Compute Average Actual Bucket Size
+            const avgActualBkt = totalActKg / totalBkt;
+            rateDisplay.innerText = `Rate: ${avgActualBkt.toFixed(2)} KG / BKT`;
+            
+            // Variance Logic
             const variance = ((totalActKg - totalEstKg) / totalEstKg) * 100;
             const sign = variance > 0 ? "+" : "";
             varDisplay.innerText = `${sign}${variance.toFixed(2)}%`;
+            varDisplay.className = `text-xl font-black ${variance >= 0 ? 'text-emerald-500' : 'text-red-500'}`;
         } else {
             actDisplay.innerText = "PENDING";
+            rateDisplay.innerText = "Rate: ---- KG / BKT";
             varDisplay.innerText = "---";
+            varDisplay.className = "text-xl font-black text-slate-300";
         }
-
         const yardsFinal = [...new Set(filtered.map(l => l.yard_no))];
         document.getElementById('activeYardDisplay').innerText = yardsFinal.length > 0 ? yardsFinal.join(' / ') : "---";
 
