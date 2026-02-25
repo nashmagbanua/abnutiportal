@@ -1446,14 +1446,14 @@ async function updateInventoryStats(currentYard, totalEstKg) {
         // 5. Update DELIVERY_LOGS to CLOSED (USED UP)
         // Eto yung link sa kabilang table mo boss
         const { error: deliveryError } = await supabaseClient
-            .from('delivery_logs')
-            .update({ 
-                date_used_up: new Date().toISOString().split('T')[0], // Petsa Ngayon
-                time_used_up: new Date().toLocaleTimeString('it-IT', { hour12: false }) // 24-Hour Time
-                remarks: 'used up'
-            })
-            .eq('coal_yard_no', selectedYard)
-            .eq('remarks', 'in use'); // Siguraduhin na yung kasalukuyang 'in use' ang isasara
+    .from('delivery_logs')
+    .update({ 
+        date_used_up: new Date().toISOString().split('T')[0],
+        time_used_up: new Date().toLocaleTimeString('it-IT', { hour12: false }),
+        remarks: 'used up' // Idagdag natin ito para maging 'used up' sa database
+    })
+    .eq('coal_yard_no', selectedYard)
+    .eq('remarks', 'in use'); // Siguraduhin na yung kasalukuyang 'in use' ang isasara
 
         if (deliveryError) throw deliveryError;
 
