@@ -1241,15 +1241,15 @@ function updatePriorityBanner(yardData, standbyLogs) {
     document.getElementById('archiveDateFilter').valueAsDate = new Date();
     refreshMasterLog();
 }
-      async function refreshMasterLog() {
+     async function refreshMasterLog() {
     const logCont = document.getElementById('masterLogContent');
     const date = document.getElementById('archiveDateFilter').value;
-    const shift = document.getElementById('shiftFilter').value;
-    const currentYard = document.getElementById('finalizeYardSelect').value; // Kunin ang yard para sa inventory link
+    const currentYard = document.getElementById('finalizeYardSelect').value;
 
     logCont.innerHTML = '<p class="text-center p-10 text-[10px] font-black text-slate-400 italic animate-pulse">Fetching Records...</p>';
 
     try {
+        // KUKUHA LANG NG DATA PARA SA SPECIFIC NA PETSA NA 'TO (00:00 - 23:59)
         const { data: logs, error } = await supabaseClient
             .from('daily_bucket_logs')
             .select('*')
@@ -1258,18 +1258,15 @@ function updatePriorityBanner(yardData, standbyLogs) {
 
         if (error) throw error;
 
-        // 1. Filter by Shift
-        const filtered = logs.filter(l => {
-            if (shift === 'ALL') return true;
-            const hr = parseInt(l.time_slot.split(':')[0]);
-            return shift === 'DAY' ? (hr >= 6 && hr <= 17) : (hr >= 18 || hr < 6);
-        });
+        // DITO: Tinanggal na natin ang Shift Filter logic (hr >= 18 || hr < 6)
+        // Lahat ng makuha sa database para sa petsang 'date' ay isasama sa computation.
+        const filtered = logs; 
 
         let totalBkt = 0;
         let totalEstKg = 0;
         let totalActKg = 0;
 
-        // 2. Build Table HTML
+        // Build Table HTML
         let html = `
             <table class="w-full text-[10px] text-left">
                 <thead>
@@ -1285,8 +1282,8 @@ function updatePriorityBanner(yardData, standbyLogs) {
                 <tbody class="divide-y divide-slate-50">
                     ${filtered.map(l => {
                         totalBkt += l.buckets_used || 0;
-                        totalEstKg += l.kg_estimated || 0;
-                        totalActKg += l.kg_actual || 0;
+                        totalEstKg += (l.kg_estimated || 0);
+                        totalActKg += (l.kg_actual || 0);
                         return `
                         <tr class="${l.is_finalized ? 'bg-emerald-50/30' : ''}">
                             <td class="p-3 font-bold text-slate-700">${l.time_slot}</td>
@@ -1300,7 +1297,7 @@ function updatePriorityBanner(yardData, standbyLogs) {
                 </tbody>
                 <tfoot class="bg-slate-900 text-white font-black">
                     <tr>
-                        <td colspan="2" class="p-3 text-right uppercase text-[8px]">Totals:</td>
+                        <td colspan="2" class="p-3 text-right uppercase text-[8px]">Total (24hrs):</td>
                         <td class="p-3 text-center text-orange-400">${totalBkt}</td>
                         <td class="p-3 text-right">${totalEstKg.toLocaleString()}</td>
                         <td class="p-3 text-right text-emerald-400">${totalActKg > 0 ? totalActKg.toLocaleString() : '---'}</td>
@@ -1309,34 +1306,30 @@ function updatePriorityBanner(yardData, standbyLogs) {
                 </tfoot>
             </table>`;
 
-        logCont.innerHTML = filtered.length > 0 ? html : '<p class="text-center p-10 text-[10px] font-black text-slate-300 italic">No records found.</p>';
+        logCont.innerHTML = filtered.length > 0 ? html : '<p class="text-center p-10 text-[10px] font-black text-slate-300 italic">No records found for this calendar day.</p>';
 
-        // 3. Update Basic Stats Cards
+        // UPDATE STATS CARDS
         document.getElementById('todayTotalKg').innerText = totalEstKg.toLocaleString() + " KG";
         
         const actDisplay = document.getElementById('todayActualKg');
         const varDisplay = document.getElementById('varianceDisplay');
-        const rateDisplay = document.getElementById('actualBucketRate');
 
         if (totalActKg > 0) {
             actDisplay.innerText = totalActKg.toLocaleString() + " KG";
-            const avgActualBkt = totalActKg / totalBkt;
-            rateDisplay.innerText = `Rate: ${avgActualBkt.toFixed(2)} KG / BKT`;
             const variance = ((totalActKg - totalEstKg) / totalEstKg) * 100;
             varDisplay.innerText = `${variance > 0 ? '+' : ''}${variance.toFixed(2)}%`;
-            varDisplay.className = `text-xl font-black ${variance >= 0 ? 'text-emerald-500' : 'text-red-500'}`;
+            varDisplay.className = `text-lg font-black ${variance >= 0 ? 'text-emerald-500' : 'text-red-500'}`;
         } else {
             actDisplay.innerText = "PENDING";
-            rateDisplay.innerText = "Rate: ---- KG / BKT";
             varDisplay.innerText = "---";
         }
 
-        // 4. Update Yard Name Display
+        // UPDATE YARD DISPLAY
         const yardsInLog = [...new Set(filtered.map(l => l.yard_no))];
         document.getElementById('activeYardDisplay').innerText = yardsInLog.length > 0 ? yardsInLog.join(' / ') : "---";
 
-        // 5. CALL THE INVENTORY LINK (Eto yung request mo boss)
-        await updateInventoryStats(currentYard, totalEstKg);
+        // UPDATE INVENTORY
+        await updateInventoryStats(currentYard);
 
     } catch (err) {
         console.error(err);
