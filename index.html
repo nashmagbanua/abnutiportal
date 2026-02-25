@@ -1316,6 +1316,65 @@ function updatePriorityBanner(yardData, standbyLogs) {
         logCont.innerHTML = `<p class="text-center p-10 text-red-400 font-black uppercase text-[9px]">Connection Error: ${err.message}</p>`;
     }
 }
+        async function triggerFinalize() {
+    const yard = document.getElementById('finalizeYardSelect').value;
+    const actualWeight = parseFloat(document.getElementById('actualWeightInput').value);
+
+    // 1. Validation: Siguraduhin na may input na weight
+    if (!actualWeight || actualWeight <= 0) {
+        alert("Boss, paki-input naman yung tamang Actual Weight (KG).");
+        return;
+    }
+
+    // Confirmation para hindi aksidente
+    if (!confirm(`Sigurado ka na ba Sir? I-finalize na natin ang ${yard} sa timbang na ${actualWeight.toLocaleString()} KG?`)) {
+        return;
+    }
+
+    try {
+        // 2. Hanapin muna lahat ng non-finalized logs para sa yard na ito
+        const { data: logs, error: fetchError } = await supabaseClient
+            .from('daily_bucket_logs')
+            .select('id, buckets_used')
+            .eq('yard_no', yard)
+            .eq('is_finalized', false);
+
+        if (fetchError) throw fetchError;
+
+        if (!logs || logs.length === 0) {
+            alert(`Sir, wala nang pending logs para sa ${yard}. Baka finalized na lahat.`);
+            return;
+        }
+
+        // 3. Compute the Actual Weight per Bucket
+        const totalBuckets = logs.reduce((sum, log) => sum + log.buckets_used, 0);
+        const kgPerBucketActual = actualWeight / totalBuckets;
+
+        // 4. I-update ang bawat record sa Supabase
+        // Note: Pwede ring bulk update kung marami, pero ito ang pinaka-safe na logic
+        for (const log of logs) {
+            const { error: updateError } = await supabaseClient
+                .from('daily_bucket_logs')
+                .update({
+                    is_finalized: true,
+                    kg_actual: log.buckets_used * kgPerBucketActual
+                })
+                .eq('id', log.id);
+
+            if (updateError) throw updateError;
+        }
+
+        alert(`Success! Finalized na ang ${yard}. Bawat bucket ay nag-average ng ${kgPerBucketActual.toFixed(2)} KG.`);
+        
+        // 5. Refresh ang Dashboard para makita ang pagbabago
+        document.getElementById('actualWeightInput').value = ''; // Clear input
+        refreshMasterLog();
+
+    } catch (err) {
+        console.error(err);
+        alert("May error boss: " + err.message);
+    }
+}
        function login() {
     const val = document.getElementById('passCode').value;
     if(db[val]) {
