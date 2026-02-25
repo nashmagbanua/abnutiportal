@@ -1154,33 +1154,41 @@ function updatePriorityBanner(yardData, standbyLogs) {
                 <span class="animate-pulse text-[12px]">●</span> Live Cloud Connection
             </div>
         </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-    <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-        <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Estimated (Today)</h4>
-        <div id="todayTotalKg" class="text-xl font-black text-slate-800">---</div>
-        <div class="text-[8px] font-bold text-slate-400 mt-1 uppercase italic">Rate: 200kg / bucket</div>
+<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+    <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm">
+        <h4 class="text-[9px] font-black text-slate-400 uppercase mb-1">Estimated (Today)</h4>
+        <div id="todayTotalKg" class="text-lg font-black text-slate-800">---</div>
+        <div class="text-[7px] font-bold text-slate-400 uppercase italic">Rate: 200kg/bkt</div>
     </div>
     
-    <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm border-l-4 border-l-emerald-500">
-        <h4 class="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-2">Actual (Today)</h4>
-        <div id="todayActualKg" class="text-xl font-black text-emerald-600">---</div>
-        <div id="actualBucketRate" class="text-[8px] font-bold text-emerald-500 mt-1 uppercase italic italic">Rate: ---- kg / bkt</div>
+    <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm border-l-4 border-l-emerald-500">
+        <h4 class="text-[9px] font-black text-emerald-600 uppercase mb-1">Actual (Today)</h4>
+        <div id="todayActualKg" class="text-lg font-black text-emerald-600">---</div>
+        <div id="actualBucketRate" class="text-[7px] font-bold text-emerald-500 uppercase italic">Rate: ---</div>
     </div>
 
-    <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-        <h4 class="text-[9px] font-black text-orange-500 uppercase tracking-widest mb-2">Variance %</h4>
-        <div id="varianceDisplay" class="text-xl font-black text-orange-500">---</div>
-        <div class="text-[8px] font-bold text-slate-400 mt-1 uppercase italic">Diff from Estimate</div>
+    <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm border-l-4 border-l-blue-500">
+        <h4 class="text-[9px] font-black text-blue-600 uppercase mb-1">Remaining Balance</h4>
+        <div id="remainingBalanceDisplay" class="text-lg font-black text-blue-600">---</div>
+        <div class="text-[7px] font-bold text-slate-400 uppercase italic">Stock Left</div>
     </div>
 
-    <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-        <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Active Yard</h4>
-        <div id="activeYardDisplay" class="text-xl font-black text-slate-800">---</div>
-        <div class="text-[8px] font-bold text-slate-400 mt-1 uppercase italic">Current Source</div>
+    <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm">
+        <h4 class="text-[9px] font-black text-indigo-600 uppercase mb-1">Active Supplier</h4>
+        <div id="supplierDisplay" class="text-[10px] font-black text-slate-800 truncate">---</div>
+        <div id="grossWeightDisplay" class="text-[7px] font-bold text-slate-400 uppercase">Net: ---</div>
+    </div>
+
+    <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm">
+        <h4 class="text-[9px] font-black text-orange-500 uppercase mb-1">Variance %</h4>
+        <div id="varianceDisplay" class="text-lg font-black text-orange-500">---</div>
+    </div>
+
+    <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm">
+        <h4 class="text-[9px] font-black text-slate-400 uppercase mb-1">Yard Source</h4>
+        <div id="activeYardDisplay" class="text-lg font-black text-slate-800">---</div>
     </div>
 </div>
-
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-1 space-y-6">
                 <div class="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-xl">
@@ -1233,12 +1241,13 @@ function updatePriorityBanner(yardData, standbyLogs) {
     document.getElementById('archiveDateFilter').valueAsDate = new Date();
     refreshMasterLog();
 }
-       async function refreshMasterLog() {
+      async function refreshMasterLog() {
     const logCont = document.getElementById('masterLogContent');
     const date = document.getElementById('archiveDateFilter').value;
     const shift = document.getElementById('shiftFilter').value;
+    const currentYard = document.getElementById('finalizeYardSelect').value; // Kunin ang yard para sa inventory link
 
-    logCont.innerHTML = '<p class="text-center p-10 text-[10px] font-black text-slate-400 italic animate-pulse text-uppercase">Fetching Records...</p>';
+    logCont.innerHTML = '<p class="text-center p-10 text-[10px] font-black text-slate-400 italic animate-pulse">Fetching Records...</p>';
 
     try {
         const { data: logs, error } = await supabaseClient
@@ -1249,22 +1258,18 @@ function updatePriorityBanner(yardData, standbyLogs) {
 
         if (error) throw error;
 
-        // fillter muna refreshMasterLog function:
-const filtered = logs.filter(l => {
-    // 1. Kung ALL ang pinili, ipakita lahat (24 Hours)
-    if (shift === 'ALL') return true; 
+        // 1. Filter by Shift
+        const filtered = logs.filter(l => {
+            if (shift === 'ALL') return true;
+            const hr = parseInt(l.time_slot.split(':')[0]);
+            return shift === 'DAY' ? (hr >= 6 && hr <= 17) : (hr >= 18 || hr < 6);
+        });
 
-    // 2. Kung hindi ALL, gamitin ang dating Shift Logic
-    const hr = parseInt(l.time_slot.split(':')[0]);
-    return shift === 'DAY' ? (hr >= 6 && hr <= 17) : (hr >= 18 || hr < 6);
-});
-
-        // 2. I-define ang variables
         let totalBkt = 0;
         let totalEstKg = 0;
         let totalActKg = 0;
 
-        // 3. Loop at Build HTML (Dito nagaganap ang computation)
+        // 2. Build Table HTML
         let html = `
             <table class="w-full text-[10px] text-left">
                 <thead>
@@ -1279,10 +1284,9 @@ const filtered = logs.filter(l => {
                 </thead>
                 <tbody class="divide-y divide-slate-50">
                     ${filtered.map(l => {
-                        totalBkt += l.buckets_used;
-                        totalEstKg += (l.kg_estimated || 0);
-                        totalActKg += (l.kg_actual || 0);
-                        
+                        totalBkt += l.buckets_used || 0;
+                        totalEstKg += l.kg_estimated || 0;
+                        totalActKg += l.kg_actual || 0;
                         return `
                         <tr class="${l.is_finalized ? 'bg-emerald-50/30' : ''}">
                             <td class="p-3 font-bold text-slate-700">${l.time_slot}</td>
@@ -1305,98 +1309,149 @@ const filtered = logs.filter(l => {
                 </tfoot>
             </table>`;
 
-        // 4. I-display ang Table
-        logCont.innerHTML = filtered.length > 0 ? html : '<p class="text-center p-10 text-[10px] font-black text-slate-300 italic">No records for this shift.</p>';
-        
-        // 5. Update Stats Cards
+        logCont.innerHTML = filtered.length > 0 ? html : '<p class="text-center p-10 text-[10px] font-black text-slate-300 italic">No records found.</p>';
+
+        // 3. Update Basic Stats Cards
         document.getElementById('todayTotalKg').innerText = totalEstKg.toLocaleString() + " KG";
         
         const actDisplay = document.getElementById('todayActualKg');
         const varDisplay = document.getElementById('varianceDisplay');
-        const rateDisplay = document.getElementById('actualBucketRate'); // Bagong ID
+        const rateDisplay = document.getElementById('actualBucketRate');
 
         if (totalActKg > 0) {
             actDisplay.innerText = totalActKg.toLocaleString() + " KG";
-            
-            // Compute Average Actual Bucket Size
             const avgActualBkt = totalActKg / totalBkt;
             rateDisplay.innerText = `Rate: ${avgActualBkt.toFixed(2)} KG / BKT`;
-            
-            // Variance Logic
             const variance = ((totalActKg - totalEstKg) / totalEstKg) * 100;
-            const sign = variance > 0 ? "+" : "";
-            varDisplay.innerText = `${sign}${variance.toFixed(2)}%`;
+            varDisplay.innerText = `${variance > 0 ? '+' : ''}${variance.toFixed(2)}%`;
             varDisplay.className = `text-xl font-black ${variance >= 0 ? 'text-emerald-500' : 'text-red-500'}`;
         } else {
             actDisplay.innerText = "PENDING";
             rateDisplay.innerText = "Rate: ---- KG / BKT";
             varDisplay.innerText = "---";
-            varDisplay.className = "text-xl font-black text-slate-300";
         }
-        const yardsFinal = [...new Set(filtered.map(l => l.yard_no))];
-        document.getElementById('activeYardDisplay').innerText = yardsFinal.length > 0 ? yardsFinal.join(' / ') : "---";
+
+        // 4. Update Yard Name Display
+        const yardsInLog = [...new Set(filtered.map(l => l.yard_no))];
+        document.getElementById('activeYardDisplay').innerText = yardsInLog.length > 0 ? yardsInLog.join(' / ') : "---";
+
+        // 5. CALL THE INVENTORY LINK (Eto yung request mo boss)
+        await updateInventoryStats(currentYard, totalEstKg);
 
     } catch (err) {
-        logCont.innerHTML = `<p class="text-center p-10 text-red-400 font-black uppercase text-[9px]">Connection Error: ${err.message}</p>`;
+        console.error(err);
+        logCont.innerHTML = `<p class="p-5 text-red-500 text-[10px]">Error: ${err.message}</p>`;
     }
 }
-        async function triggerFinalize() {
-    const yard = document.getElementById('finalizeYardSelect').value;
+
+// Separate function para malinis tingnan
+async function updateInventoryStats(currentYard, totalEstKg) {
+    try {
+        const { data: delivery, error } = await supabaseClient
+            .from('delivery_logs')
+            .select('supplier_name, coal_kg')
+            .eq('coal_yard_no', currentYard)
+            .is('date_used_up', null) // Kunin yung Active pa
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+        const supplierDisp = document.getElementById('supplierDisplay');
+        const balanceDisp = document.getElementById('remainingBalanceDisplay');
+        const grossDisp = document.getElementById('grossWeightDisplay');
+        const actualInput = document.getElementById('actualWeightInput');
+
+        if (delivery) {
+            const netWeight = delivery.coal_kg || 0;
+            supplierDisp.innerText = delivery.supplier_name;
+            grossDisp.innerText = `NET: ${netWeight.toLocaleString()} KG`;
+            
+            // Formula: Initial Delivery Weight - Estimated Consumption Today
+            const remainingBalance = netWeight - totalEstKg;
+            balanceDisp.innerText = remainingBalance.toLocaleString() + " KG";
+            balanceDisp.className = `text-xl font-black ${remainingBalance < 0 ? 'text-red-500' : 'text-blue-600'}`;
+            
+            // Auto-fill actual input box
+            actualInput.value = netWeight;
+        } else {
+            supplierDisp.innerText = "NO ACTIVE DELIVERY";
+            balanceDisp.innerText = "---";
+            grossDisp.innerText = "NET: ---";
+            actualInput.value = "";
+        }
+    } catch (err) {
+        console.log("Inventory fetch error:", err.message);
+    }
+}
+       async function triggerFinalize() {
+    const selectedYard = document.getElementById('finalizeYardSelect').value;
     const actualWeight = parseFloat(document.getElementById('actualWeightInput').value);
 
-    // 1. Validation: Siguraduhin na may input na weight
+    // 1. Validations
     if (!actualWeight || actualWeight <= 0) {
-        alert("Boss, paki-input naman yung tamang Actual Weight (KG).");
+        alert("Sir, paki-check yung Actual Weight. Hindi pwedeng zero o empty.");
         return;
     }
 
-    // Confirmation para hindi aksidente
-    if (!confirm(`Sigurado ka na ba Sir? I-finalize na natin ang ${yard} sa timbang na ${actualWeight.toLocaleString()} KG?`)) {
+    if (!confirm(`FINALIZATION CONFIRMATION:\nYard: ${selectedYard}\nActual Weight: ${actualWeight.toLocaleString()} KG\n\nI-ma-mark na natin ito as USED UP. Sigurado ka na ba Sir?`)) {
         return;
     }
 
     try {
-        // 2. Hanapin muna lahat ng non-finalized logs para sa yard na ito
-        const { data: logs, error: fetchError } = await supabaseClient
+        // 2. Kunin lahat ng PENDING logs para sa Yard na ito
+        const { data: pendingLogs, error: fetchError } = await supabaseClient
             .from('daily_bucket_logs')
             .select('id, buckets_used')
-            .eq('yard_no', yard)
+            .eq('yard_no', selectedYard)
             .eq('is_finalized', false);
 
         if (fetchError) throw fetchError;
 
-        if (!logs || logs.length === 0) {
-            alert(`Sir, wala nang pending logs para sa ${yard}. Baka finalized na lahat.`);
+        if (!pendingLogs || pendingLogs.length === 0) {
+            alert("Wala nang pending logs para sa yard na ito.");
             return;
         }
 
-        // 3. Compute the Actual Weight per Bucket
-        const totalBuckets = logs.reduce((sum, log) => sum + log.buckets_used, 0);
+        // 3. Compute the Actual Rate
+        const totalBuckets = pendingLogs.reduce((sum, log) => sum + log.buckets_used, 0);
         const kgPerBucketActual = actualWeight / totalBuckets;
 
-        // 4. I-update ang bawat record sa Supabase
-        // Note: Pwede ring bulk update kung marami, pero ito ang pinaka-safe na logic
-        for (const log of logs) {
-            const { error: updateError } = await supabaseClient
+        // 4. Update Logs to FINALIZED
+        for (const log of pendingLogs) {
+            const { error: updateLogError } = await supabaseClient
                 .from('daily_bucket_logs')
                 .update({
                     is_finalized: true,
-                    kg_actual: log.buckets_used * kgPerBucketActual
+                    kg_actual: log.buckets_used * kgPerBucketActual,
+                    bucket_size_used: kgPerBucketActual
                 })
                 .eq('id', log.id);
 
-            if (updateError) throw updateError;
+            if (updateLogError) throw updateLogError;
         }
 
-        alert(`Success! Finalized na ang ${yard}. Bawat bucket ay nag-average ng ${kgPerBucketActual.toFixed(2)} KG.`);
+        // 5. Update DELIVERY_LOGS to CLOSED (USED UP)
+        // Eto yung link sa kabilang table mo boss
+        const { error: deliveryError } = await supabaseClient
+            .from('delivery_logs')
+            .update({ 
+                date_used_up: new Date().toISOString().split('T')[0], // Petsa Ngayon
+                time_used_up: new Date().toLocaleTimeString('it-IT', { hour12: false }) // 24-Hour Time
+            })
+            .eq('coal_yard_no', selectedYard)
+            .is('date_used_up', null); // Hanapin yung active record lang
+
+        if (deliveryError) throw deliveryError;
+
+        alert(`MISSION SUCCESS!\n\n${selectedYard} is now finalized.\nActual Rate: ${kgPerBucketActual.toFixed(2)} KG per bucket.`);
         
-        // 5. Refresh ang Dashboard para makita ang pagbabago
-        document.getElementById('actualWeightInput').value = ''; // Clear input
+        // Refresh Dashboard
+        document.getElementById('actualWeightInput').value = '';
         refreshMasterLog();
 
     } catch (err) {
         console.error(err);
-        alert("May error boss: " + err.message);
+        alert("May aberya boss: " + err.message);
     }
 }
        function login() {
