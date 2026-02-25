@@ -1344,56 +1344,52 @@ function updatePriorityBanner(yardData, standbyLogs) {
     }
 }
 
-async function updateInventoryStats(currentYard, totalEstKg) {
+async function updateInventoryStats(currentYard) {
     try {
-        // 1. Kunin ang pinakabagong record na wala pang 'date_used_up'
-        const { data: delivery, error } = await supabaseClient
+        // 1. Kunin ang active delivery
+        const { data: delivery } = await supabaseClient
             .from('delivery_logs')
-            .select('supplier_name, coal_kg, coal_yard_no')
+            .select('supplier_name, coal_kg')
             .eq('coal_yard_no', currentYard)
             .eq('remarks', 'in use')
-            .is('date_used_up', null) // Ito ang naghahanap ng 'Active' stock
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .maybeSingle(); // Fix for Error 406: returns null instead of error if empty
+            .is('date_used_up', null)
+            .maybeSingle();
 
-        if (error) {
-            console.error("Fetch Error:", error.message);
+        if (!delivery) {
+            document.getElementById('supplierDisplay').innerText = "NO ACTIVE DELIVERY";
+            document.getElementById('remainingBalanceDisplay').innerText = "---";
             return;
         }
 
-        const supplierDisp = document.getElementById('supplierDisplay');
-        const balanceDisp = document.getElementById('remainingBalanceDisplay');
-        const grossDisp = document.getElementById('grossWeightDisplay');
-        const actualInput = document.getElementById('actualWeightInput');
+        // 2. KUNIN ANG LAHAT NG HINDI PA FINALIZED NA BUCKETS (Kahit anong petsa)
+        // Ito ang magpapatakbo ng "Whole Yard" monitoring
+        const { data: allUnfinalized } = await supabaseClient
+            .from('daily_bucket_logs')
+            .select('kg_estimated')
+            .eq('yard_no', currentYard)
+            .eq('is_finalized', false);
 
-        // Siguraduhin nating hindi mag-e-error ang UI updates
-        if (delivery) {
-            const netWeight = parseFloat(delivery.coal_kg) || 0;
-            
-            if(supplierDisp) supplierDisp.innerText = delivery.supplier_name || "N/A";
-            if(grossDisp) grossDisp.innerText = `NET: ${netWeight.toLocaleString()} KG`;
-            
-            // Formula: Initial Stock (coal_kg) - Current Consumption (totalEstKg)
-            const remainingBalance = netWeight - totalEstKg;
-            
-            if(balanceDisp) {
-                balanceDisp.innerText = remainingBalance.toLocaleString() + " KG";
-                balanceDisp.className = `text-xl font-black ${remainingBalance < 0 ? 'text-red-500' : 'text-blue-600'}`;
-            }
-            
-            // Auto-fill the input box for Sir's finalization
-            if(actualInput) actualInput.value = netWeight;
+        // Icompute ang total consumption simula nung naging 'in use' ang yarda
+        const totalConsumedSoFar = allUnfinalized.reduce((sum, log) => sum + (log.kg_estimated || 0), 0);
+        
+        const netWeight = parseFloat(delivery.coal_kg) || 0;
+        const remainingBalance = netWeight - totalConsumedSoFar;
 
-        } else {
-            // Default state kapag walang mahanap na active delivery
-            if(supplierDisp) supplierDisp.innerText = "NO ACTIVE DELIVERY";
-            if(balanceDisp) balanceDisp.innerText = "---";
-            if(grossDisp) grossDisp.innerText = "NET: ---";
-            if(actualInput) actualInput.value = "";
-        }
+        // 3. Update UI
+        document.getElementById('supplierDisplay').innerText = delivery.supplier_name;
+        document.getElementById('grossWeightDisplay').innerText = `NET: ${netWeight.toLocaleString()} KG`;
+        
+        const balDisp = document.getElementById('remainingBalanceDisplay');
+        balDisp.innerText = remainingBalance.toLocaleString() + " KG";
+        
+        // Mag-pula ang text kapag "Over-consumed" na vs Delivery Weight
+        balDisp.className = `text-xl font-black ${remainingBalance < 0 ? 'text-red-500' : 'text-blue-600'}`;
+        
+        // Auto-fill actual input box
+        document.getElementById('actualWeightInput').value = netWeight;
+
     } catch (err) {
-        console.error("System Error:", err.message);
+        console.error("Inventory Error:", err.message);
     }
 }
        async function triggerFinalize() {
