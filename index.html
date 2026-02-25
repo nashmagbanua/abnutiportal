@@ -1346,122 +1346,94 @@ function updatePriorityBanner(yardData, standbyLogs) {
 
 async function updateInventoryStats(currentYard) {
     try {
-        // 1. Kunin ang active delivery
-        const { data: delivery } = await supabaseClient
+        // 1. I-convert ang "CY5" papuntang "5" (String format para match sa JSON)
+        const yardNumberOnly = currentYard.replace("CY", ""); 
+
+        // 2. Kunin ang delivery na "in use" o "active delivery"
+        // base sa pattern niyo, kung hindi 'used up', ito ang active source.
+        const { data: delivery, error } = await supabaseClient
             .from('delivery_logs')
-            .select('supplier_name, coal_kg')
-            .eq('coal_yard_no', currentYard)
-            .eq('remarks', 'in use')
+            .select('supplier_name, coal_kg, remarks')
+            .eq('coal_yard_no', yardNumberOnly) 
+            .eq('remarks', 'active delivery') // Siguraduhin na 'active delivery' ang nilalagay niyo sa remarks
             .is('date_used_up', null)
             .maybeSingle();
 
-        if (!delivery) {
-            document.getElementById('supplierDisplay').innerText = "NO ACTIVE DELIVERY";
-            document.getElementById('remainingBalanceDisplay').innerText = "---";
-            return;
+        if (error) throw error;
+
+        const supplierDisp = document.getElementById('supplierDisplay');
+        const balanceDisp = document.getElementById('remainingBalanceDisplay');
+        const grossDisp = document.getElementById('grossWeightDisplay');
+        const actualInput = document.getElementById('actualWeightInput');
+
+        if (delivery) {
+            // 3. KUNIN LAHAT NG BUCKETS NA HINDI PA FINALIZED (WHOLE YARD LOGIC)
+            const { data: buckets } = await supabaseClient
+                .from('daily_bucket_logs')
+                .select('kg_estimated')
+                .eq('yard_no', currentYard) // Sa bucket logs "CY5" ang format
+                .eq('is_finalized', false);
+
+            const totalConsumed = buckets.reduce((sum, b) => sum + (parseFloat(b.kg_estimated) || 0), 0);
+            const initialNetWeight = parseFloat(delivery.coal_kg) || 0;
+            const remainingBalance = initialNetWeight - totalConsumed;
+
+            // 4. DISPLAY SA UI
+            if(supplierDisp) supplierDisp.innerText = delivery.supplier_name;
+            if(grossDisp) grossDisp.innerText = `NET: ${initialNetWeight.toLocaleString()} KG`;
+            
+            if(balanceDisp) {
+                balanceDisp.innerText = remainingBalance.toLocaleString() + " KG";
+                balanceDisp.className = `text-xl font-black ${remainingBalance < 0 ? 'text-red-500' : 'text-blue-600'}`;
+            }
+            
+            // Auto-fill actual input para sa Finalize button
+            if(actualInput) actualInput.value = initialNetWeight;
+
+        } else {
+            if(supplierDisp) supplierDisp.innerText = "NO ACTIVE DELIVERY";
+            if(balanceDisp) balanceDisp.innerText = "---";
+            if(grossDisp) grossDisp.innerText = "NET: ---";
+            if(actualInput) actualInput.value = "";
         }
-
-        // 2. KUNIN ANG LAHAT NG HINDI PA FINALIZED NA BUCKETS (Kahit anong petsa)
-        // Ito ang magpapatakbo ng "Whole Yard" monitoring
-        const { data: allUnfinalized } = await supabaseClient
-            .from('daily_bucket_logs')
-            .select('kg_estimated')
-            .eq('yard_no', currentYard)
-            .eq('is_finalized', false);
-
-        // Icompute ang total consumption simula nung naging 'in use' ang yarda
-        const totalConsumedSoFar = allUnfinalized.reduce((sum, log) => sum + (log.kg_estimated || 0), 0);
-        
-        const netWeight = parseFloat(delivery.coal_kg) || 0;
-        const remainingBalance = netWeight - totalConsumedSoFar;
-
-        // 3. Update UI
-        document.getElementById('supplierDisplay').innerText = delivery.supplier_name;
-        document.getElementById('grossWeightDisplay').innerText = `NET: ${netWeight.toLocaleString()} KG`;
-        
-        const balDisp = document.getElementById('remainingBalanceDisplay');
-        balDisp.innerText = remainingBalance.toLocaleString() + " KG";
-        
-        // Mag-pula ang text kapag "Over-consumed" na vs Delivery Weight
-        balDisp.className = `text-xl font-black ${remainingBalance < 0 ? 'text-red-500' : 'text-blue-600'}`;
-        
-        // Auto-fill actual input box
-        document.getElementById('actualWeightInput').value = netWeight;
-
     } catch (err) {
-        console.error("Inventory Error:", err.message);
+        console.error("Inventory Link Error:", err.message);
     }
 }
-       async function triggerFinalize() {
+      async function triggerFinalize() {
     const selectedYard = document.getElementById('finalizeYardSelect').value;
+    const yardNumberOnly = selectedYard.replace("CY", ""); 
     const actualWeight = parseFloat(document.getElementById('actualWeightInput').value);
 
-    // 1. Validations
     if (!actualWeight || actualWeight <= 0) {
-        alert("Sir, paki-check yung Actual Weight. Hindi pwedeng zero o empty.");
+        alert("Boss, paki-input yung Actual Weight.");
         return;
     }
 
-    if (!confirm(`FINALIZATION CONFIRMATION:\nYard: ${selectedYard}\nActual Weight: ${actualWeight.toLocaleString()} KG\n\nI-ma-mark na natin ito as USED UP. Sigurado ka na ba Sir?`)) {
-        return;
-    }
+    if (!confirm(`Finalize ${selectedYard}? Ito ay magiging 'used up' na sa record.`)) return;
 
     try {
-        // 2. Kunin lahat ng PENDING logs para sa Yard na ito
-        const { data: pendingLogs, error: fetchError } = await supabaseClient
-            .from('daily_bucket_logs')
-            .select('id, buckets_used')
-            .eq('yard_no', selectedYard)
-            .eq('is_finalized', false);
+        // [Part A] I-update ang Bucket Logs to is_finalized: true
+        // (Dito mo ilalagay yung loop mo for daily_bucket_logs update)
 
-        if (fetchError) throw fetchError;
-
-        if (!pendingLogs || pendingLogs.length === 0) {
-            alert("Wala nang pending logs para sa yard na ito.");
-            return;
-        }
-
-        // 3. Compute the Actual Rate
-        const totalBuckets = pendingLogs.reduce((sum, log) => sum + log.buckets_used, 0);
-        const kgPerBucketActual = actualWeight / totalBuckets;
-
-        // 4. Update Logs to FINALIZED
-        for (const log of pendingLogs) {
-            const { error: updateLogError } = await supabaseClient
-                .from('daily_bucket_logs')
-                .update({
-                    is_finalized: true,
-                    kg_actual: log.buckets_used * kgPerBucketActual,
-                    bucket_size_used: kgPerBucketActual
-                })
-                .eq('id', log.id);
-
-            if (updateLogError) throw updateLogError;
-        }
-
-        // 5. Update DELIVERY_LOGS to CLOSED (USED UP)
-        // Eto yung link sa kabilang table mo boss
+        // [Part B] I-update ang Delivery Log to 'used up'
         const { error: deliveryError } = await supabaseClient
-    .from('delivery_logs')
-    .update({ 
-        date_used_up: new Date().toISOString().split('T')[0],
-        time_used_up: new Date().toLocaleTimeString('it-IT', { hour12: false }),
-        remarks: 'used up' // Idagdag natin ito para maging 'used up' sa database
-    })
-    .eq('coal_yard_no', selectedYard)
-    .eq('remarks', 'in use'); // Siguraduhin na yung kasalukuyang 'in use' ang isasara
+            .from('delivery_logs')
+            .update({ 
+                date_used_up: new Date().toISOString().split('T')[0], // YYYY-MM-DD format gaya ng data mo
+                time_used_up: new Date().toLocaleTimeString('it-IT', { hour12: false }), // HH:mm:ss format
+                remarks: 'used up' // Lowercase para match sa history niyo
+            })
+            .eq('coal_yard_no', yardNumberOnly)
+            .eq('remarks', 'active delivery')
+            .is('date_used_up', null);
 
         if (deliveryError) throw deliveryError;
 
-        alert(`MISSION SUCCESS!\n\n${selectedYard} is now finalized.\nActual Rate: ${kgPerBucketActual.toFixed(2)} KG per bucket.`);
-        
-        // Refresh Dashboard
-        document.getElementById('actualWeightInput').value = '';
+        alert("Mission Success! Record is now marked as 'used up'.");
         refreshMasterLog();
-
     } catch (err) {
-        console.error(err);
-        alert("May aberya boss: " + err.message);
+        alert("Error: " + err.message);
     }
 }
        function login() {
