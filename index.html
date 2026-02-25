@@ -1138,6 +1138,17 @@ function updatePriorityBanner(yardData, standbyLogs) {
         </div>
     `;
 }
+        const yards = ["CY1", "CY2", "CY3", "CY4", "CY5", "CY6", "CY7", "CY8", "CY9"];
+        async function openCoalDumping() {
+    updateSidebarActive(5);
+    const content = document.getElementById('cont');
+    
+    // Initial Layout with Stats and Tools
+    content.innerHTML = `
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-black text-slate-800">Coal Dumping (Consumption)</h1>
+            <div id="syncIndicator" class="text-[10px] font-bold text-emerald-500 uppercase italic">● Live Cloud Connection</div>
+        </div>
         async function openCoalDumping() {
     updateSidebarActive(5);
     const content = document.getElementById('cont');
