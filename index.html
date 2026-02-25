@@ -1344,43 +1344,56 @@ function updatePriorityBanner(yardData, standbyLogs) {
     }
 }
 
-// Separate function para malinis tingnan
 async function updateInventoryStats(currentYard, totalEstKg) {
     try {
+        // 1. Kunin ang pinakabagong record na wala pang 'date_used_up'
         const { data: delivery, error } = await supabaseClient
             .from('delivery_logs')
-            .select('supplier_name, coal_kg')
+            .select('supplier_name, coal_kg, coal_yard_no')
             .eq('coal_yard_no', currentYard)
-            .is('date_used_up', null) // Kunin yung Active pa
+            .eq('remarks', 'in use')
+            .is('date_used_up', null) // Ito ang naghahanap ng 'Active' stock
             .order('created_at', { ascending: false })
             .limit(1)
-            .single();
+            .maybeSingle(); // Fix for Error 406: returns null instead of error if empty
+
+        if (error) {
+            console.error("Fetch Error:", error.message);
+            return;
+        }
 
         const supplierDisp = document.getElementById('supplierDisplay');
         const balanceDisp = document.getElementById('remainingBalanceDisplay');
         const grossDisp = document.getElementById('grossWeightDisplay');
         const actualInput = document.getElementById('actualWeightInput');
 
+        // Siguraduhin nating hindi mag-e-error ang UI updates
         if (delivery) {
-            const netWeight = delivery.coal_kg || 0;
-            supplierDisp.innerText = delivery.supplier_name;
-            grossDisp.innerText = `NET: ${netWeight.toLocaleString()} KG`;
+            const netWeight = parseFloat(delivery.coal_kg) || 0;
             
-            // Formula: Initial Delivery Weight - Estimated Consumption Today
+            if(supplierDisp) supplierDisp.innerText = delivery.supplier_name || "N/A";
+            if(grossDisp) grossDisp.innerText = `NET: ${netWeight.toLocaleString()} KG`;
+            
+            // Formula: Initial Stock (coal_kg) - Current Consumption (totalEstKg)
             const remainingBalance = netWeight - totalEstKg;
-            balanceDisp.innerText = remainingBalance.toLocaleString() + " KG";
-            balanceDisp.className = `text-xl font-black ${remainingBalance < 0 ? 'text-red-500' : 'text-blue-600'}`;
             
-            // Auto-fill actual input box
-            actualInput.value = netWeight;
+            if(balanceDisp) {
+                balanceDisp.innerText = remainingBalance.toLocaleString() + " KG";
+                balanceDisp.className = `text-xl font-black ${remainingBalance < 0 ? 'text-red-500' : 'text-blue-600'}`;
+            }
+            
+            // Auto-fill the input box for Sir's finalization
+            if(actualInput) actualInput.value = netWeight;
+
         } else {
-            supplierDisp.innerText = "NO ACTIVE DELIVERY";
-            balanceDisp.innerText = "---";
-            grossDisp.innerText = "NET: ---";
-            actualInput.value = "";
+            // Default state kapag walang mahanap na active delivery
+            if(supplierDisp) supplierDisp.innerText = "NO ACTIVE DELIVERY";
+            if(balanceDisp) balanceDisp.innerText = "---";
+            if(grossDisp) grossDisp.innerText = "NET: ---";
+            if(actualInput) actualInput.value = "";
         }
     } catch (err) {
-        console.log("Inventory fetch error:", err.message);
+        console.error("System Error:", err.message);
     }
 }
        async function triggerFinalize() {
@@ -1437,9 +1450,10 @@ async function updateInventoryStats(currentYard, totalEstKg) {
             .update({ 
                 date_used_up: new Date().toISOString().split('T')[0], // Petsa Ngayon
                 time_used_up: new Date().toLocaleTimeString('it-IT', { hour12: false }) // 24-Hour Time
+                remarks: 'used up'
             })
             .eq('coal_yard_no', selectedYard)
-            .is('date_used_up', null); // Hanapin yung active record lang
+            .eq('remarks', 'in use'); // Siguraduhin na yung kasalukuyang 'in use' ang isasara
 
         if (deliveryError) throw deliveryError;
 
