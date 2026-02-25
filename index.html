@@ -1216,9 +1216,9 @@ function updatePriorityBanner(yardData, standbyLogs) {
                         <div class="flex gap-2">
                             <input type="date" id="archiveDateFilter" onchange="refreshMasterLog()" class="text-[10px] font-black bg-slate-50 border-none rounded-lg p-2 outline-none">
                             <select id="shiftFilter" onchange="refreshMasterLog()" class="text-[10px] font-black bg-slate-50 border-none rounded-lg p-2 outline-none">
-                                <option value="DAY">DAY SHIFT</option>
-                                <option value="NIGHT">NIGHT SHIFT</option>
-                            </select>
+                            <option value="DAY">DAY SHIFT</option>
+                            <option value="NIGHT">NIGHT SHIFT</option>
+                            <option value="ALL">FULL 24 HOURS</option> </select>
                         </div>
                     </div>
                     <div id="masterLogContent" class="overflow-x-auto">
@@ -1249,11 +1249,15 @@ function updatePriorityBanner(yardData, standbyLogs) {
 
         if (error) throw error;
 
-        // 1. Filter muna
-        const filtered = logs.filter(l => {
-            const hr = parseInt(l.time_slot.split(':')[0]);
-            return shift === 'DAY' ? (hr >= 6 && hr <= 17) : (hr >= 18 || hr < 6);
-        });
+        // fillter muna refreshMasterLog function:
+const filtered = logs.filter(l => {
+    // 1. Kung ALL ang pinili, ipakita lahat (24 Hours)
+    if (shift === 'ALL') return true; 
+
+    // 2. Kung hindi ALL, gamitin ang dating Shift Logic
+    const hr = parseInt(l.time_slot.split(':')[0]);
+    return shift === 'DAY' ? (hr >= 6 && hr <= 17) : (hr >= 18 || hr < 6);
+});
 
         // 2. I-define ang variables
         let totalBkt = 0;
