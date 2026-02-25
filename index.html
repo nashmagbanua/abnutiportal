@@ -1355,7 +1355,7 @@ async function updateInventoryStats(currentYard) {
             .from('delivery_logs')
             .select('supplier_name, coal_kg, remarks')
             .eq('coal_yard_no', yardNumberOnly) 
-            .eq('remarks', 'active delivery') // Siguraduhin na 'active delivery' ang nilalagay niyo sa remarks
+            .eq('remarks', 'in use') // Siguraduhin na 'active delivery' ang nilalagay niyo sa remarks
             .is('date_used_up', null)
             .maybeSingle();
 
@@ -1435,7 +1435,7 @@ async function updateInventoryStats(currentYard) {
                 remarks: 'used up'
             })
             .eq('coal_yard_no', yardNumberOnly)
-            .eq('remarks', 'active delivery')
+            .eq('remarks', 'in use')
             .is('date_used_up', null);
 
         if (deliveryError) throw deliveryError;
