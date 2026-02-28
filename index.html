@@ -359,10 +359,18 @@
      // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
-     (function checkAccess() {
+   (function checkAccess() {
     const role = localStorage.getItem('userRole');
-    // Kung hindi supervisor, itapon pabalik sa login.html
-    if (!role || role.toLowerCase().trim() !== 'supervisor') {
+
+    if (!role) {
+        window.location.replace("login.html");
+        return;
+    }
+
+    // allow both supervisor and admin
+    const allowedRoles = ['supervisor', 'admin'];
+
+    if (!allowedRoles.includes(role.toLowerCase().trim())) {
         window.location.replace("login.html");
     }
 })();
