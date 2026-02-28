@@ -398,14 +398,17 @@
     if(!id || !pass) return alert("Pakisulat ang ID at Password");
 
     // 1. EMERGENCY BYPASS
-    if (id === "090909" && pass === "090909") {
-        localStorage.setItem('userName', "System Admin");
-        localStorage.setItem('userRole', "supervisor");
-        
-        // Mag-wait ng konti para siguradong "baon" na ang data sa browser
-        setTimeout(() => { window.location.href = "index.html"; }, 150);
-        return;
-    }
+   if (id === "090909" && pass === "090909") {
+    localStorage.setItem('userCode', id);
+    localStorage.setItem('userName', "System Admin");
+    localStorage.setItem('userRole', "supervisor");
+    localStorage.setItem('userAvatar', "avatar1.svg"); // or default avatar
+    
+    setTimeout(() => { 
+        window.location.href = "index.html"; 
+    }, 150);
+    return;
+}
 
     // 2. DATABASE LOGIN
     const { data, error } = await supabaseClient
