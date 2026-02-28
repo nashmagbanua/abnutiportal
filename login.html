@@ -342,7 +342,12 @@
     const SB_URL = "https://qbeacrpoyfacgmbzxjcu.supabase.co";
     const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFiZWFjcnBveWZhY2dtYnp4amN1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2NTM5NTIsImV4cCI6MjA2NDIyOTk1Mn0.6kfxKLJxidW4BcqsMJte61AtzydrTW-1ZJIJytiUBt4";
     const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
-
+    function setSession(id, name, role, avatar) {
+    localStorage.setItem('userCode', id);
+    localStorage.setItem('userName', name);
+    localStorage.setItem('userRole', role);
+    localStorage.setItem('userAvatar', avatar);
+}
     // NAVBAR EFFECT
     window.addEventListener('scroll', () => {
         const nav = document.getElementById('navbar');
