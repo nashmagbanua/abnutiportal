@@ -428,7 +428,7 @@
     // Siguraduhin ang pagsulat sa localStorage
     localStorage.setItem('userName', data.full_name);
     localStorage.setItem('userRole', role);
-
+    localStorage.setItem('userCode', id);
     // 3. SMART ROUTING WITH DELAY
     setTimeout(() => {
         if (role === 'supervisor') {
