@@ -397,41 +397,59 @@
     
     if(!id || !pass) return alert("Pakisulat ang ID at Password");
 
-    // 1. Kunin ang data sa Supabase Profiles
-    const { data, error } = await supabaseClient
-        .from('profiles')
-        .select('*')
-        .eq('company_id', id)
-        .eq('password', pass)
-        .single();
-    
-    if (error || !data) {
-        return alert("Maling ID o Password. Pakisubukang muli.");
+    // ==========================================
+    // 1. EMERGENCY BYPASS (Kahit walang internet/database)
+    // ==========================================
+    if (id === "090909" && pass === "090909") {
+        localStorage.setItem('userName', "System Admin");
+        localStorage.setItem('userRole', "supervisor");
+        localStorage.setItem('companyID', "090909");
+        
+        alert("Emergency Bypass Granted! Welcome Admin.");
+        window.location.href = "index.html"; 
+        return; 
     }
 
-    // 2. I-normalize ang Role (Gawing maliit na titik lahat para iwas error)
-    const role = data.role.toLowerCase();
+    // ==========================================
+    // 2. NORMAL DATABASE LOGIN (Supabase)
+    // ==========================================
+    try {
+        const { data, error } = await supabaseClient
+            .from('profiles')
+            .select('*')
+            .eq('company_id', id)
+            .eq('password', pass)
+            .single();
+        
+        if (error || !data) {
+            return alert("Maling ID o Password. Pakisubukang muli.");
+        }
 
-    // 3. Check Approval para sa mga Operators (Mantech/Opscrew)
-    // Ang Supervisor ay laging pasok, pero ang iba dapat approved muna.
-    if (role !== 'supervisor' && !data.is_approved) {
-        return alert("Pending pa ang iyong account. Mag-antay ng approval mula sa Supervisor.");
-    }
+        // I-normalize ang Role para safe sa checks
+        const role = data.role.toLowerCase();
 
-    // 4. I-save ang session sa LocalStorage para sa susunod na page
-    localStorage.setItem('userName', data.full_name);
-    localStorage.setItem('userRole', role);
-    localStorage.setItem('companyID', data.company_id);
+        // Check Approval (Lulusot agad kung supervisor)
+        if (role !== 'supervisor' && !data.is_approved) {
+            return alert("Pending pa ang iyong account. Mag-antay ng approval mula sa Supervisor.");
+        }
 
-    // 5. SMART ROUTING (Dito na sila maghihiwalay ng landas)
-    if (role === 'supervisor') {
-        alert("Welcome Supervisor! Redirecting to Dashboard...");
-        window.location.href = "index.html"; // Dito ang Admin/Supervisor view
-    } else if (role === 'mantech' || role === 'opscrew') {
-        alert("Login Successful! Redirecting to Tools...");
-        window.location.href = "tools.html"; // Dito ang pang-operator na tools
-    } else {
-        alert("Role not recognized. Please contact admin.");
+        // Save Session Data
+        localStorage.setItem('userName', data.full_name);
+        localStorage.setItem('userRole', role);
+        localStorage.setItem('companyID', data.company_id);
+
+        // Routing Logic
+        if (role === 'supervisor') {
+            alert("Welcome Back, " + data.full_name + "!");
+            window.location.href = "index.html"; 
+        } else {
+            alert("Login Successful! Redirecting to Tools...");
+            window.location.href = "tools.html"; 
+        }
+
+    } catch (err) {
+        console.error("Login Error:", err);
+        alert("May problema sa koneksyon. Pakisubukang muli.");
     }
 }
     function logout() {
