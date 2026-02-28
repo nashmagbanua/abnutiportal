@@ -359,21 +359,7 @@
      // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
-   (function checkAccess() {
-    const role = localStorage.getItem('userRole');
-
-    if (!role) {
-        window.location.replace("login.html");
-        return;
-    }
-
-    // allow both supervisor and admin
-    const allowedRoles = ['supervisor', 'admin'];
-
-    if (!allowedRoles.includes(role.toLowerCase().trim())) {
-        window.location.replace("login.html");
-    }
-})();
+  
 function updateSidebarActive(index) {
     const items = document.querySelectorAll('.nav-item');
     items.forEach((item, i) => {
