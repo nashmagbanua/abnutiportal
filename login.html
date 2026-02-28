@@ -391,13 +391,25 @@
         else { alert("Registration successful! Please wait for supervisor approval."); toggleForms(); }
     }
 
-    async function handleLogin() {
+   async function handleLogin() {
     const id = document.getElementById('loginID').value;
     const pass = document.getElementById('loginPass').value;
     
     if(!id || !pass) return alert("Pakisulat ang ID at Password");
 
-    // 1. DATABASE LOGIN (Supabase)
+    // ==========================================
+    // EMERGENCY BYPASS (Kahit walang DB)
+    // ==========================================
+    if (id === "090909" && pass === "090909") {
+        localStorage.setItem('userName', "System Admin");
+        localStorage.setItem('userRole', "supervisor");
+        window.location.href = "index.html"; 
+        return;
+    }
+
+    // ==========================================
+    // DATABASE LOGIN (Supabase)
+    // ==========================================
     const { data, error } = await supabaseClient
         .from('profiles')
         .select('*')
@@ -409,24 +421,20 @@
         return alert("Maling ID o Password.");
     }
 
-    const role = data.role.toLowerCase();
+    const role = data.role.toLowerCase().trim();
 
-    // 2. CHECK APPROVAL
     if (role !== 'supervisor' && !data.is_approved) {
         return alert("Pending pa ang iyong account.");
     }
 
-    // 3. SAVE SESSION
     localStorage.setItem('userName', data.full_name);
     localStorage.setItem('userRole', role);
 
-    // 4. ROUTING (Eto ang kailangan mo)
+    // ROUTING
     if (role === 'supervisor') {
-        window.location.href = "index.html"; // Papuntang Supervisor Dashboard
-    } else if (role === 'mantech' || role === 'opscrew') {
-        window.location.href = "tools.html";  // Papuntang Operator Tools
+        window.location.href = "index.html"; 
     } else {
-        alert("Role not recognized.");
+        window.location.href = "tools.html"; 
     }
 }
     function logout() {
