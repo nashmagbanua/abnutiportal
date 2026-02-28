@@ -290,18 +290,32 @@
 @media (max-width: 768px) {
     #sidebar {
         transform: translateX(-100%); 
-        position: fixed; /* Siguraduhin na fixed ito sa mobile */
+        position: fixed; 
         top: 0;
         left: 0;
         height: 100vh;
         width: var(--sidebar-width) !important;
         transition: transform 0.3s ease-in-out;
-        z-index: 2005; /* Dapat mas mataas sa lahat */
+        z-index: 2005; 
+        background: var(--primary) !important; /* Siguradong solid ang kulay */
     }
     
-    /* Ito ang dapat na pangalan para sa JS toggle */
     #sidebar.active {
         transform: translateX(0); 
+    }
+
+    /* --- ETO YUNG FIX PARA SA NAWAWALANG TEXT --- */
+    #sidebar.active .nav-item span, 
+    #sidebar.active .sidebar-brand span {
+        display: inline-block !important; 
+        opacity: 1 !important;
+        visibility: visible !important;
+        width: auto !important;
+    }
+
+    /* Force width para hindi mag-shrink */
+    #sidebar.collapsed {
+        width: var(--sidebar-width) !important;
     }
 
     .content {
@@ -310,7 +324,7 @@
         width: 100%;
     }
 
-    .mobile-nav-btn { /* Gamitin natin ang class name sa HTML mo kanina */
+    .mobile-nav-btn {
         display: flex !important;
         position: fixed;
         bottom: 20px;
@@ -1895,31 +1909,41 @@ async function fetchDashboardData(yDate) {
     localStorage.removeItem('isLoggedIn'); // Kung ginagamit mo pa ito
     window.location.href = 'login.html';
 }
-        // PAG-CHECK KUNG NAKA-LOG IN NA DATI
 window.onload = function() {
-    // 1. Kunin ang data mula sa localStorage (na sinave ng login.html)
+    // --- DAGDAG ITO: AUTO-CLOSE SIDEBAR SA MOBILE ---
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                const sidebar = document.getElementById('sidebar');
+                if (sidebar.classList.contains('active')) {
+                    toggleSidebarMobile(); // Isasara ang sidebar pagkapili ng menu
+                }
+            }
+        });
+    });
+
+    // 1. Kunin ang data mula sa localStorage
     const userCode = localStorage.getItem('userCode');
     const userName = localStorage.getItem('userName');
     const userRole = localStorage.getItem('userRole');
     const userAvatar = localStorage.getItem('userAvatar');
 
-    // 2. Security Check: Kung walang data, balik sa login page
-    if (!userCode) {
+    // 2. Security Check (Dagdagan natin ng userRole check para safe si Admin)
+    if (!userCode || userRole !== 'supervisor') {
         window.location.href = 'login.html';
         return;
     }
 
-    // 3. I-display ang User Info (Pangalan, Role, at Avatar)
-    // Hindi na natin kailangan ang db[userCode] dito!
+    // 3. I-display ang User Info
     if (document.getElementById('pName')) document.getElementById('pName').innerText = userName;
     if (document.getElementById('pRole')) document.getElementById('pRole').innerText = userRole;
     
     if (document.getElementById('profileBtn')) {
-        const profilePath = 'assets/' + userAvatar;
+        const profilePath = 'assets/' + (userAvatar || 'visor.svg'); // Default avatar kung empty
         document.getElementById('profileBtn').style.backgroundImage = `url('${profilePath}')`;
     }
 
-    // 4. Supabase Realtime Subscription (Mananatili ito)
+    // 4. Supabase Realtime Subscription
     const gpmSubscription = supabaseClient
         .channel('custom-all-channel')
         .on('postgres_changes', 
@@ -1932,7 +1956,7 @@ window.onload = function() {
         )
         .subscribe();
 
-    // 5. Idle Timer
+    // 5. Idle Timer (30 minutes)
     let idleTime = 0;
     document.onmousemove = () => idleTime = 0;
     document.onkeypress = () => idleTime = 0;
