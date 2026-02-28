@@ -392,21 +392,52 @@
     }
 
     async function handleLogin() {
-        const id = document.getElementById('loginID').value;
-        const pass = document.getElementById('loginPass').value;
-        if(!id || !pass) return alert("Enter ID and Password");
+    const id = document.getElementById('loginID').value;
+    const pass = document.getElementById('loginPass').value;
+    
+    if(!id || !pass) return alert("Pakisulat ang ID at Password");
 
-        const { data, error } = await supabaseClient.from('profiles').select('*').eq('company_id', id).eq('password', pass).single();
-        
-        if (data) {
-            if (!data.is_approved) return alert("Your account is pending approval from the supervisor.");
-            localStorage.setItem('userName', data.full_name);
-            localStorage.setItem('userRole', data.role);
-            window.location.href = (data.role === 'supervisor') ? "index.html" : "tools.html";
-        } else {
-            alert("Invalid credentials. Please try again.");
-        }
+    // 1. Kunin ang data sa Supabase Profiles
+    const { data, error } = await supabaseClient
+        .from('profiles')
+        .select('*')
+        .eq('company_id', id)
+        .eq('password', pass)
+        .single();
+    
+    if (error || !data) {
+        return alert("Maling ID o Password. Pakisubukang muli.");
     }
+
+    // 2. I-normalize ang Role (Gawing maliit na titik lahat para iwas error)
+    const role = data.role.toLowerCase();
+
+    // 3. Check Approval para sa mga Operators (Mantech/Opscrew)
+    // Ang Supervisor ay laging pasok, pero ang iba dapat approved muna.
+    if (role !== 'supervisor' && !data.is_approved) {
+        return alert("Pending pa ang iyong account. Mag-antay ng approval mula sa Supervisor.");
+    }
+
+    // 4. I-save ang session sa LocalStorage para sa susunod na page
+    localStorage.setItem('userName', data.full_name);
+    localStorage.setItem('userRole', role);
+    localStorage.setItem('companyID', data.company_id);
+
+    // 5. SMART ROUTING (Dito na sila maghihiwalay ng landas)
+    if (role === 'supervisor') {
+        alert("Welcome Supervisor! Redirecting to Dashboard...");
+        window.location.href = "index.html"; // Dito ang Admin/Supervisor view
+    } else if (role === 'mantech' || role === 'opscrew') {
+        alert("Login Successful! Redirecting to Tools...");
+        window.location.href = "tools.html"; // Dito ang pang-operator na tools
+    } else {
+        alert("Role not recognized. Please contact admin.");
+    }
+}
+    function logout() {
+    localStorage.clear();
+    window.location.href = "login.html"; 
+}
 </script>
 </body>
 </html>
