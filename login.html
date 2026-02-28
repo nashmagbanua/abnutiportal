@@ -397,59 +397,36 @@
     
     if(!id || !pass) return alert("Pakisulat ang ID at Password");
 
-    // ==========================================
-    // 1. EMERGENCY BYPASS (Kahit walang internet/database)
-    // ==========================================
-    if (id === "090909" && pass === "090909") {
-        localStorage.setItem('userName', "System Admin");
-        localStorage.setItem('userRole', "supervisor");
-        localStorage.setItem('companyID', "090909");
-        
-        alert("Emergency Bypass Granted! Welcome Admin.");
-        window.location.href = "index.html"; 
-        return; 
+    // 1. DATABASE LOGIN (Supabase)
+    const { data, error } = await supabaseClient
+        .from('profiles')
+        .select('*')
+        .eq('company_id', id)
+        .eq('password', pass)
+        .single();
+    
+    if (error || !data) {
+        return alert("Maling ID o Password.");
     }
 
-    // ==========================================
-    // 2. NORMAL DATABASE LOGIN (Supabase)
-    // ==========================================
-    try {
-        const { data, error } = await supabaseClient
-            .from('profiles')
-            .select('*')
-            .eq('company_id', id)
-            .eq('password', pass)
-            .single();
-        
-        if (error || !data) {
-            return alert("Maling ID o Password. Pakisubukang muli.");
-        }
+    const role = data.role.toLowerCase();
 
-        // I-normalize ang Role para safe sa checks
-        const role = data.role.toLowerCase();
+    // 2. CHECK APPROVAL
+    if (role !== 'supervisor' && !data.is_approved) {
+        return alert("Pending pa ang iyong account.");
+    }
 
-        // Check Approval (Lulusot agad kung supervisor)
-        if (role !== 'supervisor' && !data.is_approved) {
-            return alert("Pending pa ang iyong account. Mag-antay ng approval mula sa Supervisor.");
-        }
+    // 3. SAVE SESSION
+    localStorage.setItem('userName', data.full_name);
+    localStorage.setItem('userRole', role);
 
-        // Save Session Data
-        localStorage.setItem('userName', data.full_name);
-        localStorage.setItem('userRole', role);
-        localStorage.setItem('companyID', data.company_id);
-
-        // Routing Logic
-        if (role === 'supervisor') {
-            alert("Welcome Back, " + data.full_name + "!");
-            window.location.href = "index.html"; 
-        } else {
-            alert("Login Successful! Redirecting to Tools...");
-            window.location.href = "tools.html"; 
-        }
-
-    } catch (err) {
-        console.error("Login Error:", err);
-        alert("May problema sa koneksyon. Pakisubukang muli.");
+    // 4. ROUTING (Eto ang kailangan mo)
+    if (role === 'supervisor') {
+        window.location.href = "index.html"; // Papuntang Supervisor Dashboard
+    } else if (role === 'mantech' || role === 'opscrew') {
+        window.location.href = "tools.html";  // Papuntang Operator Tools
+    } else {
+        alert("Role not recognized.");
     }
 }
     function logout() {
