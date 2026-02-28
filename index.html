@@ -359,24 +359,19 @@
      // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
-       // 4. IMPROVED SECURITY CHECK (Para sa index.html lamang)
-    (function checkAccess() {
-        const role = localStorage.getItem('userRole');
-        const name = localStorage.getItem('userName');
+      // SECURITY CHECK
+(function checkAccess() {
+    const role = localStorage.getItem('userRole');
+    if (!role || role.toLowerCase() !== 'supervisor') {
+        window.location.href = "login.html"; // Kick out kung hindi supervisor
+    }
+})();
 
-        // A. Kung hindi nakalogin (walang name/role), balik sa Login Page
-        if (!role || !name) {
-            window.location.href = "login.html"; // Palitan mo kung ano ang filename ng login page mo
-            return;
-        }
-
-        // B. Kung nakalogin pero HINDI supervisor, itapon sa tools.html
-        // Ginawa nating .toLowerCase() para kahit "Supervisor" o "supervisor" sa DB, gagana.
-        if (role.toLowerCase() !== 'supervisor') {
-            alert("Access Denied! Para lamang ito sa mga Supervisor.");
-            window.location.href = "tools.html"; 
-        }
-    })();
+// LOGOUT FUNCTION
+function handleLogout() {
+    localStorage.clear(); // Burahin ang session
+    window.location.href = "login.html"; // Balik sa login.html
+}
 function updateSidebarActive(index) {
     const items = document.querySelectorAll('.nav-item');
     items.forEach((item, i) => {
