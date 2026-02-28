@@ -286,9 +286,53 @@
         page-break-inside: avoid !important;
     }
 }
+/* MOBILE SIDEBAR FIXES */
+@media (max-width: 768px) {
+    #sidebar {
+        transform: translateX(-100%); 
+        position: fixed; /* Siguraduhin na fixed ito sa mobile */
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: var(--sidebar-width) !important;
+        transition: transform 0.3s ease-in-out;
+        z-index: 2005; /* Dapat mas mataas sa lahat */
+    }
+    
+    /* Ito ang dapat na pangalan para sa JS toggle */
+    #sidebar.active {
+        transform: translateX(0); 
+    }
+
+    .content {
+        margin-left: 0 !important; 
+        padding: 15px;
+        width: 100%;
+    }
+
+    .mobile-nav-btn { /* Gamitin natin ang class name sa HTML mo kanina */
+        display: flex !important;
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 55px;
+        height: 55px;
+        background: var(--accent);
+        color: white;
+        border-radius: 50%;
+        justify-content: center;
+        align-items: center;
+        z-index: 2100;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        cursor: pointer;
+    }
+}
 </style>
 </head>
 <body>
+    <div class="mobile-nav-btn" onclick="toggleSidebarMobile()">
+    <i class="fas fa-bars"></i>
+</div>
 <div id="main-app">
         <div id="sidebar">
             <div class="sidebar-brand" onclick="toggleSide()">
@@ -2113,6 +2157,20 @@ async function deleteUser(id) {
             alert("User deleted successfully.");
             fetchUsers(); // I-refresh ang table para mawala na siya sa listahan
         }
+    }
+}
+        function toggleSidebarMobile() {
+    const sidebar = document.getElementById('sidebar');
+    const burgerIcon = document.querySelector('.mobile-nav-btn i');
+    
+    // I-toggle ang 'active' class
+    sidebar.classList.toggle('active');
+    
+    // Palitan ang icon (Bars to X)
+    if (sidebar.classList.contains('active')) {
+        burgerIcon.classList.replace('fa-bars', 'fa-times');
+    } else {
+        burgerIcon.classList.replace('fa-times', 'fa-bars');
     }
 }
     </script>
