@@ -359,19 +359,26 @@
      // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
-      // SECURITY CHECK
+     // ILAGAY ITO SA PINAKATAAS NG <SCRIPT> TAG SA INDEX.HTML
 (function checkAccess() {
     const role = localStorage.getItem('userRole');
-    if (!role || role.toLowerCase() !== 'supervisor') {
-        window.location.href = "login.html"; // Kick out kung hindi supervisor
+    const name = localStorage.getItem('userName');
+
+    // 1. Debugging (Pasilip sa Console)
+    console.log("Checking credentials...");
+    console.log("Role found:", role);
+    console.log("Name found:", name);
+
+    // 2. Ang Logic:
+    // Kung walang ROLE, o walang NAME, o ang ROLE ay hindi 'supervisor'
+    if (!role || !name || role.toLowerCase().trim() !== 'supervisor') {
+        console.warn("Access Denied. Redirecting to login...");
+        // Gagamit tayo ng window.location.replace para hindi maka-back
+        window.location.replace("login.html"); 
+    } else {
+        console.log("Access Granted. Welcome, Supervisor!");
     }
 })();
-
-// LOGOUT FUNCTION
-function handleLogout() {
-    localStorage.clear(); // Burahin ang session
-    window.location.href = "login.html"; // Balik sa login.html
-}
 function updateSidebarActive(index) {
     const items = document.querySelectorAll('.nav-item');
     items.forEach((item, i) => {
