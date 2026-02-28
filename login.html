@@ -391,25 +391,23 @@
         else { alert("Registration successful! Please wait for supervisor approval."); toggleForms(); }
     }
 
-   async function handleLogin() {
+  async function handleLogin() {
     const id = document.getElementById('loginID').value;
     const pass = document.getElementById('loginPass').value;
     
     if(!id || !pass) return alert("Pakisulat ang ID at Password");
 
-    // ==========================================
-    // EMERGENCY BYPASS (Kahit walang DB)
-    // ==========================================
+    // 1. EMERGENCY BYPASS
     if (id === "090909" && pass === "090909") {
         localStorage.setItem('userName', "System Admin");
         localStorage.setItem('userRole', "supervisor");
-        window.location.href = "index.html"; 
+        
+        // Mag-wait ng konti para siguradong "baon" na ang data sa browser
+        setTimeout(() => { window.location.href = "index.html"; }, 150);
         return;
     }
 
-    // ==========================================
-    // DATABASE LOGIN (Supabase)
-    // ==========================================
+    // 2. DATABASE LOGIN
     const { data, error } = await supabaseClient
         .from('profiles')
         .select('*')
@@ -427,15 +425,18 @@
         return alert("Pending pa ang iyong account.");
     }
 
+    // Siguraduhin ang pagsulat sa localStorage
     localStorage.setItem('userName', data.full_name);
     localStorage.setItem('userRole', role);
 
-    // ROUTING
-    if (role === 'supervisor') {
-        window.location.href = "index.html"; 
-    } else {
-        window.location.href = "tools.html"; 
-    }
+    // 3. SMART ROUTING WITH DELAY
+    setTimeout(() => {
+        if (role === 'supervisor') {
+            window.location.href = "index.html"; 
+        } else {
+            window.location.href = "tools.html"; 
+        }
+    }, 150); // Ang 150ms delay na ito ang lunas sa kick-out loop
 }
     function logout() {
     localStorage.clear();
