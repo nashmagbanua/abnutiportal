@@ -778,10 +778,6 @@ async function openCoalDelivery() {
 
     // Initialize the live grid sync
     syncCoalData();
-    
-    // Auto-refresh every 30 seconds (GRID ONLY)
-    if (window.coalSyncInterval) clearInterval(window.coalSyncInterval);
-    window.coalSyncInterval = setInterval(syncCoalData, 30000); 
 }
         async function fetchHistoryByDate() {
     const from = document.getElementById('dateFrom').value;
@@ -2156,7 +2152,28 @@ async function deleteUser(id) {
     } else {
         burgerIcon.classList.replace('fa-times', 'fa-bars');
     }
+}       
+// 2. Siguraduhin na ang masterSync ay ganito ang setup:
+async function masterSync() {
+    console.log("🚀 Powercon Master Sync: Refreshing all data...");
+    try {
+        await Promise.all([
+            syncCoalData(),
+            fetchGPMLogs()
+            // fetchUsers() // isama mo ito kung gusto mong mag-update din ang user list
+        ]);
+        console.log("✅ Data updated at: " + new Date().toLocaleTimeString());
+    } catch (err) {
+        console.error("❌ Master Sync Error:", err);
+    }
 }
+
+// 3. Isang interval na lang para sa lahat (nasa dulo dapat ito ng code):
+if (window.mainSyncInterval) clearInterval(window.mainSyncInterval);
+window.mainSyncInterval = setInterval(masterSync, 30000); 
+
+// 4. Tawagin mo rin agad para may data agad pagka-load
+masterSync();
     </script>
 </body>
 </html>
