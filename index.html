@@ -482,92 +482,101 @@ function updateSidebarActive(index) {
 
     fetchGPMLogs();
 }
-     async function fetchGPMLogs() {
+async function fetchGPMLogs() {
     const tbody = document.getElementById('gpmTableBody');
     const badgeDisplay = document.getElementById('dailyAvgGPM');
     
-    const selectedDate = document.getElementById('gpmDateFilter').value;
-    const selectedShift = document.getElementById('shiftFilter').value;
+    // 1. KUNIN MUNA ANG ELEMENTS (Wag muna ang .value)
+    const dateEl = document.getElementById('gpmDateFilter');
+    const shiftEl = document.getElementById('shiftFilter');
 
-    if (!tbody) return;
+    // 2. SAFETY CHECK: Kung wala pa ang elements sa UI, stop muna para walang error
+    if (!tbody || !dateEl || !shiftEl) {
+        console.warn("⚠️ GPM UI Elements not yet ready...");
+        return;
+    }
+
+    // 3. NGAYON SAFE NA KUNIN ANG VALUES
+    const selectedDate = dateEl.value;
+    const selectedShift = shiftEl.value;
 
     tbody.innerHTML = "<tr><td colspan='6' style='text-align:center; padding: 40px;'>Filtering data...</td></tr>";
 
     const startOfDay = `${selectedDate}T00:00:00.000Z`;
     const endOfDay = `${selectedDate}T23:59:59.999Z`;
 
-    // OPTIMIZATION: Imbes na '*', piliin lang ang kailangang columns
-    let query = supabaseClient
-        .from('gpm_readings')
-        .select('id, created_at, gpm, cws_status, deepwell9_active, deepwell9_frequency, deepwell10_active, deepwell10_frequency, operator, shift')
-        .gte('created_at', startOfDay)
-        .lte('created_at', endOfDay);
+    try {
+        let query = supabaseClient
+            .from('gpm_readings')
+            .select('id, created_at, gpm, cws_status, deepwell9_active, deepwell9_frequency, deepwell10_active, deepwell10_frequency, operator, shift')
+            .gte('created_at', startOfDay)
+            .lte('created_at', endOfDay);
 
-    if (selectedShift !== "ALL") {
-        query = query.eq('shift', selectedShift);
-    }
+        if (selectedShift !== "ALL") {
+            query = query.eq('shift', selectedShift);
+        }
 
-    // OPTIMIZATION: Lagyan ng .limit(200) para hindi mag-hang ang browser kung sobrang daming logs
-    const { data, error } = await query.order('created_at', { ascending: false }).limit(200);
+        const { data, error } = await query.order('created_at', { ascending: false }).limit(200);
 
-    if (error) {
-        tbody.innerHTML = `<tr><td colspan="6" style="color:red; text-align:center;">Error: ${error.message}</td></tr>`;
-        return;
-    }
+        if (error) throw error;
 
-    if (!data || data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 30px; color: #a0aec0;">No records found.</td></tr>`;
-        badgeDisplay.innerText = "No Data";
-        badgeDisplay.style.background = "#cbd5e0"; 
-        return;
-    }
+        if (!data || data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 30px; color: #a0aec0;">No records found.</td></tr>`;
+            if (badgeDisplay) {
+                badgeDisplay.innerText = "No Data";
+                badgeDisplay.style.background = "#cbd5e0"; 
+            }
+            return;
+        }
 
-    let rows = "";
-    data.forEach(log => {
-        const time = new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        const gpmVal = parseFloat(log.gpm || 0).toFixed(2);
+        let rows = "";
+        data.forEach(log => {
+            const time = new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const gpmVal = parseFloat(log.gpm || 0).toFixed(2);
 
-        // UI PRESERVED: Deepwell 9 Status
-        const dw9Status = log.deepwell9_active 
-            ? `<span style="color:#48bb78;">● ON</span> <small>${log.deepwell9_frequency}Hz</small>` 
-            : `<span style="color:#a0aec0;">○ OFF</span>`;
-            
-        // UI PRESERVED: Deepwell 10 Status
-        const dw10Status = log.deepwell10_active 
-            ? `<span style="color:#48bb78;">● ON</span> <small>${log.deepwell10_frequency}Hz</small>` 
-            : `<span style="color:#a0aec0;">○ OFF</span>`;
+            const dw9Status = log.deepwell9_active 
+                ? `<span style="color:#48bb78;">● ON</span> <small>${log.deepwell9_frequency}Hz</small>` 
+                : `<span style="color:#a0aec0;">○ OFF</span>`;
+                
+            const dw10Status = log.deepwell10_active 
+                ? `<span style="color:#48bb78;">● ON</span> <small>${log.deepwell10_frequency}Hz</small>` 
+                : `<span style="color:#a0aec0;">○ OFF</span>`;
 
-        rows += `
-            <tr>
-                <td><b>${time}</b></td>
-                <td class="text-blue">${gpmVal}</td>
-                <td><small>${log.cws_status || ''}</small></td>
-                <td>${dw9Status}</td>
-                <td>${dw10Status}</td>
-                <td>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <b>${log.operator || 'Unknown'}</b><br>
-                            <small style="color:#718096;">${log.shift || ''}</small>
+            rows += `
+                <tr>
+                    <td><b>${time}</b></td>
+                    <td class="text-blue">${gpmVal}</td>
+                    <td><small>${log.cws_status || ''}</small></td>
+                    <td>${dw9Status}</td>
+                    <td>${dw10Status}</td>
+                    <td>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <b>${log.operator || 'Unknown'}</b><br>
+                                <small style="color:#718096;">${log.shift || ''}</small>
+                            </div>
+                            <button onclick="deleteGPMLog('${log.id}', event)" 
+                                    style="background: none; border: none; color: #e53e3e; cursor: pointer; padding: 5px 10px;">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
                         </div>
-                        <button onclick="deleteGPMLog('${log.id}', event)" 
-                                style="background: none; border: none; color: #e53e3e; cursor: pointer; padding: 5px 10px;">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `;
-    });
+                    </td>
+                </tr>
+            `;
+        });
 
-    tbody.innerHTML = rows;
+        tbody.innerHTML = rows;
 
-    // UI PRESERVED: Badge Updates
-    const totalCount = data.length;
-    const latestGPM = parseFloat(data[0].gpm || 0).toFixed(2);
-    
-    badgeDisplay.innerHTML = `LOGS: ${totalCount} | LATEST: ${latestGPM} GPM`;
-    badgeDisplay.style.background = (parseFloat(latestGPM) < 100) ? "#e53e3e" : "#38a169";
+        if (badgeDisplay && data[0]) {
+            const totalCount = data.length;
+            const latestGPM = parseFloat(data[0].gpm || 0).toFixed(2);
+            badgeDisplay.innerHTML = `LOGS: ${totalCount} | LATEST: ${latestGPM} GPM`;
+            badgeDisplay.style.background = (parseFloat(latestGPM) < 100) ? "#e53e3e" : "#38a169";
+        }
+    } catch (err) {
+        console.error("GPM Fetch Error:", err);
+        tbody.innerHTML = `<tr><td colspan="6" style="color:red; text-align:center;">Error loading data.</td></tr>`;
+    }
 }
 function openPowerMonitor() {
     updateSidebarActive(2);
