@@ -482,7 +482,7 @@ function updateSidebarActive(index) {
 
     fetchGPMLogs();
 }
-      async function fetchGPMLogs() {
+     async function fetchGPMLogs() {
     const tbody = document.getElementById('gpmTableBody');
     const badgeDisplay = document.getElementById('dailyAvgGPM');
     
@@ -493,13 +493,13 @@ function updateSidebarActive(index) {
 
     tbody.innerHTML = "<tr><td colspan='6' style='text-align:center; padding: 40px;'>Filtering data...</td></tr>";
 
-    // Gawing local time ang start at end para match sa database query
     const startOfDay = `${selectedDate}T00:00:00.000Z`;
     const endOfDay = `${selectedDate}T23:59:59.999Z`;
 
+    // OPTIMIZATION: Imbes na '*', piliin lang ang kailangang columns
     let query = supabaseClient
         .from('gpm_readings')
-        .select('*')
+        .select('id, created_at, gpm, cws_status, deepwell9_active, deepwell9_frequency, deepwell10_active, deepwell10_frequency, operator, shift')
         .gte('created_at', startOfDay)
         .lte('created_at', endOfDay);
 
@@ -507,7 +507,8 @@ function updateSidebarActive(index) {
         query = query.eq('shift', selectedShift);
     }
 
-    const { data, error } = await query.order('created_at', { ascending: false });
+    // OPTIMIZATION: Lagyan ng .limit(200) para hindi mag-hang ang browser kung sobrang daming logs
+    const { data, error } = await query.order('created_at', { ascending: false }).limit(200);
 
     if (error) {
         tbody.innerHTML = `<tr><td colspan="6" style="color:red; text-align:center;">Error: ${error.message}</td></tr>`;
@@ -524,34 +525,34 @@ function updateSidebarActive(index) {
     let rows = "";
     data.forEach(log => {
         const time = new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        const gpmVal = parseFloat(log.gpm).toFixed(2);
+        const gpmVal = parseFloat(log.gpm || 0).toFixed(2);
 
+        // UI PRESERVED: Deepwell 9 Status
         const dw9Status = log.deepwell9_active 
             ? `<span style="color:#48bb78;">● ON</span> <small>${log.deepwell9_frequency}Hz</small>` 
             : `<span style="color:#a0aec0;">○ OFF</span>`;
             
+        // UI PRESERVED: Deepwell 10 Status
         const dw10Status = log.deepwell10_active 
             ? `<span style="color:#48bb78;">● ON</span> <small>${log.deepwell10_frequency}Hz</small>` 
             : `<span style="color:#a0aec0;">○ OFF</span>`;
 
-        // DITO ANG POSIBLENG ERROR: Siguraduhin na malinis ang pagkaka-copy nito
         rows += `
             <tr>
                 <td><b>${time}</b></td>
                 <td class="text-blue">${gpmVal}</td>
-                <td><small>${log.cws_status}</small></td>
+                <td><small>${log.cws_status || ''}</small></td>
                 <td>${dw9Status}</td>
                 <td>${dw10Status}</td>
                 <td>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div>
-                            <b>${log.operator}</b><br>
-                            <small style="color:#718096;">${log.shift}</small>
+                            <b>${log.operator || 'Unknown'}</b><br>
+                            <small style="color:#718096;">${log.shift || ''}</small>
                         </div>
-               <button onclick="deleteGPMLog('${log.id}', event)" 
-        style="background: none; border: none; color: #e53e3e; cursor: pointer; padding: 5px 10px;">
-    <i class="fas fa-trash-alt"></i>
-</button>
+                        <button onclick="deleteGPMLog('${log.id}', event)" 
+                                style="background: none; border: none; color: #e53e3e; cursor: pointer; padding: 5px 10px;">
+                            <i class="fas fa-trash-alt"></i>
                         </button>
                     </div>
                 </td>
@@ -561,51 +562,12 @@ function updateSidebarActive(index) {
 
     tbody.innerHTML = rows;
 
+    // UI PRESERVED: Badge Updates
     const totalCount = data.length;
-    const latestGPM = parseFloat(data[0].gpm).toFixed(2);
+    const latestGPM = parseFloat(data[0].gpm || 0).toFixed(2);
     
     badgeDisplay.innerHTML = `LOGS: ${totalCount} | LATEST: ${latestGPM} GPM`;
     badgeDisplay.style.background = (parseFloat(latestGPM) < 100) ? "#e53e3e" : "#38a169";
-}
-        async function deleteGPMLog(logId, e) {
-    if (!logId || logId === 'undefined') {
-        alert("Error: Missing ID!");
-        return;
-    }
-
-    const confirmDelete = confirm("Sigurado ka bang buburahin ang record na ito?");
-    if (!confirmDelete) return;
-
-    try {
-        // 1. Burahin sa Supabase
-        const { data, error, status } = await supabaseClient
-            .from('gpm_readings')
-            .delete()
-            .eq('id', logId);
-
-        if (error) throw error;
-
-        // Debugging: 204 means success delete sa Supabase
-        console.log("Supabase Status:", status);
-
-        // 2. SUCCESS! Burahin agad sa mata mo (UI)
-        const row = e.target.closest('tr');
-        if (row) {
-            row.style.transition = "0.3s";
-            row.style.opacity = "0";
-            row.style.background = "#fff5f5";
-            setTimeout(() => row.remove(), 300);
-        }
-
-        alert("Record deleted permanently!");
-
-    } catch (err) {
-        console.error("Delete Failed:", err);
-        alert("Failed to delete: " + err.message);
-        
-        // Pag nag-error, i-refresh ang logs para bumalik 'yung UI sa tama
-        fetchGPMLogs();
-    }
 }
 function openPowerMonitor() {
     updateSidebarActive(2);
@@ -890,9 +852,12 @@ function getShift(timeString) {
 
 async function syncCoalData() {
     // 1. Fetch Data from Supabase
+    // OPTIMIZATION: Imbes na lahat ng records, kuhanin lang ang records within 1 month 
+    // o yung mga hindi pa 'used up' para hindi ma-load ang libo-libong archives.
     const { data: logs, error } = await supabaseClient
         .from('delivery_logs')
         .select('*')
+        .neq('remarks', 'used up') // OPTIMIZATION: Wag nang kunin ang mga tapos na
         .order('created_at', { ascending: false });
 
     if (error) return console.error('Supabase Error:', error);
@@ -902,14 +867,14 @@ async function syncCoalData() {
     let totalInUseKg = 0;
     const standbyLogs = [];
     
-    // 2. Initialize 9 Yards (Laging back to default para malinis ang simula)
+    // 2. Initialize 9 Yards
     for(let i=1; i<=9; i++) {
         currentYardData[i] = { 
             status: 'vacant', 
             supplier: 'Empty', 
             kg: 0, 
-            dr_no: '--',      // Idagdag ito
-            ctp_no: '--',      // Idagdag ito
+            dr_no: '--',      
+            ctp_no: '--',      
             date: '--', 
             time: '--', 
             shift: '', 
@@ -954,27 +919,22 @@ async function syncCoalData() {
         }
     });
 
-    // 4. Update UI (Summary, Grid, at Priority Banner)
+    // 4. Update UI - PINANATILI ANG LAHAT NG UI CALLS MO
     if (typeof updateSummaryUI === "function") updateSummaryUI(totalStandbyKg, totalInUseKg);
     if (typeof renderGridOnly === "function") renderGridOnly();
     if (typeof updatePriorityBanner === "function") updatePriorityBanner(currentYardData, standbyLogs);
-    
-    // DASHBOARD SIDEBAR UPDATE (Yung bagong request mo)
-    if (typeof updateDashboardSidebar === "function") {
-        updateDashboardSidebar();
-    }
+    if (typeof updateDashboardSidebar === "function") updateDashboardSidebar();
 
-    // 5. SMART TABLE UPDATE (Dito ang anti-gulo logic)
+    // 5. SMART TABLE UPDATE (Anti-gulo logic preserved)
     const dateFromInput = document.getElementById('dateFrom');
     const dateToInput = document.getElementById('dateTo');
     const histDiv = document.getElementById('history-list');
 
-    // MGA CONDITIONS PARA HINDI MAG-REFRESH ANG TABLE:
     const hasDateInput = (dateFromInput && dateFromInput.value) || (dateToInput && dateToInput.value);
     const isSearching = histDiv && (histDiv.innerHTML.includes("Searching records") || histDiv.innerHTML.includes("Grand Total:"));
 
     if (!hasDateInput && !isSearching) {
-        // DEFAULT VIEW: FIFO List (Standby at In Use lang)
+        // Filter lang yung kailangan para sa FIFO
         const activeFIFO = logs.filter(l => l.remarks === 'standby' || l.remarks === 'in use')
             .sort((a, b) => {
                 const dateA = new Date(`${a.date_arrived}T${a.time_arrived}`);
@@ -991,8 +951,8 @@ async function syncCoalData() {
     if(document.getElementById('last-update')) {
         document.getElementById('last-update').innerText = "Last Sync: " + new Date().toLocaleTimeString();
     }
-} // <--- DITO DAPAT NAG-EEND ANG FUNCTION
-
+}
+        
 function renderGridOnly() {
     const grid = document.getElementById('yard-grid');
     if (!grid) return;
