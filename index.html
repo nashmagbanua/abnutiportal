@@ -2162,14 +2162,12 @@ async function deleteUser(id) {
         burgerIcon.classList.replace('fa-times', 'fa-bars');
     }
 }       
-// 2. Siguraduhin na ang masterSync ay ganito ang setup:
 async function masterSync() {
     console.log("🚀 Powercon Master Sync: Refreshing all data...");
     try {
         await Promise.all([
             syncCoalData(),
             fetchGPMLogs()
-            // fetchUsers() // isama mo ito kung gusto mong mag-update din ang user list
         ]);
         console.log("✅ Data updated at: " + new Date().toLocaleTimeString());
     } catch (err) {
@@ -2177,11 +2175,20 @@ async function masterSync() {
     }
 }
 
-// 3. Isang interval na lang para sa lahat (nasa dulo dapat ito ng code):
+// --- DITO MO ILAGAY ANG BAGO ---
+// 3. Optimized Interval: Mag-sync lang kung nakabukas ang tab
 if (window.mainSyncInterval) clearInterval(window.mainSyncInterval);
-window.mainSyncInterval = setInterval(masterSync, 30000); 
 
-// 4. Tawagin mo rin agad para may data agad pagka-load
+window.mainSyncInterval = setInterval(() => {
+    // Mag-sync lang kung ang tab ay "Visible" (hindi naka-hide/minimize)
+    if (document.visibilityState === 'visible') {
+        masterSync();
+    } else {
+        console.log("⏸️ Tab is hidden. Sync paused to save resources.");
+    }
+}, 30000); 
+
+// 4. Tawagin agad para may data pagka-load
 masterSync();
     </script>
 </body>
