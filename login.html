@@ -46,11 +46,14 @@ body {
         background-size: cover;
         background-position: center center;
         background-repeat: no-repeat;
-        z-index: -1; /* Nasa likod ng lahat ng text/cards */
-        
-        /* Force clear rendering sa mobile */
+        z-index: -1; 
         transform: translateZ(0);
         -webkit-transform: translateZ(0);
+        animation: fadeInBackground 1.5s ease-in-out;
+    }
+    @keyframes fadeInBackground {
+        from { opacity: 0; }
+        to { opacity: 1; }
     }
 }
  /* --- MODERN NAVIGATION & OPTIMIZED DROPDOWN --- */
