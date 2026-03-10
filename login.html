@@ -20,15 +20,12 @@
             --glass: rgba(255, 255, 255, 0.05);
             --border: rgba(255, 255, 255, 0.1);
             --bg-dark: #1a202c;
-        }
-
-        * { box-sizing: border-box; scroll-behavior: smooth; }
-
-        body{
- background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('assets/background.webp');
- background-size: cover;
- background-position: center;
- background-attachment: fixed;
+            }
+* { box-sizing: border-box; scroll-behavior: smooth; margin:0; padding:0; }
+body {
+    background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('assets/background.webp');
+    background-size: cover; background-position:center; background-repeat:no-repeat; background-attachment:fixed;
+    min-height:100vh; font-family:'Inter', sans-serif; color:white; overflow-x:hidden;
 }
 
 @media (max-width:820px){
@@ -39,41 +36,170 @@
   background-attachment: scroll;
  }
 }
-
-        /* --- NAVIGATION --- */
-        nav {
-            position: fixed; top: 0; width: 100%; padding: 15px 5%;
-            display: flex; justify-content: space-between; align-items: center;
-            z-index: 1000; transition: 0.4s;
-        }
-        nav.scrolled{
- background: rgba(26,32,44,0.7);
- backdrop-filter: blur(10px);
- border-bottom: 1px solid var(--border);
+ /* --- MODERN NAVIGATION & OPTIMIZED DROPDOWN --- */
+nav {
+    position: fixed; top: 0; width: 100%; padding: 15px 5%;
+    display: flex; justify-content: space-between; align-items: center;
+    z-index: 2000; transition: 0.4s;
 }
 
-        .logo-container { display: flex; align-items: center; gap: 10px; }
-        .nav-logo { height: 40px; width: auto; filter: drop-shadow(0 0 5px rgba(255,255,255,0.2)); }
-        .logo-text { font-weight: bold; font-size: 1.2rem; letter-spacing: 1px; }
+nav.scrolled {
+    background: rgba(26, 32, 44, 0.9);
+    backdrop-filter: blur(15px);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 5%;
+}
 
-        .nav-links { display: flex; align-items: center; gap: 15px; }
-        .nav-links a { color: white; text-decoration: none; font-weight: 500; transition: 0.3s; font-size: 0.9rem; cursor: pointer; }
-        .nav-links a:hover { color: var(--primary); }
+.logo-container { display: flex; align-items: center; gap: 10px; z-index: 2100; }
+.nav-logo { height: 35px; width: auto; }
+.logo-text { font-weight: 800; font-size: 1.1rem; letter-spacing: 1px; }
 
-        /* Dropdown Tools */
-        .dropdown { position: relative; display: inline-block; }
-        .dropdown-content {
-            display: none; position: absolute; background: #2d3748; min-width: 200px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.5); border-radius: 10px; z-index: 1; 
-            top: 100%; right: 0; border: 1px solid var(--border); overflow: hidden;
-        }
-        .dropdown-content a {
-            color: white; padding: 12px 16px; text-decoration: none; display: block;
-            border-bottom: 1px solid var(--border); font-size: 0.85rem;
-        }
-        .dropdown-content a:hover { background: var(--primary); }
-        .dropdown:hover .dropdown-content { display: block; }
+.burger {
+    display: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 2100;
+}
 
+.nav-links { display: flex; align-items: center; gap: 20px; }
+.nav-links a { 
+    color: rgba(255, 255, 255, 0.8); 
+    text-decoration: none; 
+    font-weight: 500; 
+    transition: 0.3s; 
+    font-size: 0.9rem; 
+}
+.nav-links a:hover { opacity: 1; color: var(--primary); }
+
+/* --- DROPDOWN OPTIMIZATION (DESKTOP) --- */
+.dropdown { position: relative; }
+
+.dropdown-content {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: #1a202c;
+    min-width: 220px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    padding: 8px 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2200;
+}
+
+/* Hover effect para sa Desktop lang */
+@media (min-width: 821px) {
+    .dropdown:hover .dropdown-content {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+}
+
+.dropdown-content a {
+    display: block;
+    padding: 12px 20px !important;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    width: 100%;
+    text-align: left;
+}
+
+.dropdown-content a:last-child { border-bottom: none; }
+.dropdown-content a:hover { 
+    background: rgba(72, 187, 120, 0.1); 
+    color: var(--primary) !important;
+}
+
+/* --- MOBILE RESPONSIVE NAV (MAX 820px) --- */
+@media (max-width: 820px) {
+    .burger { display: block; }
+
+    .nav-links {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        height: 100vh;
+        width: 75%; 
+        background: rgba(26, 32, 44, 0.98);
+        backdrop-filter: blur(20px);
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center; /* I-center ang items sa cross-axis */
+        padding-top: 100px; /* Dinagdagan natin para hindi dikit sa taas */
+        transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+    }
+
+    .nav-links.active { right: 0; }
+
+    .nav-links a {
+        opacity: 0.8;
+        width: 100%;
+        padding: 15px 0; /* Ginawa nating 0 ang horizontal padding para center talaga */
+        font-size: 1.1rem;
+        display: block;
+        text-align: center; /* Ito ang magic line para sa text centering */
+    }
+
+    /* Mobile Dropdown adjustment */
+    .dropdown { 
+        width: 100%; 
+        text-align: center; /* I-center ang "Tools" title */
+    }
+
+    .dropdown-toggle {
+        display: flex;
+        justify-content: center; /* I-center ang text at icon ng dropdown */
+        align-items: center;
+        gap: 8px;
+    }
+
+    .dropdown-content {
+        position: static;
+        opacity: 1;
+        visibility: visible;
+        display: none;
+        background: rgba(255,255,255,0.03);
+        width: 100%;
+        margin-top: 5px;
+        border: none;
+    }
+    
+    .dropdown-content a {
+        padding: 12px 0 !important; /* Center pati links sa loob ng dropdown */
+        font-size: 0.95rem;
+        background: transparent;
+    }
+
+    .dropdown.active .dropdown-content { display: block; }
+
+    /* Sign In Button Centering */
+    .nav-links a.signin-btn {
+    margin: 25px auto; 
+    width: 60%; 
+    background: rgba(72, 187, 120, 0.8) !important; 
+    color: white !important;
+    text-align: center;
+    border-radius: 12px;
+    font-weight: bold;
+    padding: 10px !important; /* Binawasan mula 12px para lumiliit nang kaunti */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Mas dark na shadow para lumitaw sa transparent bg */
+    display: block; /* Siguradong block para gumana ang margin auto */
+    backdrop-filter: blur(5px); /* Optional: para magmukhang glass-type ang button */
+    transition: 0.3s ease;
+}
+
+/* Para umailaw pag clinick sa mobile */
+.nav-links a.signin-btn:active {
+    background: var(--primary) !important;
+    transform: scale(0.95);
+    opacity: 1;
+}
+}
         /* --- HERO & LOGIN --- */
         .hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 100px 5% 50px; }
         .info-side { text-align: center; margin-bottom: 40px; }
@@ -199,10 +325,15 @@
         <img src="assets/abnlogo.png" alt="Logo" class="nav-logo">
         <div class="logo-text">ABN <span style="color: var(--primary);">UTILITIES</span></div>
     </div>
-    <div class="nav-links">
+
+    <div class="burger" id="burger-menu">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <div class="nav-links" id="nav-menu">
         <a href="#">Home</a>
-        <div class="dropdown">
-            <a href="#tools-section">Tools <i class="fas fa-chevron-down" style="font-size: 0.7rem;"></i></a>
+        <div class="dropdown" id="tools-dropdown">
+            <a href="javascript:void(0)" class="dropdown-toggle">Tools <i class="fas fa-chevron-down"></i></a>
             <div class="dropdown-content">
                 <a href="https://abnpowercon.vercel.app" target="_blank">PowerCon</a>
                 <a href="https://abncoaldumping.vercel.app" target="_blank">Coal Dumping</a>
@@ -213,7 +344,7 @@
         </div>
         <a href="#about">Areas</a>
         <a href="https://forms.gle/nuMgiwT9jmo3PjxA7" target="_blank">Exam</a>
-        <a onclick="toggleForms()" style="background:var(--primary); padding: 5px 15px; border-radius: 5px; font-weight: bold;">Sign In</a>
+        <a onclick="toggleForms()" class="login-nav-btn" style="background:var(--primary); padding: 8px 20px; border-radius: 8px; font-weight: bold; color: white;">Sign In</a>
     </div>
 </nav>
 
@@ -221,7 +352,10 @@
     <div class="info-side" data-aos="fade-right">
         <h1>Digital Utilities Operation (DUO)</h1>
         <p><span style="color: var(--primary); font-weight: 600;">Empowering Utility Management.</span>  Our mission is to transition from legacy manual documentation to a realtime data ecosystem eliminating paper waste and automating workloads for technical excellence.  --- A real-time data ecosystem for technical excellence and paperless operations.</p>
-        <button class="login-btn" style="max-width: 200px;" onclick="document.getElementById('tools-section').scrollIntoView()">View All Tools</button>
+        <button class="login-btn" style="width: auto; min-width: 220px;" onclick="document.getElementById('tools-section').scrollIntoView()">
+    <span>Explore Tools</span>
+    <i class="fas fa-rocket" style="font-size: 0.9rem;"></i>
+</button>
     </div>
     
     <div class="login-side" data-aos="fade-left">
@@ -463,6 +597,51 @@
         }
     }, 150); // Ang 150ms delay na ito ang lunas sa kick-out loop
 }
+   // --- MOBILE MENU LOGIC ---
+const burger = document.getElementById('burger-menu');
+const navMenu = document.getElementById('nav-menu');
+const dropdownToggle = document.querySelector('.dropdown-toggle');
+const dropdown = document.getElementById('tools-dropdown');
+
+// Toggle Main Mobile Menu
+burger.addEventListener('click', () => {
+    navMenu.classList.toggle('active');
+    // Palitan ang icon (Bars to X)
+    const icon = burger.querySelector('i');
+    icon.classList.toggle('fa-bars');
+    icon.classList.toggle('fa-times');
+});
+
+// Dropdown click sa Mobile (Accordion style)
+dropdownToggle.addEventListener('click', (e) => {
+    if (window.innerWidth <= 820) {
+        e.preventDefault(); // Pipigilan nito ang link default behavior
+        dropdown.classList.toggle('active');
+        
+        // Optional: Rotate chevron icon para sa visual cue
+        const chevron = dropdownToggle.querySelector('.fa-chevron-down');
+        if (chevron) {
+            chevron.style.transform = dropdown.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0deg)';
+            chevron.style.transition = '0.3s ease';
+        }
+    }
+});
+
+// Close menu pag nag-click ng kahit anong link (maliban sa dropdown toggle)
+document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+        // Kung hindi dropdown toggle ang clinick, isara ang sidebar
+        if(!link.classList.contains('dropdown-toggle')) {
+            navMenu.classList.remove('active');
+            
+            // Ibalik ang burger icon sa dati
+            const icon = burger.querySelector('i');
+            if (icon.classList.contains('fa-times')) {
+                icon.classList.replace('fa-times', 'fa-bars');
+            }
+        }
+    });
+});
     function logout() {
     localStorage.clear();
     window.location.href = "login.html"; 
