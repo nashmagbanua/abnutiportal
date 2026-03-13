@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -9,14 +9,14 @@
 <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
-
+<!-- Panzoom -->
 <script src="https://unpkg.com/@panzoom/panzoom/dist/panzoom.min.js"></script>
 
 <style>
 
 body{
-font-family:Arial, sans-serif;
 margin:0;
+font-family:Arial, sans-serif;
 background:#f3f4f6;
 }
 
@@ -30,7 +30,7 @@ font-size:20px;
 font-weight:bold;
 }
 
-/* BUTTON TABS */
+/* TABS */
 
 .flow-tabs{
 display:flex;
@@ -41,12 +41,12 @@ flex-wrap:wrap;
 
 .flow-tabs button{
 background:#16a34a;
-color:white;
 border:none;
+color:white;
 padding:10px 18px;
 border-radius:8px;
-cursor:pointer;
 font-weight:600;
+cursor:pointer;
 }
 
 .flow-tabs button:hover{
@@ -57,7 +57,7 @@ background:#15803d;
 background:#065f46;
 }
 
-/* CONTROL BUTTONS */
+/* CONTROLS */
 
 .controls{
 display:flex;
@@ -74,7 +74,7 @@ border-radius:6px;
 cursor:pointer;
 }
 
-/* FLOWCHART AREA */
+/* VIEWER */
 
 .viewer{
 width:100%;
@@ -83,16 +83,28 @@ background:white;
 border-top:1px solid #ddd;
 position:relative;
 overflow:hidden;
+
+touch-action:none;
+-webkit-overflow-scrolling:touch;
 }
 
 #flow-wrapper{
 cursor:grab;
+touch-action:none;
 }
+
+#flow-wrapper:active{
+cursor:grabbing;
+}
+
+/* FLOW IMAGE */
 
 .flow-img{
 width:1300px;
 user-select:none;
+-webkit-user-drag:none;
 pointer-events:none;
+touch-action:none;
 }
 
 .hidden{
@@ -118,6 +130,8 @@ height:70vh;
 ABN Utilities | Boiler Process Flow
 </div>
 
+<!-- TABS -->
+
 <div class="flow-tabs">
 
 <button class="active" onclick="showFlow('full',this)">
@@ -134,6 +148,8 @@ ABN Utilities | Boiler Process Flow
 
 </div>
 
+<!-- CONTROLS -->
+
 <div class="controls">
 
 <button onclick="resetZoom()">Reset View</button>
@@ -141,6 +157,8 @@ ABN Utilities | Boiler Process Flow
 <button onclick="toggleFullscreen()">Fullscreen</button>
 
 </div>
+
+<!-- VIEWER -->
 
 <div class="viewer">
 
@@ -164,17 +182,53 @@ class="flow-img hidden">
 
 <script>
 
+/* DISABLE RIGHT CLICK */
+
+document.addEventListener("contextmenu", function(e){
+e.preventDefault();
+});
+
+
+/* DISABLE IMAGE DRAG */
+
+document.addEventListener("dragstart", function(e){
+e.preventDefault();
+});
+
+
 /* PANZOOM */
 
 const elem = document.getElementById('flow-wrapper');
 
 const panzoom = Panzoom(elem,{
-maxScale:5,
+maxScale:6,
 minScale:1,
+step:0.3,
 contain:'outside'
 });
 
+
+/* WHEEL ZOOM DESKTOP */
+
 elem.parentElement.addEventListener('wheel', panzoom.zoomWithWheel);
+
+
+/* DOUBLE TAP ZOOM MOBILE */
+
+let lastTap = 0;
+
+elem.addEventListener("touchend", function(event){
+
+const currentTime = new Date().getTime();
+const tapLength = currentTime - lastTap;
+
+if(tapLength < 300 && tapLength > 0){
+panzoom.zoomIn();
+}
+
+lastTap = currentTime;
+
+});
 
 
 /* RESET */
