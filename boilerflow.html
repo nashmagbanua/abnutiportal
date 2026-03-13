@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ABN Utilities | Boiler Process Flow</title>
+    
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
@@ -13,6 +14,7 @@
     <style>
         :root { --primary: #15803d; }
 
+        /* PINAGSAMA NA BODY SELECTORS */
         body {
             margin: 0; padding: 0;
             font-family: sans-serif;
@@ -21,6 +23,10 @@
             display: flex;
             flex-direction: column;
             overflow: hidden; 
+            -webkit-user-select: none;  
+            -ms-user-select: none;      
+            user-select: none;          
+            -webkit-touch-callout: none; 
         }
 
         .header {
@@ -31,26 +37,29 @@
             z-index: 20;
         }
 
+        /* GRID FOR BUTTONS - NO OVERLAP */
         .flow-tabs {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
             gap: 8px;
             padding: 10px;
             background: white;
-            overflow-x: auto;
-            border-bottom: 1px solid #ddd;
             z-index: 20;
-            -webkit-overflow-scrolling: touch;
+        }
+
+        @media (max-width: 600px) {
+            .flow-tabs { grid-template-columns: 1fr 1fr; }
         }
 
         .flow-tabs button {
             background: #eee;
             border: none;
-            padding: 10px 18px;
-            border-radius: 20px;
+            padding: 10px 12px;
+            border-radius: 8px;
             font-size: 13px;
             font-weight: bold;
-            white-space: nowrap;
             cursor: pointer;
+            transition: 0.2s;
         }
 
         .flow-tabs button.active {
@@ -69,7 +78,7 @@
         }
 
         #flow-wrapper {
-            width: 2500px; /* Mas pinalaki para mas malayo ang drag range */
+            width: 2500px; 
             height: 1500px;
             display: flex;
             align-items: center;
@@ -82,7 +91,6 @@
             max-width: none;
             display: block;
             pointer-events: none;
-            user-select: none;
         }
 
         .hidden { display: none !important; }
@@ -116,9 +124,9 @@
     <div class="header">ABN Boiler Flow</div>
 
     <div class="flow-tabs">
-        <button id="tab-full" class="active" onclick="showFlow('full', this)">⚙ Full</button>
-        <button id="tab-water" onclick="showFlow('water', this)">💧 Water</button>
-        <button id="tab-steam" onclick="showFlow('steam', this)">♨ Steam</button>
+        <button id="tab-full" class="active" onclick="showFlow('full', this)">⚙ Full Flow</button>
+        <button id="tab-water" onclick="showFlow('water', this)">💧 Water/Air</button>
+        <button id="tab-steam" onclick="showFlow('steam', this)">♨ Steam/Drain</button>
     </div>
 
     <div class="viewer" id="viewer-area">
@@ -147,22 +155,16 @@
             animate: true
         });
 
-        // Wheel zoom for Desktop/Chromebook
         viewerArea.addEventListener('wheel', panzoom.zoomWithWheel);
 
-        // --- DOUBLE TAP LOGIC FOR MOBILE ---
+        // --- DOUBLE TAP LOGIC ---
         let lastTap = 0;
         viewerArea.addEventListener('touchend', (e) => {
             const currentTime = new Date().getTime();
             const tapLength = currentTime - lastTap;
-            
-            // Kung ang pagitan ng dalawang tap ay less than 300ms
             if (tapLength < 300 && tapLength > 0) {
-                e.preventDefault(); // Iwasan ang default browser zoom
-                
+                e.preventDefault();
                 const currentScale = panzoom.getScale();
-                
-                // Toggle Zoom: Pag maliit pa, i-zoom in. Pag malaki na, i-reset.
                 if (currentScale < 1.5) {
                     panzoom.zoom(2.5, { animate: true });
                 } else {
@@ -175,11 +177,8 @@
         function showFlow(type, btn) {
             document.querySelectorAll(".flow-img").forEach(img => img.classList.add("hidden"));
             document.querySelectorAll(".flow-tabs button").forEach(b => b.classList.remove("active"));
-            
             document.getElementById("flow-" + type).classList.remove("hidden");
             btn.classList.add("active");
-            
-            // I-reset ang pwesto para nasa gitna ulit
             panzoom.reset();
         }
 
@@ -187,9 +186,35 @@
             panzoom.reset({ animate: true });
         }
 
-        // Disable standard drags/context menus
-        document.addEventListener('dragstart', (e) => e.preventDefault());
-        document.addEventListener('contextmenu', (e) => e.preventDefault());
+        // --- SECURITY SCRIPTS ---
+
+        // Disable Right Click & Drag
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('dragstart', e => e.preventDefault());
+
+        // Keyboard Blockers
+        document.addEventListener('keydown', function(e) {
+            // Block Ctrl+P, Ctrl+S, Ctrl+Shift+I (DevTools)
+            if (e.ctrlKey && (e.key === 'p' || e.key === 's' || (e.shiftKey && e.key === 'I'))) {
+                e.preventDefault();
+                if(e.key === 'p') alert("Printing restricted.");
+            }
+            // PrintScreen - Note: Limited support on modern browsers
+            if (e.key === "PrintScreen") {
+                navigator.clipboard.writeText("").catch(() => {});
+                alert("Screenshots restricted.");
+            }
+        });
+
+        // Clear clipboard when leaving the tab
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                // Try to overwrite clipboard
+                try {
+                    navigator.clipboard.writeText("Confidential - Nutribev Corp").catch(() => {});
+                } catch (err) {}
+            }
+        });
     </script>
 </body>
 </html>
