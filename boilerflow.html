@@ -1,292 +1,193 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ABN Utilities | Boiler Process Flow</title>
+     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <script src="https://unpkg.com/@panzoom/panzoom/dist/panzoom.min.js"></script>
 
-<title>ABN Utilities | Boiler Process Flow</title>
-<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
-<!-- Panzoom -->
-<script src="https://unpkg.com/@panzoom/panzoom/dist/panzoom.min.js"></script>
+    <style>
+        :root {
+            --primary: #15803d;
+            --secondary: #1f2937;
+        }
 
-<style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f3f4f6;
+            overflow: hidden; /* Iwasan ang scroll ng buong page sa mobile */
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-body{
-margin:0;
-font-family:Arial, sans-serif;
-background:#f3f4f6;
-}
+        .header {
+            background: var(--primary);
+            color: white;
+            padding: 12px 15px;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
 
-/* HEADER */
+        /* TABS - Optimized for Mobile Scrolling */
+        .flow-tabs {
+            display: flex;
+            gap: 8px;
+            padding: 10px;
+            background: white;
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+            border-bottom: 1px solid #e5e7eb;
+        }
 
-.header{
-background:#15803d;
-color:white;
-padding:15px;
-font-size:20px;
-font-weight:bold;
-}
+        .flow-tabs::-webkit-scrollbar { display: none; }
 
-/* TABS */
+        .flow-tabs button {
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            color: #374151;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
 
-.flow-tabs{
-display:flex;
-gap:10px;
-padding:15px;
-flex-wrap:wrap;
-}
+        .flow-tabs button.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
 
-.flow-tabs button{
-background:#16a34a;
-border:none;
-color:white;
-padding:10px 18px;
-border-radius:8px;
-font-weight:600;
-cursor:pointer;
-}
+        /* VIEWER - The "Google Maps" Experience */
+        .viewer {
+            flex-grow: 1;
+            width: 100%;
+            background: #222; /* Darker para mas focus sa diagram */
+            position: relative;
+            overflow: hidden;
+            touch-action: none; /* Importante ito para sa Panzoom */
+        }
 
-.flow-tabs button:hover{
-background:#15803d;
-}
+        #flow-wrapper {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+        }
 
-.flow-tabs button.active{
-background:#065f46;
-}
+        #flow-wrapper:active { cursor: grabbing; }
 
-/* CONTROLS */
+        .flow-img {
+            max-width: none;
+            height: auto;
+            width: 1200px; /* Base width */
+            display: block;
+            pointer-events: none;
+            user-select: none;
+        }
 
-.controls{
-display:flex;
-gap:10px;
-padding:0 15px 10px;
-}
+        .hidden { display: none; }
 
-.controls button{
-background:#1f2937;
-color:white;
-border:none;
-padding:8px 14px;
-border-radius:6px;
-cursor:pointer;
-}
+        /* FLOATING CONTROLS */
+        .floating-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
 
-/* VIEWER */
-
-.viewer{
-width:100%;
-height:75vh;
-background:white;
-border-top:1px solid #ddd;
-position:relative;
-overflow:hidden;
-
-touch-action:none;
--webkit-overflow-scrolling:touch;
-}
-
-#flow-wrapper{
-cursor:grab;
-touch-action:none;
-}
-
-#flow-wrapper:active{
-cursor:grabbing;
-}
-
-/* FLOW IMAGE */
-
-.flow-img{
-width:1600px;        /* mas malaki kaysa viewer */
-max-width:none;
-user-select:none;
--webkit-user-drag:none;
-pointer-events:none;
-}
-
-.hidden{
-display:none;
-}
-
-/* MOBILE */
-
-@media(max-width:768px){
-
-.viewer{
-touch-action:none;
-overflow:hidden;
-}
-
-}
-
-</style>
+        .btn-round {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: white;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--secondary);
+            cursor: pointer;
+        }
+    </style>
 </head>
 
 <body>
 
-<div class="header">
-ABN Utilities | Boiler Process Flow
-</div>
+    <div class="header">ABN Boiler Process</div>
 
-<!-- TABS -->
+    <div class="flow-tabs">
+        <button id="btn-full" class="active" onclick="showFlow('full', this)">⚙ Full Process</button>
+        <button id="btn-water" onclick="showFlow('water', this)">💧 Water & Air</button>
+        <button id="btn-steam" onclick="showFlow('steam', this)">♨ Steam & Drain</button>
+    </div>
 
-<div class="flow-tabs">
+    <div class="viewer" id="viewer-container">
+        <div id="flow-wrapper">
+            <img id="flow-full" src="assets/boilerfullflow.gif" class="flow-img">
+            <img id="flow-water" src="assets/boilerwaterandairflow.gif" class="flow-img hidden">
+            <img id="flow-steam" src="assets/boilersteamanddrain.gif" class="flow-img hidden">
+        </div>
 
-<button class="active" onclick="showFlow('full',this)">
-⚙ Full Process
-</button>
+        <div class="floating-controls">
+            <button class="btn-round" onclick="resetZoom()">🏠</button>
+            <button class="btn-round" onclick="panzoom.zoomIn()">➕</button>
+            <button class="btn-round" onclick="panzoom.zoomOut()">➖</button>
+        </div>
+    </div>
 
-<button onclick="showFlow('water',this)">
-💧 Water & Air
-</button>
+    <script>
+        const elem = document.getElementById('flow-wrapper');
+        
+        // Initializing Panzoom with "Google Maps" feel
+        const panzoom = Panzoom(elem, {
+            maxScale: 5,
+            minScale: 0.5,
+            contain: 'outside', // Mas maganda ito para sa malalaking image
+            startScale: 1,
+            cursor: 'grab'
+        });
 
-<button onclick="showFlow('steam',this)">
-♨ Steam & Drain
-</button>
+        // Enable mouse wheel zoom
+        elem.parentElement.addEventListener('wheel', panzoom.zoomWithWheel);
 
-</div>
+        // Fix for mobile: Disable context menu and default drags
+        document.addEventListener("contextmenu", e => e.preventDefault());
+        document.addEventListener("dragstart", e => e.preventDefault());
 
-<!-- CONTROLS -->
+        // Show/Hide Logic
+        function showFlow(type, btn) {
+            document.querySelectorAll(".flow-img").forEach(img => img.classList.add("hidden"));
+            document.querySelectorAll(".flow-tabs button").forEach(b => b.classList.remove("active"));
+            
+            btn.classList.add("active");
+            document.getElementById(`flow-${type}`).classList.remove("hidden");
+            
+            // Panzoom needs to reset or update when image changes
+            setTimeout(() => {
+                panzoom.reset();
+            }, 10);
+        }
 
-<div class="controls">
-
-<button onclick="resetZoom()">Reset View</button>
-
-<button onclick="toggleFullscreen()">Fullscreen</button>
-
-</div>
-
-<!-- VIEWER -->
-
-<div class="viewer">
-
-<div id="flow-wrapper">
-
-<img id="flow-full"
-src="assets/boilerfullflow.gif"
-class="flow-img">
-
-<img id="flow-water"
-src="assets/boilerwaterandairflow.gif"
-class="flow-img hidden">
-
-<img id="flow-steam"
-src="assets/boilersteamanddrain.gif"
-class="flow-img hidden">
-
-</div>
-
-</div>
-
-<script>
-
-/* DISABLE RIGHT CLICK */
-
-document.addEventListener("contextmenu", function(e){
-e.preventDefault();
-});
-
-
-/* DISABLE IMAGE DRAG */
-
-document.addEventListener("dragstart", function(e){
-e.preventDefault();
-});
-
-
-/* PANZOOM */
-
-const elem = document.getElementById('flow-wrapper');
-
-const panzoom = Panzoom(elem,{
-maxScale:6,
-minScale:0.8,
-step:0.3,
-contain:false   
-});
-
-
-/* WHEEL ZOOM DESKTOP */
-
-elem.parentElement.addEventListener('wheel', panzoom.zoomWithWheel);
-
-
-/* DOUBLE TAP ZOOM MOBILE */
-
-let lastTap = 0;
-
-elem.addEventListener("touchend", function(event){
-
-const currentTime = new Date().getTime();
-const tapLength = currentTime - lastTap;
-
-if(tapLength < 300 && tapLength > 0){
-panzoom.zoomIn();
-}
-
-lastTap = currentTime;
-
-});
-
-
-/* RESET */
-
-function resetZoom(){
-panzoom.reset();
-}
-
-
-/* FULLSCREEN */
-
-function toggleFullscreen(){
-
-const viewer = document.querySelector(".viewer");
-
-if(!document.fullscreenElement){
-viewer.requestFullscreen();
-}
-else{
-document.exitFullscreen();
-}
-
-}
-
-    panzoom.pan(0,0,{animate:true});
-
-/* FLOW SWITCH */
-
-function showFlow(type,btn){
-
-document.querySelectorAll(".flow-img").forEach(img=>{
-img.classList.add("hidden");
-});
-
-document.querySelectorAll(".flow-tabs button").forEach(b=>{
-b.classList.remove("active");
-});
-
-btn.classList.add("active");
-
-if(type==="full"){
-document.getElementById("flow-full").classList.remove("hidden");
-}
-
-if(type==="water"){
-document.getElementById("flow-water").classList.remove("hidden");
-}
-
-if(type==="steam"){
-document.getElementById("flow-steam").classList.remove("hidden");
-}
-
-resetZoom();
-
-}
-
-</script>
-
+        function resetZoom() {
+            panzoom.reset({ animate: true });
+        }
+    </script>
 </body>
 </html>
