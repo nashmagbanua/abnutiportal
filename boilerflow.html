@@ -11,33 +11,26 @@
     <script src="https://unpkg.com/@panzoom/panzoom/dist/panzoom.min.js"></script>
 
     <style>
-        :root {
-            --primary: #15803d;
-            --dark: #111827;
-        }
+        :root { --primary: #15803d; }
 
         body {
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             font-family: sans-serif;
-            background: #f3f4f6;
+            background: #1a1a1a;
             height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow: hidden; /* Mahalaga: para hindi gumagalaw ang buong page */
+            overflow: hidden; 
         }
 
-        /* HEADER */
         .header {
             background: var(--primary);
             color: white;
             padding: 12px 15px;
             font-weight: bold;
             z-index: 20;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
-        /* TABS - Scrollable sa mobile para hindi mag-overlap */
         .flow-tabs {
             display: flex;
             gap: 8px;
@@ -46,15 +39,16 @@
             overflow-x: auto;
             border-bottom: 1px solid #ddd;
             z-index: 20;
+            -webkit-overflow-scrolling: touch;
         }
 
         .flow-tabs button {
-            background: #e5e7eb;
+            background: #eee;
             border: none;
-            padding: 10px 15px;
-            border-radius: 8px;
+            padding: 10px 18px;
+            border-radius: 20px;
             font-size: 13px;
-            font-weight: 600;
+            font-weight: bold;
             white-space: nowrap;
             cursor: pointer;
         }
@@ -64,77 +58,70 @@
             color: white;
         }
 
-        /* VIEWER - Google Maps Feel */
         .viewer {
             flex-grow: 1;
-            background: #262626; /* Dark background para malitaw ang white diagram */
             position: relative;
             overflow: hidden;
-            touch-action: none; /* Block browser scroll para Panzoom ang gagana */
+            touch-action: none; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         #flow-wrapper {
-            width: 100%;
-            height: 100%;
+            width: 2500px; /* Mas pinalaki para mas malayo ang drag range */
+            height: 1500px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
         .flow-img {
+            width: 100%;
+            height: auto;
             max-width: none;
-            height: 85vh; /* Fit sa height ng mobile screen */
-            width: auto;
             display: block;
-            user-select: none;
             pointer-events: none;
+            user-select: none;
         }
 
-        .hidden {
-            display: none !important;
-        }
+        .hidden { display: none !important; }
 
-        /* FLOATING CONTROLS */
         .controls {
             position: absolute;
-            bottom: 20px;
+            bottom: 25px;
             right: 20px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
             z-index: 30;
         }
 
         .btn-ctrl {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
             border: none;
             background: white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            font-size: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            font-size: 22px;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-        }
-
-        .btn-ctrl:active {
-            background: #eee;
         }
     </style>
 </head>
 <body>
 
-    <div class="header">ABN Boiler Process Flow</div>
+    <div class="header">ABN Boiler Flow</div>
 
     <div class="flow-tabs">
-        <button id="tab-full" class="active" onclick="showFlow('full', this)">⚙ Full Process</button>
-        <button id="tab-water" onclick="showFlow('water', this)">💧 Water & Air</button>
-        <button id="tab-steam" onclick="showFlow('steam', this)">♨ Steam & Drain</button>
+        <button id="tab-full" class="active" onclick="showFlow('full', this)">⚙ Full</button>
+        <button id="tab-water" onclick="showFlow('water', this)">💧 Water</button>
+        <button id="tab-steam" onclick="showFlow('steam', this)">♨ Steam</button>
     </div>
 
-    <div class="viewer">
+    <div class="viewer" id="viewer-area">
         <div id="flow-wrapper">
             <img id="flow-full" src="assets/boilerfullflow.gif" class="flow-img">
             <img id="flow-water" src="assets/boilerwaterandairflow.gif" class="flow-img hidden">
@@ -142,7 +129,7 @@
         </div>
 
         <div class="controls">
-            <button class="btn-ctrl" onclick="resetZoom()" title="Reset View">🏠</button>
+            <button class="btn-ctrl" onclick="resetView()">🏠</button>
             <button class="btn-ctrl" onclick="panzoom.zoomIn()">➕</button>
             <button class="btn-ctrl" onclick="panzoom.zoomOut()">➖</button>
         </div>
@@ -150,51 +137,59 @@
 
     <script>
         const elem = document.getElementById('flow-wrapper');
+        const viewerArea = document.getElementById('viewer-area');
         
-        // Panzoom Config
         const panzoom = Panzoom(elem, {
             maxScale: 5,
-            minScale: 0.3,
-            contain: 'outside', // Para pwedeng i-drag lampas sa borders
-            startScale: 1
+            minScale: 0.1,
+            contain: 'outside',
+            startScale: 0.4,
+            animate: true
         });
 
-        // Mouse wheel zoom para sa Desktop/Chromebook
-        elem.parentElement.addEventListener('wheel', panzoom.zoomWithWheel);
+        // Wheel zoom for Desktop/Chromebook
+        viewerArea.addEventListener('wheel', panzoom.zoomWithWheel);
 
-        // Iwasan ang default drag ng browser
-        document.addEventListener('dragstart', (e) => e.preventDefault());
-        document.addEventListener('contextmenu', (e) => e.preventDefault());
+        // --- DOUBLE TAP LOGIC FOR MOBILE ---
+        let lastTap = 0;
+        viewerArea.addEventListener('touchend', (e) => {
+            const currentTime = new Date().getTime();
+            const tapLength = currentTime - lastTap;
+            
+            // Kung ang pagitan ng dalawang tap ay less than 300ms
+            if (tapLength < 300 && tapLength > 0) {
+                e.preventDefault(); // Iwasan ang default browser zoom
+                
+                const currentScale = panzoom.getScale();
+                
+                // Toggle Zoom: Pag maliit pa, i-zoom in. Pag malaki na, i-reset.
+                if (currentScale < 1.5) {
+                    panzoom.zoom(2.5, { animate: true });
+                } else {
+                    panzoom.reset({ animate: true });
+                }
+            }
+            lastTap = currentTime;
+        });
 
-        // SHOW/HIDE LOGIC - Dito natin aayusin yung "Double Image"
         function showFlow(type, btn) {
-            // 1. Itago lahat ng images
-            document.querySelectorAll(".flow-img").forEach(img => {
-                img.classList.add("hidden");
-            });
-
-            // 2. Alisin ang "active" class sa lahat ng buttons
-            document.querySelectorAll(".flow-tabs button").forEach(b => {
-                b.classList.remove("active");
-            });
-
-            // 3. Ipakita yung piniling image
-            const targetId = "flow-" + type;
-            document.getElementById(targetId).classList.remove("hidden");
-
-            // 4. Gawing active yung pinindot na button
+            document.querySelectorAll(".flow-img").forEach(img => img.classList.add("hidden"));
+            document.querySelectorAll(".flow-tabs button").forEach(b => b.classList.remove("active"));
+            
+            document.getElementById("flow-" + type).classList.remove("hidden");
             btn.classList.add("active");
-
-            // 5. Reset zoom para balik sa gitna ang bagong image
-            setTimeout(() => {
-                panzoom.reset({ animate: false });
-            }, 50);
+            
+            // I-reset ang pwesto para nasa gitna ulit
+            panzoom.reset();
         }
 
-        function resetZoom() {
+        function resetView() {
             panzoom.reset({ animate: true });
         }
-    </script>
 
+        // Disable standard drags/context menus
+        document.addEventListener('dragstart', (e) => e.preventDefault());
+        document.addEventListener('contextmenu', (e) => e.preventDefault());
+    </script>
 </body>
 </html>
