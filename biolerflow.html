@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Boiler Process Flow</title>
+
+<style>
+
+body{
+font-family: Arial, sans-serif;
+background:#f5f7fa;
+margin:0;
+padding:20px;
+}
+
+h2{
+margin-bottom:10px;
+}
+
+/* Tabs */
+
+.flow-tabs{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-bottom:15px;
+}
+
+.flow-tabs button{
+padding:10px 16px;
+border:none;
+background:#1f2937;
+color:white;
+border-radius:6px;
+cursor:pointer;
+font-size:14px;
+}
+
+.flow-tabs button:hover{
+background:#374151;
+}
+
+/* Flowchart viewer */
+
+.flowchart-container{
+width:100%;
+overflow-x:auto;
+background:white;
+border-radius:10px;
+border:1px solid #ddd;
+padding:10px;
+}
+
+/* Image */
+
+.flow-img{
+width:1200px;
+max-width:none;
+height:auto;
+}
+
+.hidden{
+display:none;
+}
+
+/* Mobile */
+
+@media (max-width:768px){
+
+.flow-tabs{
+justify-content:center;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<h2>Boiler Process Flow</h2>
+
+<div class="flow-tabs">
+
+<button onclick="showFlow('full')">Full Flow</button>
+
+<button onclick="showFlow('water')">Water & Air</button>
+
+<button onclick="showFlow('steam')">Steam & Drain</button>
+
+</div>
+
+<div class="flowchart-container">
+
+<img id="flow-full"
+src="assets/boilerfullflow.gif"
+class="flow-img">
+
+<img id="flow-water"
+src="assets/boilerwaterandairflow.gif"
+class="flow-img hidden">
+
+<img id="flow-steam"
+src="assets/boilersteamanddrain.gif"
+class="flow-img hidden">
+
+</div>
+
+<script>
+
+function showFlow(type){
+
+document.querySelectorAll(".flow-img").forEach(img=>{
+img.classList.add("hidden");
+});
+
+if(type === "full"){
+document.getElementById("flow-full").classList.remove("hidden");
+}
+
+if(type === "water"){
+document.getElementById("flow-water").classList.remove("hidden");
+}
+
+if(type === "steam"){
+document.getElementById("flow-steam").classList.remove("hidden");
+}
+
+}
+
+</script>
+
+</body>
+</html>
