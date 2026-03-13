@@ -4,10 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ABN Utilities | Boiler Process Flow</title>
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
-
+    
     <script src="https://unpkg.com/@panzoom/panzoom/dist/panzoom.min.js"></script>
 
     <style>
@@ -26,19 +23,15 @@
 
         .header {
             background: var(--primary);
-            color: white;
-            padding: 12px 15px;
-            font-weight: bold;
-            z-index: 20;
+            color: white; padding: 12px 15px;
+            font-weight: bold; z-index: 20;
         }
 
         .flow-tabs {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-            gap: 8px;
-            padding: 10px;
-            background: white;
-            z-index: 20;
+            gap: 8px; padding: 10px;
+            background: white; z-index: 20;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
@@ -49,7 +42,7 @@
         .flow-tabs button {
             background: #eee; border: none;
             padding: 10px; border-radius: 8px;
-            font-size: 13px; font-weight: bold;
+            font-size: 12px; font-weight: bold;
             cursor: pointer;
         }
 
@@ -57,47 +50,42 @@
             background: var(--primary); color: white;
         }
 
-        /* VIEWER FIX */
-       .viewer {
-        flex-grow: 1;
-        position: relative;
-        overflow: hidden;
-        touch-action: none;
-        background: #1a1a1a;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+        .viewer {
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden;
+            touch-action: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    #flow-wrapper {
-        /* Ginawa nating dynamic ang container size */
-        width: 100vw; 
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+        #flow-wrapper {
+            /* IMPORTANTE: Gawin nating malaki ang canvas para smooth ang drag */
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    .flow-img {
-        /* Eto ang magic: Kakasya siya sa width ng phone mo by default */
-        width: 100%; 
-        height: auto;
-        /* Pero hindi siya lalampas sa height ng screen */
-        max-height: 85vh;
-        display: block;
-        pointer-events: none;
-    }
+        .flow-img {
+            /* Default size para sa Mobile: FIT TO WIDTH */
+            width: 100%;
+            height: auto;
+            /* Default size para sa Desktop: HUWAG LALAMPAS SA SCREEN HEIGHT */
+            max-height: 85vh;
+            display: block;
+            pointer-events: none;
+        }
 
         .hidden { display: none !important; }
 
         .controls {
             position: absolute;
-            bottom: 25px;
-            right: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            z-index: 30;
+            bottom: 25px; right: 20px;
+            display: flex; flex-direction: column;
+            gap: 12px; z-index: 30;
         }
 
         .btn-ctrl {
@@ -112,7 +100,7 @@
 </head>
 <body>
 
-    <div class="header">ABN Boiler Flow</div>
+    <div class="header">ABN Boiler Flow (Nutribev)</div>
 
     <div class="flow-tabs">
         <button id="tab-full" class="active" onclick="showFlow('full', this)">⚙ Full Flow</button>
@@ -137,56 +125,51 @@
 
     <script>
         const elem = document.getElementById('flow-wrapper');
-    const viewerArea = document.getElementById('viewer-area');
-    
-    const panzoom = Panzoom(elem, {
-        maxScale: 5,
-        minScale: 1, // 1 para hindi na siya liliit pa sa "sakto sa screen"
-        contain: 'outside', // Hahayaan kang mag-drag pag naka-zoom
-        animate: true,
-        // Start sa sakto lang (Scale 1)
-        startScale: 1
-    });
-
-    // Importante: Recenter agad pagka-load
-    setTimeout(() => {
-        panzoom.pan(0, 0);
-    }, 200);
-
-    // DOUBLE TAP LOGIC (iOS/Android)
-    let lastTap = 0;
-    viewerArea.addEventListener('touchend', (e) => {
-        const currentTime = new Date().getTime();
-        const tapLength = currentTime - lastTap;
-        if (tapLength < 300 && tapLength > 0) {
-            e.preventDefault();
-            const currentScale = panzoom.getScale();
-            
-            if (currentScale < 1.5) {
-                // Zoom in sa gitna
-                panzoom.zoom(2.5, { animate: true });
-            } else {
-                // Balik sa sakto sa screen
-                panzoom.reset({ animate: true });
-                setTimeout(() => panzoom.pan(0, 0), 300);
-            }
-        }
-        lastTap = currentTime;
-    });
-
-    function showFlow(type, btn) {
-        document.querySelectorAll(".flow-img").forEach(img => img.classList.add("hidden"));
-        document.querySelectorAll(".flow-tabs button").forEach(b => b.classList.remove("active"));
-        document.getElementById("flow-" + type).classList.remove("hidden");
-        btn.classList.add("active");
+        const viewerArea = document.getElementById('viewer-area');
         
-        // Balik sa sakto sa screen paglipat ng diagram
-        panzoom.reset();
-        setTimeout(() => panzoom.pan(0, 0), 50);
-    }
+        const panzoom = Panzoom(elem, {
+            maxScale: 5,
+            minScale: 1, // Hindi pwedeng mas maliit pa sa "fit-to-screen"
+            contain: 'outside',
+            animate: true,
+            startScale: 1
+        });
+
+        // Wheel zoom speed control
+        viewerArea.addEventListener('wheel', (e) => {
+            panzoom.zoomWithWheel(e, { step: 0.1 });
+        });
+
+        // DOUBLE TAP TO ZOOM (Mobile Focus)
+        let lastTap = 0;
+        viewerArea.addEventListener('touchend', (e) => {
+            const currentTime = new Date().getTime();
+            const tapLength = currentTime - lastTap;
+            if (tapLength < 300 && tapLength > 0) {
+                e.preventDefault();
+                if (panzoom.getScale() < 1.5) {
+                    panzoom.zoom(2.5, { animate: true }); // Zoom in
+                } else {
+                    panzoom.reset({ animate: true }); // Zoom out balik sa "sakto"
+                    setTimeout(() => panzoom.pan(0, 0), 300);
+                }
+            }
+            lastTap = currentTime;
+        });
+
+        function showFlow(type, btn) {
+            document.querySelectorAll(".flow-img").forEach(img => img.classList.add("hidden"));
+            document.querySelectorAll(".flow-tabs button").forEach(b => b.classList.remove("active"));
+            document.getElementById("flow-" + type).classList.remove("hidden");
+            btn.classList.add("active");
+            
+            panzoom.reset();
+            setTimeout(() => panzoom.pan(0, 0), 50);
+        }
 
         function resetView() {
             panzoom.reset({ animate: true });
+            setTimeout(() => panzoom.pan(0, 0), 300);
         }
 
         function toggleFullscreen() {
@@ -197,10 +180,13 @@
             }
         }
 
-        // Security
+        // Security - Best Effort (Browser level)
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && (e.key === 'p' || e.key === 's')) e.preventDefault();
+            // Block Save, Print, and Inspect
+            if (e.ctrlKey && (e.key === 'p' || e.key === 's' || (e.shiftKey && e.key === 'I'))) {
+                e.preventDefault();
+            }
         });
     </script>
 </body>
