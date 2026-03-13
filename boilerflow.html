@@ -13,156 +13,188 @@
     <style>
         :root {
             --primary: #15803d;
-            --secondary: #1f2937;
+            --dark: #111827;
         }
 
         body {
             margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            padding: 0;
+            font-family: sans-serif;
             background: #f3f4f6;
-            overflow: hidden; /* Iwasan ang scroll ng buong page sa mobile */
             height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow: hidden; /* Mahalaga: para hindi gumagalaw ang buong page */
         }
 
+        /* HEADER */
         .header {
             background: var(--primary);
             color: white;
             padding: 12px 15px;
-            font-size: 18px;
             font-weight: bold;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            z-index: 10;
+            z-index: 20;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
-        /* TABS - Optimized for Mobile Scrolling */
+        /* TABS - Scrollable sa mobile para hindi mag-overlap */
         .flow-tabs {
             display: flex;
             gap: 8px;
             padding: 10px;
             background: white;
             overflow-x: auto;
-            white-space: nowrap;
-            -webkit-overflow-scrolling: touch;
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1px solid #ddd;
+            z-index: 20;
         }
 
-        .flow-tabs::-webkit-scrollbar { display: none; }
-
         .flow-tabs button {
-            background: #f3f4f6;
-            border: 1px solid #e5e7eb;
-            color: #374151;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
+            background: #e5e7eb;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 13px;
             font-weight: 600;
-            transition: all 0.2s;
-            flex-shrink: 0;
+            white-space: nowrap;
+            cursor: pointer;
         }
 
         .flow-tabs button.active {
             background: var(--primary);
             color: white;
-            border-color: var(--primary);
         }
 
-        /* VIEWER - The "Google Maps" Experience */
+        /* VIEWER - Google Maps Feel */
         .viewer {
-    flex-grow: 1;
-    width: 100%;
-    background: #1a1a1a; /* Dark background para lumitaw ang puting diagram */
-    position: relative;
-    overflow: hidden;
-    touch-action: none;
-}
+            flex-grow: 1;
+            background: #262626; /* Dark background para malitaw ang white diagram */
+            position: relative;
+            overflow: hidden;
+            touch-action: none; /* Block browser scroll para Panzoom ang gagana */
+        }
 
-#flow-wrapper {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center; /* I-center ang image verticaly */
-    justify-content: center;
-    cursor: grab;
-}
+        #flow-wrapper {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-.flow-img {
-    /* Baguhin natin ito para mag-fit base sa height sa mobile */
-    height: 90vh; 
-    width: auto;
-    max-width: none;
-    user-select: none;
-    -webkit-user-drag: none;
-}
+        .flow-img {
+            max-width: none;
+            height: 85vh; /* Fit sa height ng mobile screen */
+            width: auto;
+            display: block;
+            user-select: none;
+            pointer-events: none;
+        }
 
-/* Floating Controls - Mas malaki konti para sa daliri */
-.btn-round {
-    width: 50px;
-    height: 50px;
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(5px);
-    border-radius: 12px; /* Square-ish modern look */
-    margin-bottom: 5px;
-}
+        .hidden {
+            display: none !important;
+        }
 
+        /* FLOATING CONTROLS */
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 30;
+        }
+
+        .btn-ctrl {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            border: none;
+            background: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .btn-ctrl:active {
+            background: #eee;
+        }
     </style>
 </head>
-
 <body>
 
-    <div class="header">ABN Boiler Process</div>
+    <div class="header">ABN Boiler Process Flow</div>
 
     <div class="flow-tabs">
-        <button id="btn-full" class="active" onclick="showFlow('full', this)">⚙ Full Process</button>
-        <button id="btn-water" onclick="showFlow('water', this)">💧 Water & Air</button>
-        <button id="btn-steam" onclick="showFlow('steam', this)">♨ Steam & Drain</button>
+        <button id="tab-full" class="active" onclick="showFlow('full', this)">⚙ Full Process</button>
+        <button id="tab-water" onclick="showFlow('water', this)">💧 Water & Air</button>
+        <button id="tab-steam" onclick="showFlow('steam', this)">♨ Steam & Drain</button>
     </div>
 
-    <div class="viewer" id="viewer-container">
+    <div class="viewer">
         <div id="flow-wrapper">
             <img id="flow-full" src="assets/boilerfullflow.gif" class="flow-img">
             <img id="flow-water" src="assets/boilerwaterandairflow.gif" class="flow-img hidden">
             <img id="flow-steam" src="assets/boilersteamanddrain.gif" class="flow-img hidden">
         </div>
 
-        <div class="floating-controls">
-            <button class="btn-round" onclick="resetZoom()">🏠</button>
-            <button class="btn-round" onclick="panzoom.zoomIn()">➕</button>
-            <button class="btn-round" onclick="panzoom.zoomOut()">➖</button>
+        <div class="controls">
+            <button class="btn-ctrl" onclick="resetZoom()" title="Reset View">🏠</button>
+            <button class="btn-ctrl" onclick="panzoom.zoomIn()">➕</button>
+            <button class="btn-ctrl" onclick="panzoom.zoomOut()">➖</button>
         </div>
     </div>
 
     <script>
         const elem = document.getElementById('flow-wrapper');
         
-        // Initializing Panzoom with "Google Maps" feel
-       
-const panzoom = Panzoom(elem, {
-    maxScale: 4,
-    minScale: 0.5,
-    contain: 'outside', // Hahayaan kang i-drag ang image lampas sa screen para makita lahat
-    step: 0.3,
-    handleStartEvent: (event) => {
-        event.preventDefault(); // Iwasan ang "ghosting" ng image habang dina-drag
-    }
-});
+        // Panzoom Config
+        const panzoom = Panzoom(elem, {
+            maxScale: 5,
+            minScale: 0.3,
+            contain: 'outside', // Para pwedeng i-drag lampas sa borders
+            startScale: 1
+        });
 
-// Ito para sa smooth transition paglipat ng tabs
-function showFlow(type, btn) {
-    const images = document.querySelectorAll(".flow-img");
-    const buttons = document.querySelectorAll(".flow-tabs button");
+        // Mouse wheel zoom para sa Desktop/Chromebook
+        elem.parentElement.addEventListener('wheel', panzoom.zoomWithWheel);
 
-    images.forEach(img => img.classList.add("hidden"));
-    buttons.forEach(b => b.classList.remove("active"));
-    
-    btn.classList.add("active");
-    const activeImg = document.getElementById(`flow-${type}`);
-    activeImg.classList.remove("hidden");
+        // Iwasan ang default drag ng browser
+        document.addEventListener('dragstart', (e) => e.preventDefault());
+        document.addEventListener('contextmenu', (e) => e.preventDefault());
 
-    // Recenter natin agad para hindi "mawala" yung image pag lipat ng tab
-    panzoom.reset({ animate: false }); 
-}
+        // SHOW/HIDE LOGIC - Dito natin aayusin yung "Double Image"
+        function showFlow(type, btn) {
+            // 1. Itago lahat ng images
+            document.querySelectorAll(".flow-img").forEach(img => {
+                img.classList.add("hidden");
+            });
+
+            // 2. Alisin ang "active" class sa lahat ng buttons
+            document.querySelectorAll(".flow-tabs button").forEach(b => {
+                b.classList.remove("active");
+            });
+
+            // 3. Ipakita yung piniling image
+            const targetId = "flow-" + type;
+            document.getElementById(targetId).classList.remove("hidden");
+
+            // 4. Gawing active yung pinindot na button
+            btn.classList.add("active");
+
+            // 5. Reset zoom para balik sa gitna ang bagong image
+            setTimeout(() => {
+                panzoom.reset({ animate: false });
+            }, 50);
+        }
+
+        function resetZoom() {
+            panzoom.reset({ animate: true });
+        }
     </script>
+
 </body>
 </html>
