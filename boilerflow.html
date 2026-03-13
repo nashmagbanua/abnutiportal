@@ -4,11 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ABN Utilities | Boiler Process Flow</title>
-     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
 
-    
     <script src="https://unpkg.com/@panzoom/panzoom/dist/panzoom.min.js"></script>
 
     <style>
@@ -71,60 +70,42 @@
 
         /* VIEWER - The "Google Maps" Experience */
         .viewer {
-            flex-grow: 1;
-            width: 100%;
-            background: #222; /* Darker para mas focus sa diagram */
-            position: relative;
-            overflow: hidden;
-            touch-action: none; /* Importante ito para sa Panzoom */
-        }
+    flex-grow: 1;
+    width: 100%;
+    background: #1a1a1a; /* Dark background para lumitaw ang puting diagram */
+    position: relative;
+    overflow: hidden;
+    touch-action: none;
+}
 
-        #flow-wrapper {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: grab;
-        }
+#flow-wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center; /* I-center ang image verticaly */
+    justify-content: center;
+    cursor: grab;
+}
 
-        #flow-wrapper:active { cursor: grabbing; }
+.flow-img {
+    /* Baguhin natin ito para mag-fit base sa height sa mobile */
+    height: 90vh; 
+    width: auto;
+    max-width: none;
+    user-select: none;
+    -webkit-user-drag: none;
+}
 
-        .flow-img {
-            max-width: none;
-            height: auto;
-            width: 1200px; /* Base width */
-            display: block;
-            pointer-events: none;
-            user-select: none;
-        }
+/* Floating Controls - Mas malaki konti para sa daliri */
+.btn-round {
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(5px);
+    border-radius: 12px; /* Square-ish modern look */
+    margin-bottom: 5px;
+}
 
-        .hidden { display: none; }
-
-        /* FLOATING CONTROLS */
-        .floating-controls {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .btn-round {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            background: white;
-            border: none;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-            font-size: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--secondary);
-            cursor: pointer;
-        }
     </style>
 </head>
 
@@ -156,38 +137,32 @@
         const elem = document.getElementById('flow-wrapper');
         
         // Initializing Panzoom with "Google Maps" feel
-        const panzoom = Panzoom(elem, {
-            maxScale: 5,
-            minScale: 0.5,
-            contain: 'outside', // Mas maganda ito para sa malalaking image
-            startScale: 1,
-            cursor: 'grab'
-        });
+       
+const panzoom = Panzoom(elem, {
+    maxScale: 4,
+    minScale: 0.5,
+    contain: 'outside', // Hahayaan kang i-drag ang image lampas sa screen para makita lahat
+    step: 0.3,
+    handleStartEvent: (event) => {
+        event.preventDefault(); // Iwasan ang "ghosting" ng image habang dina-drag
+    }
+});
 
-        // Enable mouse wheel zoom
-        elem.parentElement.addEventListener('wheel', panzoom.zoomWithWheel);
+// Ito para sa smooth transition paglipat ng tabs
+function showFlow(type, btn) {
+    const images = document.querySelectorAll(".flow-img");
+    const buttons = document.querySelectorAll(".flow-tabs button");
 
-        // Fix for mobile: Disable context menu and default drags
-        document.addEventListener("contextmenu", e => e.preventDefault());
-        document.addEventListener("dragstart", e => e.preventDefault());
+    images.forEach(img => img.classList.add("hidden"));
+    buttons.forEach(b => b.classList.remove("active"));
+    
+    btn.classList.add("active");
+    const activeImg = document.getElementById(`flow-${type}`);
+    activeImg.classList.remove("hidden");
 
-        // Show/Hide Logic
-        function showFlow(type, btn) {
-            document.querySelectorAll(".flow-img").forEach(img => img.classList.add("hidden"));
-            document.querySelectorAll(".flow-tabs button").forEach(b => b.classList.remove("active"));
-            
-            btn.classList.add("active");
-            document.getElementById(`flow-${type}`).classList.remove("hidden");
-            
-            // Panzoom needs to reset or update when image changes
-            setTimeout(() => {
-                panzoom.reset();
-            }, 10);
-        }
-
-        function resetZoom() {
-            panzoom.reset({ animate: true });
-        }
+    // Recenter natin agad para hindi "mawala" yung image pag lipat ng tab
+    panzoom.reset({ animate: false }); 
+}
     </script>
 </body>
 </html>
