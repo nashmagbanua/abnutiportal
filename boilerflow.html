@@ -68,30 +68,40 @@
         }
 
         .viewer {
-            flex-grow: 1;
-            position: relative;
-            overflow: hidden;
-            touch-action: none; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+    flex-grow: 1;
+    position: relative;
+    overflow: hidden; 
+    touch-action: none; 
+    display: flex;
+    align-items: center; /* I-center verticaly */
+    justify-content: center; /* I-center horizontally */
+    background: #1a1a1a;
+}
 
-        #flow-wrapper {
-            width: 2500px; 
-            height: 1500px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+#flow-wrapper {
+    /* Ginawa nating min-width/height para hindi siya mag-shrink */
+    min-width: 2500px; 
+    min-height: 1800px; 
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    /* Siguraduhin na ang pag-zoom ay laging sa gitna nagsisimula */
+    transform-origin: center center; 
+    
+    /* Iwasan ang anumang margin na pwedeng tumulak sa image pataas */
+    margin: 0;
+    padding: 0;
+}
 
-        .flow-img {
-            width: 100%;
-            height: auto;
-            max-width: none;
-            display: block;
-            pointer-events: none;
-        }
+.flow-img {
+    width: 100%; /* Gamitin ang buong width ng wrapper */
+    height: auto;
+    max-width: none;
+    display: block;
+    pointer-events: none;
+}
 
         .hidden { display: none !important; }
 
@@ -144,20 +154,33 @@
     </div>
 
     <script>
+
         const elem = document.getElementById('flow-wrapper');
         const viewerArea = document.getElementById('viewer-area');
         
+        // Check kung mobile o desktop para sa initial zoom
+        const isMobile = window.innerWidth <= 768;
+
         const panzoom = Panzoom(elem, {
             maxScale: 5,
             minScale: 0.1,
             contain: 'outside',
-            startScale: 0.4,
+            // Mas zoomed out sa desktop (0.25) kaysa mobile (0.4) para hindi putol
+            startScale: isMobile ? 0.4 : 0.25, 
             animate: true
         });
 
-        viewerArea.addEventListener('wheel', panzoom.zoomWithWheel);
+        // Auto-center pagka-load
+        setTimeout(() => {
+            panzoom.pan(0, 0);
+        }, 200);
 
-        // --- DOUBLE TAP LOGIC ---
+        // Control zoom speed sa wheel (Desktop/Chromebook)
+        viewerArea.addEventListener('wheel', (e) => {
+            panzoom.zoomWithWheel(e, { step: 0.1 });
+        });
+
+        // --- DOUBLE TAP LOGIC (iOS/Android) ---
         let lastTap = 0;
         viewerArea.addEventListener('touchend', (e) => {
             const currentTime = new Date().getTime();
@@ -165,47 +188,55 @@
             if (tapLength < 300 && tapLength > 0) {
                 e.preventDefault();
                 const currentScale = panzoom.getScale();
-                if (currentScale < 1.5) {
-                    panzoom.zoom(2.5, { animate: true });
+                if (currentScale < 1.2) {
+                    panzoom.zoom(2.2, { animate: true });
                 } else {
                     panzoom.reset({ animate: true });
+                    setTimeout(() => panzoom.pan(0, 0), 300);
                 }
             }
             lastTap = currentTime;
         });
+
+        // --- FULLSCREEN TOGGLE ---
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    alert(`Error: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
 
         function showFlow(type, btn) {
             document.querySelectorAll(".flow-img").forEach(img => img.classList.add("hidden"));
             document.querySelectorAll(".flow-tabs button").forEach(b => b.classList.remove("active"));
             document.getElementById("flow-" + type).classList.remove("hidden");
             btn.classList.add("active");
+            
+            // Reset position para hindi "ligaw" yung image paglipat
             panzoom.reset();
+            setTimeout(() => panzoom.pan(0, 0), 50);
         }
 
         function resetView() {
             panzoom.reset({ animate: true });
+            setTimeout(() => panzoom.pan(0, 0), 300);
         }
 
-        // --- SECURITY SCRIPTS ---
-
-        // Disable Right Click & Drag
+        // Security Scripts (Huwag tanggalin para sa protection)
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.addEventListener('dragstart', e => e.preventDefault());
-
-        // Keyboard Blockers
         document.addEventListener('keydown', function(e) {
-            // Block Ctrl+P, Ctrl+S, Ctrl+Shift+I (DevTools)
             if (e.ctrlKey && (e.key === 'p' || e.key === 's' || (e.shiftKey && e.key === 'I'))) {
                 e.preventDefault();
-                if(e.key === 'p') alert("Printing restricted.");
             }
-            // PrintScreen - Note: Limited support on modern browsers
             if (e.key === "PrintScreen") {
                 navigator.clipboard.writeText("").catch(() => {});
                 alert("Screenshots restricted.");
             }
         });
-
         // Clear clipboard when leaving the tab
         document.addEventListener('visibilitychange', function() {
             if (document.hidden) {
