@@ -1,76 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Boiler Process Flow</title>
+<title>ABN Utilities | Boiler Process Flow</title>
+<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
+
+<script src="https://unpkg.com/@panzoom/panzoom/dist/panzoom.min.js"></script>
 
 <style>
 
 body{
-font-family: Arial, sans-serif;
-background:#f5f7fa;
+font-family:Arial, sans-serif;
 margin:0;
-padding:20px;
+background:#f3f4f6;
 }
 
-h2{
-margin-bottom:10px;
+/* HEADER */
+
+.header{
+background:#15803d;
+color:white;
+padding:15px;
+font-size:20px;
+font-weight:bold;
 }
 
-/* Tabs */
+/* BUTTON TABS */
 
 .flow-tabs{
 display:flex;
 gap:10px;
+padding:15px;
 flex-wrap:wrap;
-margin-bottom:15px;
 }
 
 .flow-tabs button{
-padding:10px 16px;
-border:none;
-background:#1f2937;
+background:#16a34a;
 color:white;
-border-radius:6px;
+border:none;
+padding:10px 18px;
+border-radius:8px;
 cursor:pointer;
-font-size:14px;
+font-weight:600;
 }
 
 .flow-tabs button:hover{
-background:#374151;
+background:#15803d;
 }
 
-/* Flowchart viewer */
+.flow-tabs button.active{
+background:#065f46;
+}
 
-.flowchart-container{
+/* CONTROL BUTTONS */
+
+.controls{
+display:flex;
+gap:10px;
+padding:0 15px 10px;
+}
+
+.controls button{
+background:#1f2937;
+color:white;
+border:none;
+padding:8px 14px;
+border-radius:6px;
+cursor:pointer;
+}
+
+/* FLOWCHART AREA */
+
+.viewer{
 width:100%;
-overflow-x:auto;
+height:75vh;
 background:white;
-border-radius:10px;
-border:1px solid #ddd;
-padding:10px;
+border-top:1px solid #ddd;
+position:relative;
+overflow:hidden;
 }
 
-/* Image */
+#flow-wrapper{
+cursor:grab;
+}
 
 .flow-img{
-width:1200px;
-max-width:none;
-height:auto;
+width:1300px;
+user-select:none;
+pointer-events:none;
 }
 
 .hidden{
 display:none;
 }
 
-/* Mobile */
+/* MOBILE */
 
-@media (max-width:768px){
+@media(max-width:768px){
 
-.flow-tabs{
-justify-content:center;
+.viewer{
+height:70vh;
 }
 
 }
@@ -80,26 +114,44 @@ justify-content:center;
 
 <body>
 
-<h2>Boiler Process Flow</h2>
+<div class="header">
+ABN Utilities | Boiler Process Flow
+</div>
 
 <div class="flow-tabs">
 
-<button onclick="showFlow('full')">Full Flow</button>
+<button class="active" onclick="showFlow('full',this)">
+⚙ Full Process
+</button>
 
-<button onclick="showFlow('water')">Water & Air</button>
+<button onclick="showFlow('water',this)">
+💧 Water & Air
+</button>
 
-<button onclick="showFlow('steam')">Steam & Drain</button>
+<button onclick="showFlow('steam',this)">
+♨ Steam & Drain
+</button>
 
 </div>
 
-<div class="flowchart-container">
+<div class="controls">
+
+<button onclick="resetZoom()">Reset View</button>
+
+<button onclick="toggleFullscreen()">Fullscreen</button>
+
+</div>
+
+<div class="viewer">
+
+<div id="flow-wrapper">
 
 <img id="flow-full"
 src="assets/boilerfullflow.gif"
 class="flow-img">
 
 <img id="flow-water"
-src="assets/boilerwaterandairflow.gif"
+src="assets/boilerwaterairflow.gif"
 class="flow-img hidden">
 
 <img id="flow-steam"
@@ -108,25 +160,73 @@ class="flow-img hidden">
 
 </div>
 
+</div>
+
 <script>
 
-function showFlow(type){
+/* PANZOOM */
+
+const elem = document.getElementById('flow-wrapper');
+
+const panzoom = Panzoom(elem,{
+maxScale:5,
+minScale:1,
+contain:'outside'
+});
+
+elem.parentElement.addEventListener('wheel', panzoom.zoomWithWheel);
+
+
+/* RESET */
+
+function resetZoom(){
+panzoom.reset();
+}
+
+
+/* FULLSCREEN */
+
+function toggleFullscreen(){
+
+const viewer = document.querySelector(".viewer");
+
+if(!document.fullscreenElement){
+viewer.requestFullscreen();
+}
+else{
+document.exitFullscreen();
+}
+
+}
+
+
+/* FLOW SWITCH */
+
+function showFlow(type,btn){
 
 document.querySelectorAll(".flow-img").forEach(img=>{
 img.classList.add("hidden");
 });
 
-if(type === "full"){
+document.querySelectorAll(".flow-tabs button").forEach(b=>{
+b.classList.remove("active");
+});
+
+btn.classList.add("active");
+
+if(type==="full"){
 document.getElementById("flow-full").classList.remove("hidden");
 }
 
-if(type === "water"){
+if(type==="water"){
 document.getElementById("flow-water").classList.remove("hidden");
 }
 
-if(type === "steam"){
+if(type==="steam"){
 document.getElementById("flow-steam").classList.remove("hidden");
 }
+
+resetZoom();
 
 }
 
