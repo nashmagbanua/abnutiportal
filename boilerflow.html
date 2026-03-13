@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ABN Utilities | Boiler Process Flow</title>
-    
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
@@ -14,7 +13,6 @@
     <style>
         :root { --primary: #15803d; }
 
-        /* PINAGSAMA NA BODY SELECTORS */
         body {
             margin: 0; padding: 0;
             font-family: sans-serif;
@@ -23,10 +21,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden; 
-            -webkit-user-select: none;  
-            -ms-user-select: none;      
-            user-select: none;          
-            -webkit-touch-callout: none; 
+            -webkit-user-select: none; user-select: none;
         }
 
         .header {
@@ -37,14 +32,14 @@
             z-index: 20;
         }
 
-        /* GRID FOR BUTTONS - NO OVERLAP */
         .flow-tabs {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
             gap: 8px;
             padding: 10px;
             background: white;
             z-index: 20;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
         @media (max-width: 600px) {
@@ -52,56 +47,44 @@
         }
 
         .flow-tabs button {
-            background: #eee;
-            border: none;
-            padding: 10px 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: bold;
+            background: #eee; border: none;
+            padding: 10px; border-radius: 8px;
+            font-size: 13px; font-weight: bold;
             cursor: pointer;
-            transition: 0.2s;
         }
 
         .flow-tabs button.active {
-            background: var(--primary);
-            color: white;
+            background: var(--primary); color: white;
         }
 
+        /* VIEWER FIX */
         .viewer {
-    flex-grow: 1;
-    position: relative;
-    overflow: hidden; 
-    touch-action: none; 
-    display: flex;
-    align-items: center; /* I-center verticaly */
-    justify-content: center; /* I-center horizontally */
-    background: #1a1a1a;
-}
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden;
+            touch-action: none;
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-#flow-wrapper {
-    /* Ginawa nating min-width/height para hindi siya mag-shrink */
-    min-width: 2500px; 
-    min-height: 1800px; 
-    
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    
-    /* Siguraduhin na ang pag-zoom ay laging sa gitna nagsisimula */
-    transform-origin: center center; 
-    
-    /* Iwasan ang anumang margin na pwedeng tumulak sa image pataas */
-    margin: 0;
-    padding: 0;
-}
+        #flow-wrapper {
+            /* Imbes na fixed pixels, ginawa nating dynamic */
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-.flow-img {
-    width: 100%; /* Gamitin ang buong width ng wrapper */
-    height: auto;
-    max-width: none;
-    display: block;
-    pointer-events: none;
-}
+        .flow-img {
+            /* Ito ang magpapasakto sa image mo */
+            max-width: none;
+            max-height: 90%; 
+            display: block;
+            pointer-events: none;
+        }
 
         .hidden { display: none !important; }
 
@@ -116,16 +99,12 @@
         }
 
         .btn-ctrl {
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            border: none;
+            width: 50px; height: 50px;
+            border-radius: 50%; border: none;
             background: white;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-            font-size: 22px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            font-size: 20px;
+            display: flex; align-items: center; justify-content: center;
         }
     </style>
 </head>
@@ -147,6 +126,7 @@
         </div>
 
         <div class="controls">
+            <button class="btn-ctrl" onclick="toggleFullscreen()">📺</button>
             <button class="btn-ctrl" onclick="resetView()">🏠</button>
             <button class="btn-ctrl" onclick="panzoom.zoomIn()">➕</button>
             <button class="btn-ctrl" onclick="panzoom.zoomOut()">➖</button>
@@ -154,97 +134,61 @@
     </div>
 
     <script>
-
         const elem = document.getElementById('flow-wrapper');
         const viewerArea = document.getElementById('viewer-area');
         
-        // Check kung mobile o desktop para sa initial zoom
-        const isMobile = window.innerWidth <= 768;
-
         const panzoom = Panzoom(elem, {
             maxScale: 5,
-            minScale: 0.1,
+            minScale: 0.5,
             contain: 'outside',
-            // Mas zoomed out sa desktop (0.25) kaysa mobile (0.4) para hindi putol
-            startScale: isMobile ? 0.4 : 0.25, 
             animate: true
         });
 
-        // Auto-center pagka-load
-        setTimeout(() => {
-            panzoom.pan(0, 0);
-        }, 200);
-
-        // Control zoom speed sa wheel (Desktop/Chromebook)
+        // Wheel zoom for Desktop
         viewerArea.addEventListener('wheel', (e) => {
             panzoom.zoomWithWheel(e, { step: 0.1 });
         });
 
-        // --- DOUBLE TAP LOGIC (iOS/Android) ---
+        // Double Tap for Mobile
         let lastTap = 0;
         viewerArea.addEventListener('touchend', (e) => {
             const currentTime = new Date().getTime();
             const tapLength = currentTime - lastTap;
             if (tapLength < 300 && tapLength > 0) {
                 e.preventDefault();
-                const currentScale = panzoom.getScale();
-                if (currentScale < 1.2) {
-                    panzoom.zoom(2.2, { animate: true });
+                if (panzoom.getScale() < 1.5) {
+                    panzoom.zoom(2.5, { animate: true });
                 } else {
                     panzoom.reset({ animate: true });
-                    setTimeout(() => panzoom.pan(0, 0), 300);
                 }
             }
             lastTap = currentTime;
         });
-
-        // --- FULLSCREEN TOGGLE ---
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    alert(`Error: ${err.message}`);
-                });
-            } else {
-                document.exitFullscreen();
-            }
-        }
 
         function showFlow(type, btn) {
             document.querySelectorAll(".flow-img").forEach(img => img.classList.add("hidden"));
             document.querySelectorAll(".flow-tabs button").forEach(b => b.classList.remove("active"));
             document.getElementById("flow-" + type).classList.remove("hidden");
             btn.classList.add("active");
-            
-            // Reset position para hindi "ligaw" yung image paglipat
             panzoom.reset();
-            setTimeout(() => panzoom.pan(0, 0), 50);
         }
 
         function resetView() {
             panzoom.reset({ animate: true });
-            setTimeout(() => panzoom.pan(0, 0), 300);
         }
 
-        // Security Scripts (Huwag tanggalin para sa protection)
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {});
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // Security
         document.addEventListener('contextmenu', e => e.preventDefault());
-        document.addEventListener('dragstart', e => e.preventDefault());
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && (e.key === 'p' || e.key === 's' || (e.shiftKey && e.key === 'I'))) {
-                e.preventDefault();
-            }
-            if (e.key === "PrintScreen") {
-                navigator.clipboard.writeText("").catch(() => {});
-                alert("Screenshots restricted.");
-            }
-        });
-        // Clear clipboard when leaving the tab
-        document.addEventListener('visibilitychange', function() {
-            if (document.hidden) {
-                // Try to overwrite clipboard
-                try {
-                    navigator.clipboard.writeText("Confidential - Nutribev Corp").catch(() => {});
-                } catch (err) {}
-            }
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && (e.key === 'p' || e.key === 's')) e.preventDefault();
         });
     </script>
 </body>
