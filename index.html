@@ -2271,22 +2271,40 @@ async function masterSync() {
         console.error("❌ Master Sync Error:", err);
     }
 }
-
-// --- DITO MO ILAGAY ANG BAGO ---
-// 3. Optimized Interval: Mag-sync lang kung nakabukas ang tab
-if (window.mainSyncInterval) clearInterval(window.mainSyncInterval);
-
-window.mainSyncInterval = setInterval(() => {
-    // Mag-sync lang kung ang tab ay "Visible" (hindi naka-hide/minimize)
-    if (document.visibilityState === 'visible') {
-        masterSync();
-    } else {
-        console.log("⏸️ Tab is hidden. Sync paused to save resources.");
+        // ILAGAY ITO SA LOOB NG IYONG SCRIPT TAGS (Kahit sa pinakababang bahagi)
+function updateChartRange(rangeValue) {
+    console.log("📊 Chart range changed to:", rangeValue);
+    
+    // I-update ang global variable ng range (kung meron ka nito para sa Coal Data)
+    if (window.currentRange !== undefined) {
+        window.currentRange = parseInt(rangeValue) || 7;
     }
-}, 30000); 
+    
+    // Kung may function ka na 'syncCoalData', ito ang magre-refresh ng charts
+    if (typeof syncCoalData === 'function') {
+        syncCoalData(); 
+    } else if (typeof masterSync === 'function') {
+        masterSync();
+    }
+}
 
-// 4. Tawagin agad para may data pagka-load
-masterSync();
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("🖥️ UI is fully loaded. Starting Master Sync safely...");
+    
+    // Unang tawag para may data agad pagka-load ng page nang hindi nag-uunahan ang UI
+    masterSync();
+    
+    // Optimized Interval: Magbackground-sync lang tuwing 30 segundo kung nakabukas/visible ang tab
+    if (window.mainSyncInterval) clearInterval(window.mainSyncInterval);
+    
+    window.mainSyncInterval = setInterval(() => {
+        if (document.visibilityState === 'visible') {
+            masterSync();
+        } else {
+            console.log("⏸️ Tab is hidden. Sync paused to save resources.");
+        }
+    }, 30000); 
+});
     </script>
     <script src="quiz-maker-module.js"></script>
 </body>
