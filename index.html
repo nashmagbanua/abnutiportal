@@ -1655,7 +1655,7 @@ async function updateInventoryStats(currentYard) {
                 }
             });
         });
- function loadDashboard() {
+function loadDashboard() {
     updateSidebarActive(0);
     const content = document.getElementById('cont');
     
@@ -1698,16 +1698,14 @@ async function updateInventoryStats(currentYard) {
                 <div id="updateStatus" style="font-size: 0.7rem; margin-top: 5px;"></div> 
             </div>
 
-           <div class="stat-card" style="border-left-color: #e53e3e;">
+            <div class="stat-card" style="border-left-color: #e53e3e;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <h4 style="margin: 0; font-size: 0.85rem; color: #718096; text-transform: uppercase; tracking-wider: 0.05em;">🔥 Boiler A Steam Pressure</h4>
-                    
                     <div style="background: #edf2f7; padding: 2px; border-radius: 6px; display: flex; gap: 2px;">
                         <button id="btnBoilerA_Main" onclick="toggleBoilerStatus('A', 'MAIN')" style="font-size: 0.6rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; transition: all 0.2s;">MAIN</button>
                         <button id="btnBoilerA_Backup" onclick="toggleBoilerStatus('A', 'BACKUP')" style="font-size: 0.6rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; transition: all 0.2s;">BACK-UP</button>
                     </div>
                 </div>
-
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; border-bottom: 1px solid #edf2f7; padding-bottom: 8px;">
                     <div>
                         <p style="margin:0; font-size: 0.65rem; font-weight: bold; color: #718096; text-transform: uppercase;">Present Value (PV)</p>
@@ -1722,7 +1720,6 @@ async function updateInventoryStats(currentYard) {
                         </div>
                     </div>
                 </div>
-
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
                     <span style="font-size: 0.75rem; font-weight: bold; color: #718096;">🌡️ Furnace Temp:</span>
                     <span style="font-size: 1.3rem; font-weight: 900; color: #dd6b20; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 6px rgba(221, 107, 32, 0.45); letter-spacing: 1px;" id="boilerA_Temp">0°C</span>
@@ -1732,13 +1729,11 @@ async function updateInventoryStats(currentYard) {
             <div class="stat-card" style="border-left-color: #48bb78;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <h4 style="margin: 0; font-size: 0.85rem; color: #718096; text-transform: uppercase; tracking-wider: 0.05em;">🔥 Boiler B Steam Pressure</h4>
-                    
                     <div style="background: #edf2f7; padding: 2px; border-radius: 6px; display: flex; gap: 2px;">
                         <button id="btnBoilerB_Main" onclick="toggleBoilerStatus('B', 'MAIN')" style="font-size: 0.6rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; transition: all 0.2s;">MAIN</button>
                         <button id="btnBoilerB_Backup" onclick="toggleBoilerStatus('B', 'BACKUP')" style="font-size: 0.6rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; transition: all 0.2s;">BACK-UP</button>
                     </div>
                 </div>
-
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; border-bottom: 1px solid #edf2f7; padding-bottom: 8px;">
                     <div>
                         <p style="margin:0; font-size: 0.65rem; font-weight: bold; color: #718096; text-transform: uppercase;">Present Value (PV)</p>
@@ -1753,10 +1748,37 @@ async function updateInventoryStats(currentYard) {
                         </div>
                     </div>
                 </div>
-
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
                     <span style="font-size: 0.75rem; font-weight: bold; color: #718096;">🌡️ Furnace Temp:</span>
                     <span style="font-size: 1.3rem; font-weight: 900; color: #dd6b20; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 6px rgba(221, 107, 32, 0.45); letter-spacing: 1px;" id="boilerB_Temp">0°C</span>
+                </div>
+            </div>
+
+            <div class="stat-card" style="border-left-color: #3182ce;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h4 style="margin: 0; font-size: 0.85rem; color: #718096; text-transform: uppercase; tracking-wider: 0.05em;">💧 Clean Steam Generator (CSG)</h4>
+                    <div style="background: #edf2f7; padding: 2px; border-radius: 6px; display: flex; gap: 2px;">
+                        <button id="btnCsg_4b" onclick="toggleCsgStatus('4B')" style="font-size: 0.6rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; transition: all 0.2s;">4 BARS</button>
+                        <button id="btnCsg_7b" onclick="toggleCsgStatus('7B')" style="font-size: 0.6rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; transition: all 0.2s;">7 BARS</button>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; border-bottom: 1px solid #edf2f7; padding-bottom: 8px;">
+                    <div>
+                        <p style="margin:0; font-size: 0.65rem; font-weight: bold; color: #718096; text-transform: uppercase;">Present Value (PV)</p>
+                        <div style="font-size: 1.9rem; font-weight: 900; color: #e53e3e; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 8px rgba(229, 62, 62, 0.45); letter-spacing: 1px;" id="csg_PV">
+                            0.0 <small style="font-size: 0.75rem; color: #a0aec0; font-weight:normal; font-family: sans-serif;">bars</small>
+                        </div>
+                    </div>
+                    <div style="border-left: 1px solid #edf2f7; padding-left: 10px;">
+                        <p style="margin:0; font-size: 0.65rem; font-weight: bold; color: #718096; text-transform: uppercase;">Set Value (SV)</p>
+                        <div style="font-size: 1.9rem; font-weight: 900; color: #38a169; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 8px rgba(56, 161, 105, 0.45); letter-spacing: 1px;" id="csg_SP">
+                            4.0 <small style="font-size: 0.75rem; color: #a0aec0; font-weight:normal; font-family: sans-serif;">bars</small>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                    <span style="font-size: 0.75rem; font-weight: bold; color: #718096;">📦 Product Name:</span>
+                    <span style="font-size: 0.95rem; font-weight: 800; color: #2b6cb0; background: #ebf8ff; padding: 2px 8px; border-radius: 4px; text-transform: uppercase;" id="csg_Product">VMR</span>
                 </div>
             </div>
 
@@ -1788,36 +1810,6 @@ async function updateInventoryStats(currentYard) {
                         <div style="color: #4a5568;">Tapon: <span id="dash24hTonsB" style="font-weight: bold;">0.00</span></div>
                     </div>
                 </div>
-                <div class="stat-card" style="border-left-color: #3182ce;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h4 style="margin: 0; font-size: 0.85rem; color: #718096; text-transform: uppercase; tracking-wider: 0.05em;">💧 Clean Steam Generator (CSG)</h4>
-                    
-                    <div style="background: #edf2f7; padding: 2px; border-radius: 6px; display: flex; gap: 2px;">
-                        <button id="btnCsg_4b" onclick="toggleCsgStatus('4B')" style="font-size: 0.6rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; transition: all 0.2s;">4 BARS</button>
-                        <button id="btnCsg_7b" onclick="toggleCsgStatus('7B')" style="font-size: 0.6rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; transition: all 0.2s;">7 BARS</button>
-                    </div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; border-bottom: 1px solid #edf2f7; padding-bottom: 8px;">
-                    <div>
-                        <p style="margin:0; font-size: 0.65rem; font-weight: bold; color: #718096; text-transform: uppercase;">Present Value (PV)</p>
-                        <div style="font-size: 1.9rem; font-weight: 900; color: #e53e3e; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 8px rgba(229, 62, 62, 0.45); letter-spacing: 1px;" id="csg_PV">
-                            0.0 <small style="font-size: 0.75rem; color: #a0aec0; font-weight:normal; font-family: sans-serif;">bars</small>
-                        </div>
-                    </div>
-                    <div style="border-left: 1px solid #edf2f7; padding-left: 10px;">
-                        <p style="margin:0; font-size: 0.65rem; font-weight: bold; color: #718096; text-transform: uppercase;">Set Value (SV)</p>
-                        <div style="font-size: 1.9rem; font-weight: 900; color: #38a169; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 8px rgba(56, 161, 105, 0.45); letter-spacing: 1px;" id="csg_SP">
-                            4.0 <small style="font-size: 0.75rem; color: #a0aec0; font-weight:normal; font-family: sans-serif;">bars</small>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
-                    <span style="font-size: 0.75rem; font-weight: bold; color: #718096;">📦 Product Name:</span>
-                    <span style="font-size: 0.95rem; font-weight: 800; color: #2b6cb0; background: #ebf8ff; padding: 2px 8px; border-radius: 4px; text-transform: uppercase;" id="csg_Product">VMR</span>
-                </div>
-            </div>
                 <div style="text-align: right; margin-top: 8px;">
                     <span id="dashCoalLogDate" style="font-size: 0.65rem; background: #f7fafc; padding: 2px 6px; border: 1px solid #e2e8f0; border-radius: 4px; color: #a0aec0;">Loading...</span>
                 </div>
@@ -1826,22 +1818,18 @@ async function updateInventoryStats(currentYard) {
             <div class="stat-card" style="border-left-color: #319795;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <h4 style="margin: 0; font-size: 0.85rem; color: #718096; text-transform: uppercase; tracking-wider: 0.05em;">Chemical Usage (24H)</h4>
-                    
                     <div style="background: #edf2f7; padding: 2px; border-radius: 6px; display: flex; gap: 2px;">
                         <button id="btnChemView" onclick="switchChemView('chem')" style="font-size: 0.65rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; background: #ffffff; color: #2d3748; transition: all 0.2s;">Chemical</button>
                         <button id="btnAreaView" onclick="switchChemView('area')" style="font-size: 0.65rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; background: transparent; color: #718096; transition: all 0.2s;">Area</button>
                     </div>
                 </div>
-                
                 <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 8px; border-bottom: 1px solid #edf2f7; padding-bottom: 6px;">
                     <div style="font-size: 1.5rem; font-weight: 900; color: #2d3748;" id="dashChemMainValue">0 <span style="font-size: 0.8rem; font-weight: normal; color: #a0aec0;">TAPS</span></div>
                     <div style="font-size: 0.75rem; font-weight: bold; color: #a0aec0;" id="dashChemLowAlert">0 CRITICAL</div>
                 </div>
-
                 <div style="margin-top: 8px; font-size: 0.78rem; max-height: 95px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px;" id="dashChemListContainer">
                     <p style="color: #a0aec0; text-align: center; font-style: italic; padding: 10px 0;">Loading chemical logs...</p>
                 </div>
-
                 <div style="text-align: right; margin-top: 6px;">
                     <span id="dashChemSyncTime" style="font-size: 0.65rem; background: #f7fafc; padding: 2px 6px; border: 1px solid #e2e8f0; border-radius: 4px; color: #a0aec0;">Syncing...</span>
                 </div>
@@ -1863,20 +1851,20 @@ async function updateInventoryStats(currentYard) {
         </div>
     `;
 
-   // Engine Delay loader at STEAMMMMM SIMULATOR changed in the future updates 
+    // Engine Delay loader at STEAM CONTROLLER
     setTimeout(() => {
         if (typeof fetchDashboardData === "function") fetchDashboardData(yDate);
         if (typeof fetchLatestGPM === "function") fetchLatestGPM(); 
         if (typeof checkTodayStatus === "function") checkTodayStatus();
-        if (typeof fetch24hCoalConsumption === "function" ? fetch24hCoalConsumption() : null);
+        if (typeof fetch24hCoalConsumption === "function") fetch24hCoalConsumption();
         if (typeof fetchDashboardChemicals === "function") fetchDashboardChemicals();
         
-        // 🔴 Unang load ng boiler data pagkabukas ng dashboard:
+        // 🔴 Unang load at kulay ng Boiler at CSG states pagkabukas:
         if (typeof fetchBoilerSteamData === "function") fetchBoilerSteamData();
-        renderBoilerToggleButtons();
+        if (typeof renderBoilerToggleButtons === "function") renderBoilerToggleButtons();
+        if (typeof renderCsgToggleButtons === "function") renderCsgToggleButtons();
 
-        // 🔄 AUTOMATIC LIVE LOOP (DITO NATIN ISINAMAK):
-        // Patatakbuhin nito ang simulation kada 2 segundo para mag-isa siyang gagalaw at mag-o-oscillate!
+        // 🔄 AUTOMATIC LIVE LOOP: Tumatakbo kada 2 segundo
         setInterval(() => {
             if (typeof fetchBoilerSteamData === "function") {
                 fetchBoilerSteamData();
