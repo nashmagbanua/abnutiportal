@@ -1614,6 +1614,33 @@ async function updateInventoryStats(currentYard) {
                     <div class="value" style="font-size: 1.5rem; color: #cbd5e0;">Loading...</div>
                 </div>
             </div>
+
+            <div class="stat-card" style="border-left-color: #38a169;">
+                <h4 style="margin: 0; font-size: 0.85rem; color: #718096; text-transform: uppercase; tracking-wider: 0.05em;">Total Coal Consumption (24H)</h4>
+                
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 10px; border-bottom: 1px solid #edf2f7; padding-bottom: 8px;">
+                    <div style="font-size: 1.6rem; font-weight: 900; color: #2d3748;" id="dash24hCombinedBkt">0 <span style="font-size: 0.8rem; font-weight: normal; color: #a0aec0;">BKT</span></div>
+                    <div style="font-size: 1.3rem; font-weight: 900; color: #319795;" id="dash24hCombinedTons">0.00 <span style="font-size: 0.75rem; font-weight: normal; color: #a0aec0;">TPN</span></div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; font-size: 0.78rem;">
+                    <div>
+                        <div style="font-weight: bold; color: #38a169;">🔥 Boiler A</div>
+                        <div style="color: #4a5568; margin-top: 2px;">Count: <span id="dash24hBktA" style="font-weight: bold;">0</span> BKT</div>
+                        <div style="color: #4a5568;">Tapon: <span id="dash24hTonsA" style="font-weight: bold;">0.00</span> TPN</div>
+                    </div>
+                    <div style="border-left: 1px solid #edf2f7; padding-left: 10px;">
+                        <div style="font-weight: bold; color: #48bb78;">🔥 Boiler B</div>
+                        <div style="color: #4a5568; margin-top: 2px;">Count: <span id="dash24hBktB" style="font-weight: bold;">0</span> BKT</div>
+                        <div style="color: #4a5568;">Tapon: <span id="dash24hTonsB" style="font-weight: bold;">0.00</span> TPN</div>
+                    </div>
+                </div>
+
+                <div style="text-align: right; margin-top: 8px;">
+                    <span id="dashCoalLogDate" style="font-size: 0.65rem; background: #f7fafc; padding: 2px 6px; border: 1px solid #e2e8f0; border-radius: 4px; color: #a0aec0;">Loading...</span>
+                </div>
+            </div>
+
         </div>
 
         <div id="coal-queue-bar" style="margin-top: 15px;"></div>
@@ -1636,11 +1663,12 @@ async function updateInventoryStats(currentYard) {
         if (typeof fetchLatestGPM === "function") fetchLatestGPM(); 
         if (typeof checkTodayStatus === "function") checkTodayStatus();
         
-        // Tawagin ang syncCoalData para i-process ang currentYardData
-        // At ang updateDashboardSidebar para i-render ang coal elements sa dashboard
+        // 🔴 DAGDAG: Tawagin ang bagong data engine para sa Coal Tracking
+        if (typeof fetch24hCoalConsumption === "function") fetch24hCoalConsumption();
+        
         if (typeof syncCoalData === "function") {
             syncCoalData(); 
-         }
+        }
     }, 150);
 }
 function updateDashboardSidebar() {
@@ -2319,7 +2347,9 @@ async function masterSync() {
     try {
         await Promise.all([
             syncCoalData(),
-            fetchGPMLogs()
+            fetchGPMLogs(),
+            // 🟢 ISINAMA NATIN DITO PARA SUMABAY SA BACKGROUND REFRESH TUWING 30 SECONDS:
+            typeof fetch24hCoalConsumption === "function" ? fetch24hCoalConsumption() : Promise.resolve()
         ]);
         console.log("✅ Data updated at: " + new Date().toLocaleTimeString());
     } catch (err) {
@@ -2349,6 +2379,74 @@ function updateChartRange(rangeValue) {
         syncCoalData(); 
     } else if (typeof masterSync === 'function') {
         masterSync();
+    }
+}
+        // ====================================================================
+// NEW FIX: 24-Hour Coal Consumption Engine (daily_bucket_logs)
+// ====================================================================
+async function fetch24hCoalConsumption() {
+    try {
+        // 1. Kuhanin ang petsa ngayon sa Pilipinas (Format: YYYY-MM-DD)
+        const ngayon = new Date();
+        const year = ngayon.getFullYear();
+        const month = String(ngayon.getMonth() + 1).padStart(2, '0');
+        const day = String(ngayon.getDate()).padStart(2, '0');
+        const dateStr = `${year}-${month}-${day}`; 
+
+        // I-set ang text ng Petsa ngayon sa card
+        if(document.getElementById('dashCoalLogDate')) {
+            document.getElementById('dashCoalLogDate').innerText = ngayon.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        // 2. Hila ng data mula sa Supabase gamit ang iyong totoong table name at log_date
+        const { data, error } = await supabaseClient
+            .from('daily_bucket_logs')
+            .select('boiler, buckets_used, tapon_count')
+            .eq('log_date', dateStr);
+
+        if (error) throw error;
+
+        // Ihanda ang mga counters para sa Boiler A at Boiler B
+        let bktA = 0, bktB = 0;
+        let tonsA = 0, tonsB = 0;
+
+        // 3. I-loop ang mga entries ngayong araw at i-separate base sa boiler name
+        if (data && data.length > 0) {
+            data.forEach(row => {
+                const boilerName = row.boiler ? row.boiler.toUpperCase() : '';
+                
+                if (boilerName.includes('A')) {
+                    bktA += parseFloat(row.buckets_used || 0);
+                    tonsA += parseFloat(row.tapon_count || 0);
+                } else if (boilerName.includes('B')) {
+                    bktB += parseFloat(row.buckets_used || 0);
+                    tonsB += parseFloat(row.tapon_count || 0);
+                }
+            });
+        }
+
+        // Pag-combine ng dalawang boiler para sa Main display
+        const combinedBkt = bktA + bktB;
+        const combinedTons = tonsA + tonsB;
+
+        // 4. I-inject ang mga kalkuladong numero sa iyong UI Elements
+        if(document.getElementById('dash24hCombinedBkt')) {
+            document.getElementById('dash24hCombinedBkt').innerHTML = `${combinedBkt.toLocaleString()} <span style="font-size: 0.8rem; font-weight: normal; color: #a0aec0;">BKT</span>`;
+        }
+        if(document.getElementById('dash24hCombinedTons')) {
+            document.getElementById('dash24hCombinedTons').innerHTML = `${combinedTons.toFixed(2)} <span style="font-size: 0.75rem; font-weight: normal; color: #a0aec0;">TPN</span>`;
+        }
+        
+        // Boiler A Breakdown Display
+        if(document.getElementById('dash24hBktA')) document.getElementById('dash24hBktA').innerText = bktA.toLocaleString();
+        if(document.getElementById('dash24hTonsA')) document.getElementById('dash24hTonsA').innerText = tonsA.toFixed(2);
+        
+        // Boiler B Breakdown Display
+        if(document.getElementById('dash24hBktB')) document.getElementById('dash24hBktB').innerText = bktB.toLocaleString();
+        if(document.getElementById('dash24hTonsB')) document.getElementById('dash24hTonsB').innerText = tonsB.toFixed(2);
+
+    } catch (err) {
+        console.error("❌ Error sa pag-compute ng 24h Coal galing sa daily_bucket_logs:", err);
     }
 }
 
