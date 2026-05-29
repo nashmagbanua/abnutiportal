@@ -17,11 +17,23 @@ async function loadQuizMaker() {
         </div>
     `;
     
+    // 1. KUNIN ANG CURRENT USER MULA SA LOCALSTORAGE (Dahil internal app at walang Supabase Auth)
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (!currentUser) {
+        content.innerHTML = `
+            <div style="padding:40px;text-align:center;color:var(--text-sub);">
+                <i class="fas fa-exclamation-triangle" style="font-size:2.5rem;margin-bottom:15px;color:#e67e22;"></i>
+                <p style="font-size:1.1rem;font-weight:600;">Kailangan mong mag-login muna.</p>
+                <p style="font-size:0.9rem;margin-top:5px;">Hindi mahanap ang session ng iyong Supervisor account.</p>
+            </div>`;
+        return;
+    }
+
     // Fetch quizzes created by current user
     const { data, error } = await supabaseClient
         .from('quizzes')
         .select('*')
-        .eq('created_by', (await supabaseClient.auth.getUser()).data.user.id)
+        .eq('created_by', currentUser.id)
         .order('created_at', { ascending: false });
     
     if (error) {
@@ -164,7 +176,12 @@ async function createNewQuiz() {
     
     if (!title) return showToast('Quiz title is required', 'warning');
     
-    const user = (await supabaseClient.auth.getUser()).data.user;
+    // KUNIN ANG CURRENT USER MULA SA LOCALSTORAGE
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (!currentUser || !currentUser.id) {
+        return showToast('Session error: Mangyaring mag-login muna.', 'error');
+    }
+    
     const isPublic = type === 'public';
     const publicSlug = isPublic ? generateSlug(title) : null;
     
@@ -173,7 +190,7 @@ async function createNewQuiz() {
         .insert([{
             title,
             description: desc,
-            created_by: user.id,
+            created_by: currentUser.id,
             is_public: isPublic,
             public_slug: publicSlug,
             is_published: false
