@@ -1801,7 +1801,7 @@ async function fetchLatestGPM() {
     }
 }
 async function fetchDashboardData(yDate) {
-    // 1. Kunin ang Yesterday's Total
+    // 1. Kunin ang Yesterday's Total (Huwag galawin ang parteng ito para laging tama ang card)
     database.ref('readings/' + yDate).once('value', (snapshot) => {
         const data = snapshot.val();
         let total = 0;
@@ -1818,17 +1818,29 @@ async function fetchDashboardData(yDate) {
         }
     });
 
-    // 2. LOGIC PARA SA LAST 7 DAYS CHART
+    // 2. DYNAMIC LOGIC PARA SA CHART (Dito natin binago)
+    // Kukunin nito kung anong range ang pinili sa dropdown. Kung wala pa, default ay 7 days.
+    const totalDays = window.currentChartRange || 7;
+    
     const labels = [];
     const datePromises = [];
 
-    for (let i = 6; i >= 0; i--) {
+    // Ang loop ay nakadepende na ngayon sa totalDays (pwedeng 7, pwedeng 30)
+    for (let i = totalDays - 1; i >= 0; i--) {
         const d = new Date();
         d.setDate(d.getDate() - i);
         const dateStr = d.toISOString().split('T')[0];
-        const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
         
-        labels.push(dayName);
+        // Pormat ng Label: Kung higit sa 7 araw (gaya ng 30 days), maikling petsa (e.g., "Jan 15")
+        // ang gagamitin para hindi magpatong-patong ang mga text sa ilalim ng chart.
+        let labelName;
+        if (totalDays > 7) {
+            labelName = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        } else {
+            labelName = d.toLocaleDateString('en-US', { weekday: 'short' });
+        }
+        
+        labels.push(labelName);
         
         const promise = database.ref('readings/' + dateStr).once('value').then(snap => {
             const dayReadings = snap.val();
@@ -1843,14 +1855,14 @@ async function fetchDashboardData(yDate) {
         datePromises.push(promise);
     }
 
-    // Hintayin matapos ang fetch
+    // Hintayin matapos ang fetch ng lahat ng araw (7 man o 30)
     const results = await Promise.all(datePromises);
 
     // --- SAFETY CHECK DITO ---
     const canvas = document.getElementById('usageChart');
     if (!canvas) {
         console.warn("Usage Chart element missing. User likely navigated away.");
-        return; // Itigil ang function, huwag mag-error
+        return; 
     }
 
     const ctx = canvas.getContext('2d');
@@ -1870,7 +1882,7 @@ async function fetchDashboardData(yDate) {
                 fill: true,
                 tension: 0.3,
                 borderWidth: 3,
-                pointRadius: 4,
+                pointRadius: totalDays > 7 ? 2 : 4, // Mas maliit na tuldok kapag 30 days para malinis tingnan
                 pointBackgroundColor: '#3182ce'
             }]
         },
@@ -1891,12 +1903,17 @@ async function fetchDashboardData(yDate) {
                 y: { 
                     beginAtZero: true,
                     ticks: { callback: value => value.toLocaleString() } 
-                } 
+                },
+                x: {
+                    // Limitahan ang gridlines sa ilalim kapag marami para hindi masakit sa mata
+                    ticks: {
+                        maxTicksLimit: totalDays > 7 ? 10 : 7
+                    }
+                }
             }
         }
     });
 }
-
 // Para automatic mag-load ang dashboard pagka-login
 // Idagdag ang loadDashboard() sa loob ng login() function mo.
 
@@ -2235,6 +2252,44 @@ async function doDelete(id, btn) {
                 setTimeout(() => toast.remove(), 300);
             }, duration);
         }
+        // ====================================================================
+// NEW FIX: Function para sa pagbura ng GPM Log nang walang Auth dependency
+// ====================================================================
+async function deleteGPMLog(logId) {
+    // 1. Magpakita ng confirmation prompt para hindi aksidenteng mabura
+    if (!confirm("Sigurado ka bang gusto mong burahin ang GPM reading na ito?")) {
+        return;
+    }
+
+    try {
+        console.log(`🗑️ Sinusubukang burahin ang log ID: ${logId}`);
+
+        // 2. I-delete ang record mula sa Supabase table ng gpm logs
+        // Paalala: Siguraduhin na 'gpm_readings' o kung ano man ang tamang pangalan ng table mo sa Supabase
+        const { error } = await supabaseClient
+            .from('gpm_readings') 
+            .delete()
+            .eq('id', logId);
+
+        if (error) throw error;
+
+        // 3. Magpakita ng tagumpay na alert/toast (kung may showToast ka)
+        if (typeof showToast === 'function') {
+            showToast('Matagumpay na nabura ang GPM log!', 'success');
+        } else {
+            alert('Matagumpay na nabura ang GPM log!');
+        }
+
+        // 4. Awtomatikong i-refresh ang screen para maglaho ang binurang linya sa table
+        if (typeof masterSync === 'function') {
+            masterSync();
+        }
+
+    } catch (err) {
+        console.error("❌ Error sa pagbura ng GPM Log:", err);
+        alert("Hindi nabura ang log: " + err.message);
+    }
+}
 
         // ─── MOBILE SIDEBAR (UNIFIED with backdrop) ──────────────
         function toggleSidebarMobile() {
@@ -2271,16 +2326,25 @@ async function masterSync() {
         console.error("❌ Master Sync Error:", err);
     }
 }
-        // ILAGAY ITO SA LOOB NG IYONG SCRIPT TAGS (Kahit sa pinakababang bahagi)
+     
+
+// 1. UPDATE CHART RANGE HANDLER (Ito ang binago para tawagin ang Firebase Chart )
 function updateChartRange(rangeValue) {
-    console.log("📊 Chart range changed to:", rangeValue);
+    const days = parseInt(rangeValue) || 7;
+    window.currentChartRange = days; // Sine-save ang 7 o 30 sa global variable
+    console.log(`📊 Chart range changed to: ${days} days`);
     
-    // I-update ang global variable ng range (kung meron ka nito para sa Coal Data)
-    if (window.currentRange !== undefined) {
-        window.currentRange = parseInt(rangeValue) || 7;
-    }
+    // Gumawa ng date string para sa "kahapon" na kailangan ng fetchDashboardData
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yDateStr = yesterday.toISOString().split('T')[0];
+
+    // Kung nariyan ang fetchDashboardData (Firebase), i-refresh ang chart agad
+    if (typeof fetchDashboardData === 'function') {
+        fetchDashboardData(yDateStr);
+    } 
     
-    // Kung may function ka na 'syncCoalData', ito ang magre-refresh ng charts
+    // Kung may hiwalay ka ring Coal Data chart (Supabase), isabay na rin natin
     if (typeof syncCoalData === 'function') {
         syncCoalData(); 
     } else if (typeof masterSync === 'function') {
@@ -2288,13 +2352,12 @@ function updateChartRange(rangeValue) {
     }
 }
 
+// 2. DOM CONTENT LOADED (Huwag galawin ito, okay na ito!)
 document.addEventListener("DOMContentLoaded", () => {
     console.log("🖥️ UI is fully loaded. Starting Master Sync safely...");
     
-    // Unang tawag para may data agad pagka-load ng page nang hindi nag-uunahan ang UI
     masterSync();
     
-    // Optimized Interval: Magbackground-sync lang tuwing 30 segundo kung nakabukas/visible ang tab
     if (window.mainSyncInterval) clearInterval(window.mainSyncInterval);
     
     window.mainSyncInterval = setInterval(() => {
