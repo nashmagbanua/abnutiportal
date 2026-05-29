@@ -303,21 +303,26 @@
 
 <div class="timer" id="timer" style="display: none;"></div>
 
+```html
 <script>
-    // Initialize Supabase (use your own config)
+    // Initialize Supabase
     const SUPABASE_URL = 'https://qbeacrpoyfacgmbzxjcu.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFiZWFjcnBveWZhY2dtYnp4amN1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2NTM5NTIsImV4cCI6MjA2NDIyOTk1Mn0.6kfxKLJxidW4BcqsMJte61AtzydrTW-1ZJIJytiUBt4';
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFiZWFjcnBveWZhY2dtYnp4amN1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2NTM5NTIsImV4cCI6MjA2NDIyOTk1Mn0.6kfxKLJxidW4BcqsMJte61AtzydrTW-1ZJIJytiUBt4";
+
+    // FIXED: renamed variable to avoid duplicate declaration error
+    const supabaseClient = supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+    );
 
     let currentQuiz = null;
     let currentQuestions = [];
-    let currentAnswers = {}; // { question_id: answer }
+    let currentAnswers = {};
     let timerInterval = null;
     let timeRemaining = 0;
 
     async function loadQuiz() {
         try {
-            // Get slug from URL query param: ?slug=safety-training-abc123
             const params = new URLSearchParams(window.location.search);
             const slug = params.get('slug');
 
@@ -326,8 +331,8 @@
                 return;
             }
 
-            // Fetch quiz by slug
-            const { data: quiz, error: quizError } = await supabase
+            // Fetch quiz
+            const { data: quiz, error: quizError } = await supabaseClient
                 .from('quizzes')
                 .select('*')
                 .eq('public_slug', slug)
@@ -335,14 +340,14 @@
                 .single();
 
             if (quizError || !quiz) {
-                showError('Quiz not found or has been deleted.');
+                showError('Quiz not found or deleted.');
                 return;
             }
 
             currentQuiz = quiz;
 
             // Fetch questions
-            const { data: questions, error: qError } = await supabase
+            const { data: questions, error: qError } = await supabaseClient
                 .from('quiz_questions')
                 .select('*')
                 .eq('quiz_id', quiz.id)
@@ -355,47 +360,57 @@
 
             currentQuestions = questions;
 
-            // If quiz is private, check if user is logged in
+            // Private quiz check
             if (!quiz.is_public) {
-                const { data: { user } } = await supabase.auth.getUser();
+                const { data: { user } } = await supabaseClient.auth.getUser();
+
                 if (!user) {
-                    showError('This quiz requires you to be logged in.');
+                    showError('You need to login first.');
                     return;
                 }
             }
 
             renderQuiz();
+
         } catch (err) {
-            showError('Error loading quiz: ' + err.message);
+            showError(err.message);
         }
     }
 
     function renderQuiz() {
         const content = document.getElementById('content');
 
-        // If public, show info collection form first
         if (currentQuiz.is_public) {
             content.innerHTML = `
                 <div class="info-form">
-                    <h3 style="margin-bottom:20px;color:var(--text-dark);">Before you start...</h3>
+                    <h3 style="margin-bottom:20px;">
+                        Before you start...
+                    </h3>
+
                     <div class="form-group">
-                        <label>Full Name <span class="required">*</span></label>
-                        <input type="text" id="nameInput" placeholder="Your name" required>
+                        <label>Full Name *</label>
+                        <input type="text" id="nameInput">
                     </div>
+
                     <div class="form-group">
-                        <label>Email <span class="required">*</span></label>
-                        <input type="email" id="emailInput" placeholder="your@email.com" required>
+                        <label>Email *</label>
+                        <input type="email" id="emailInput">
                     </div>
+
                     <div class="form-group">
                         <label>Department</label>
-                        <input type="text" id="deptInput" placeholder="e.g., Operations">
+                        <input type="text" id="deptInput">
                     </div>
+
                     <div class="form-group">
                         <label>Employee ID</label>
-                        <input type="text" id="empIdInput" placeholder="e.g., EMP-001">
+                        <input type="text" id="empIdInput">
                     </div>
-                    <button class="btn-primary" onclick="startQuiz()" style="width:100%;">
-                        <i class="fas fa-arrow-right"></i> Start Quiz
+
+                    <button class="btn-primary"
+                        onclick="startQuiz()"
+                        style="width:100%;">
+                        Start Quiz
                     </button>
                 </div>
             `;
@@ -405,11 +420,16 @@
     }
 
     function startQuiz() {
-        const content = document.getElementById('content');
 
-        // Get user info if public
-        let respondentInfo = { name: '', email: '', department: '', employee_id: '' };
+        let respondentInfo = {
+            name: '',
+            email: '',
+            department: '',
+            employee_id: ''
+        };
+
         if (currentQuiz.is_public) {
+
             respondentInfo = {
                 name: document.getElementById('nameInput').value,
                 email: document.getElementById('emailInput').value,
@@ -418,20 +438,20 @@
             };
 
             if (!respondentInfo.name || !respondentInfo.email) {
-                alert('Name and email are required');
+                alert('Name and Email required');
                 return;
             }
         }
 
-        // Initialize timer if set
-        if (currentQuiz.time_limit_seconds) {
-            timeRemaining = currentQuiz.time_limit_seconds;
-            startTimer();
-            document.getElementById('timer').style.display = 'block';
-        }
+        window.respondentInfo = respondentInfo;
 
-        // Render questions
-        let html = `<div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>`;
+        const content = document.getElementById('content');
+
+        let html = `
+            <div class="progress-bar">
+                <div class="progress-fill" style="width:0%"></div>
+            </div>
+        `;
 
         currentQuestions.forEach((q, idx) => {
             html += renderQuestion(q, idx + 1);
@@ -439,92 +459,146 @@
 
         html += `
             <div class="buttons">
-                <button class="btn-secondary" onclick="window.location.href='/'" ><i class="fas fa-times"></i> Exit</button>
-                <button class="btn-primary" onclick="submitQuiz()"><i class="fas fa-check"></i> Submit</button>
+                <button class="btn-secondary"
+                    onclick="window.location.reload()">
+                    Exit
+                </button>
+
+                <button class="btn-primary"
+                    onclick="submitQuiz()">
+                    Submit Quiz
+                </button>
             </div>
         `;
 
         content.innerHTML = html;
 
-        // Store respondent info for submission
-        window.respondentInfo = respondentInfo;
+        if (currentQuiz.time_limit_seconds) {
+            timeRemaining = currentQuiz.time_limit_seconds;
+            startTimer();
+            document.getElementById('timer').style.display = 'block';
+        }
     }
 
     function renderQuestion(question, questionNum) {
+
         const type = question.question_type;
         const options = question.options || [];
 
         let html = `
             <div class="question-container">
+
                 <div class="question-header">
-                    <div class="question-number">${questionNum}</div>
+                    <div class="question-number">
+                        ${questionNum}
+                    </div>
+
                     <div class="question-text">
                         ${question.question_text}
-                        ${question.is_required ? '<span class="required">*</span>' : ''}
                     </div>
                 </div>
+
                 <div class="options">
         `;
 
         if (type === 'true_false') {
+
             html += `
                 <div class="option">
-                    <input type="radio" id="q${question.id}_true" name="q${question.id}" value="true"
-                        onchange="updateAnswer('${question.id}', 'true')">
-                    <label for="q${question.id}_true">True</label>
+                    <input type="radio"
+                        name="q${question.id}"
+                        value="true"
+                        onchange="updateAnswer('${question.id}','true')">
+
+                    <label>True</label>
                 </div>
+
                 <div class="option">
-                    <input type="radio" id="q${question.id}_false" name="q${question.id}" value="false"
-                        onchange="updateAnswer('${question.id}', 'false')">
-                    <label for="q${question.id}_false">False</label>
+                    <input type="radio"
+                        name="q${question.id}"
+                        value="false"
+                        onchange="updateAnswer('${question.id}','false')">
+
+                    <label>False</label>
                 </div>
             `;
-        } else if (type === 'checkbox') {
+
+        } else if (type === 'multiple_choice') {
+
             options.forEach(opt => {
+
                 html += `
                     <div class="option">
-                        <input type="checkbox" id="q${question.id}_${opt.id}" value="${opt.id}"
-                            onchange="updateAnswer('${question.id}', this)">
-                        <label for="q${question.id}_${opt.id}">${opt.text}</label>
+
+                        <input type="radio"
+                            name="q${question.id}"
+                            value="${opt.id}"
+                            onchange="updateAnswer('${question.id}','${opt.id}')">
+
+                        <label>${opt.text}</label>
+
                     </div>
                 `;
             });
-        } else if (type === 'multiple_choice') {
+
+        } else if (type === 'checkbox') {
+
             options.forEach(opt => {
+
                 html += `
                     <div class="option">
-                        <input type="radio" id="q${question.id}_${opt.id}" name="q${question.id}" value="${opt.id}"
-                            onchange="updateAnswer('${question.id}', '${opt.id}')">
-                        <label for="q${question.id}_${opt.id}">${opt.text}</label>
+
+                        <input type="checkbox"
+                            class="q${question.id}"
+                            value="${opt.id}"
+                            onchange="updateCheckboxAnswer('${question.id}')">
+
+                        <label>${opt.text}</label>
+
                     </div>
                 `;
             });
         }
 
         html += `</div></div>`;
+
         return html;
     }
 
     function updateAnswer(questionId, value) {
-        if (typeof value === 'string') {
-            currentAnswers[questionId] = value;
-        } else {
-            // Checkbox - collect all checked
-            const checkboxes = document.querySelectorAll(`input[name="q${questionId}"]:checked`);
-            currentAnswers[questionId] = Array.from(checkboxes).map(cb => cb.value);
-        }
+        currentAnswers[questionId] = value;
+        updateProgress();
+    }
 
-        // Update progress
-        const answeredCount = Object.keys(currentAnswers).length;
+    function updateCheckboxAnswer(questionId) {
+
+        const checked = document.querySelectorAll(
+            `.q${questionId}:checked`
+        );
+
+        currentAnswers[questionId] = Array
+            .from(checked)
+            .map(cb => cb.value);
+
+        updateProgress();
+    }
+
+    function updateProgress() {
+
+        const answered = Object.keys(currentAnswers).length;
         const total = currentQuestions.length;
-        const progress = (answeredCount / total) * 100;
-        document.querySelector('.progress-fill').style.width = progress + '%';
+
+        const percent = (answered / total) * 100;
+
+        document.querySelector('.progress-fill')
+            .style.width = percent + '%';
     }
 
     async function submitQuiz() {
+
         try {
-            // Create quiz attempt
-            const { data: attempt, error: attemptError } = await supabase
+
+            const { data: attempt, error } = await supabaseClient
                 .from('quiz_attempts')
                 .insert([{
                     quiz_id: currentQuiz.id,
@@ -532,83 +606,98 @@
                     respondent_email: window.respondentInfo.email,
                     respondent_department: window.respondentInfo.department,
                     respondent_employee_id: window.respondentInfo.employee_id,
+                    total_score: 0,
+                    percentage_score: 0,
                     start_time: new Date().toISOString(),
-                    end_time: new Date().toISOString(),
-                    total_score: 0, // Will calculate in Sprint 2
-                    percentage_score: 0
+                    end_time: new Date().toISOString()
                 }])
                 .select()
                 .single();
 
-            if (attemptError) throw attemptError;
+            if (error) throw error;
 
-            // Save responses (basic - actual scoring in Sprint 2)
-            for (const [qId, answer] of Object.entries(currentAnswers)) {
-                await supabase
+            for (const [questionId, answer] of Object.entries(currentAnswers)) {
+
+                await supabaseClient
                     .from('quiz_responses')
                     .insert([{
                         quiz_attempt_id: attempt.id,
-                        question_id: qId,
+                        question_id: questionId,
                         answer: answer,
-                        is_correct: false, // Will calculate in Sprint 2
+                        is_correct: false,
                         points_earned: 0
                     }]);
             }
 
             clearInterval(timerInterval);
+
             showSuccessScreen();
+
         } catch (err) {
-            alert('Error submitting quiz: ' + err.message);
+
+            alert('Submit Error: ' + err.message);
         }
     }
 
     function showSuccessScreen() {
+
         document.getElementById('timer').style.display = 'none';
+
         document.getElementById('content').innerHTML = `
             <div class="success-screen">
+
                 <div class="success-icon">
-                    <i class="fas fa-check"></i>
+                    ✓
                 </div>
-                <h2 style="color:var(--text-dark);margin-bottom:5px;">Quiz Submitted!</h2>
-                <p style="color:#718096;margin-bottom:20px;">Your responses have been recorded.</p>
-                <p style="color:#718096;margin-bottom:30px;">You will receive an email shortly with your results and certificate.</p>
-                <button class="btn-primary" onclick="window.location.href='/'">
-                    <i class="fas fa-home"></i> Back to Home
-                </button>
+
+                <h2>Quiz Submitted!</h2>
+
+                <p>
+                    Your responses have been recorded successfully.
+                </p>
+
             </div>
         `;
     }
 
     function startTimer() {
+
         const timerEl = document.getElementById('timer');
+
         timerInterval = setInterval(() => {
+
             timeRemaining--;
+
             const minutes = Math.floor(timeRemaining / 60);
             const seconds = timeRemaining % 60;
-            timerEl.textContent = `⏱️ ${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+            timerEl.innerHTML =
+                `⏱️ ${minutes}:${seconds.toString().padStart(2, '0')}`;
 
             if (timeRemaining <= 60) {
                 timerEl.classList.add('warning');
             }
 
             if (timeRemaining <= 0) {
+
                 clearInterval(timerInterval);
+
                 submitQuiz();
             }
+
         }, 1000);
     }
 
     function showError(message) {
+
         document.getElementById('content').innerHTML = `
             <div class="error-message">
-                <i class="fas fa-exclamation-circle"></i> ${message}
+                ${message}
             </div>
         `;
     }
 
-    // Load quiz on page load
     loadQuiz();
 </script>
-
 </body>
 </html>
