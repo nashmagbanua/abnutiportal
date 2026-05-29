@@ -298,14 +298,13 @@
         width: var(--sidebar-width) !important;
         transition: transform 0.3s ease-in-out;
         z-index: 2005; 
-        background: var(--primary) !important; /* Siguradong solid ang kulay */
+        background: var(--primary) !important;
     }
     
     #sidebar.active {
         transform: translateX(0); 
     }
 
-    /* --- ETO YUNG FIX PARA SA NAWAWALANG TEXT --- */
     #sidebar.active .nav-item span, 
     #sidebar.active .sidebar-brand span {
         display: inline-block !important; 
@@ -314,7 +313,6 @@
         width: auto !important;
     }
 
-    /* Force width para hindi mag-shrink */
     #sidebar.collapsed {
         width: var(--sidebar-width) !important;
     }
@@ -342,12 +340,46 @@
         cursor: pointer;
     }
 }
+
+/* --- SIDEBAR BACKDROP (mobile) --- */
+#sidebar-backdrop {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 2004;
+    backdrop-filter: blur(2px);
+    animation: fadeBackdrop 0.3s ease;
+}
+#sidebar-backdrop.active { display: block; }
+@keyframes fadeBackdrop { from { opacity:0; } to { opacity:1; } }
+
+/* --- TOAST NOTIFICATION (index) --- */
+#toast-container {
+    position: fixed; top: 20px; right: 20px; z-index: 9999;
+    display: flex; flex-direction: column; gap: 8px;
+}
+.toast {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px; border-radius: 10px; min-width: 240px; max-width: 320px;
+    color: white; font-size: 0.85rem; font-weight: 500;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    animation: toastSlideIn 0.3s ease;
+}
+.toast.success { background: #276749; border: 1px solid #38a169; }
+.toast.error   { background: #9b2c2c; border: 1px solid #f56565; }
+.toast.info    { background: #2b6cb0; border: 1px solid #4299e1; }
+.toast.warning { background: #975a16; border: 1px solid #f6ad55; }
+@keyframes toastSlideIn { from { opacity:0; transform: translateX(30px); } to { opacity:1; transform: translateX(0); } }
+@keyframes toastFadeOut { from { opacity:1; } to { opacity:0; transform: translateX(30px); } }
 </style>
 </head>
 <body>
     <div class="mobile-nav-btn" onclick="toggleSidebarMobile()">
     <i class="fas fa-bars"></i>
 </div>
+    <div id="sidebar-backdrop" onclick="closeSidebarMobile()"></div>
+    <div id="toast-container"></div>
+
 <div id="main-app">
         <div id="sidebar">
             <div class="sidebar-brand" onclick="toggleSide()">
@@ -360,8 +392,9 @@
         <input type="text" id="sidebarSearch" placeholder="Search parameters..." oninput="handleSidebarSearch()">
     </div>
 </div>
-            <div style="margin-top: 10px;">
+    <div style="margin-top: 10px;">
     <div class="nav-item active" onclick="loadDashboard()"><i class="fas fa-th-large"></i> <span>Dashboard</span></div>
+    <div class="nav-item" onclick="loadQuizMaker()"><i class="fas fa-poll"></i> <span>Quiz Maker</span></div>
     <div class="nav-item" onclick="openGPMCalculator()"><i class="fas fa-calculator"></i> <span>GPM Calculator</span></div>
     <div class="nav-item" onclick="openPowerMonitor()"><i class="fas fa-bolt"></i> <span>Power Consumption</span></div>
     <div class="nav-item" onclick="openChemicals()"><i class="fas fa-flask"></i> <span>Chemicals</span></div>
@@ -453,7 +486,7 @@ function updateSidebarActive(index) {
                         style="padding: 6px 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-family: inherit; background: white;">
                     <option value="ALL">All Shifts</option>
                     <option value="Morning">Dayshift (Morning)</option>
-                    <option value="Nigth">Nightshift (Nigth)</option> 
+                    <option value="Night">Nightshift (Night)</option>
                 </select>
             </div>
 
@@ -2092,77 +2125,139 @@ window.onload = function() {
 
     fetchUsers();
 }
-        // --- FUNCTION PARA SA RESET PASSWORD ---
-async function resetPassword(id) {
-    const newPass = prompt("Enter new password for this operator:", "123456");
-    
-    if (newPass === null) return; // Pag pinindot ang 'Cancel'
-    if (newPass.trim() === "") return alert("Password cannot be empty!");
+// --- RESET PASSWORD (no more prompt()) ---
+function resetPassword(id) {
+    // Build inline modal
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9998;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
+    overlay.innerHTML = `
+        <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:16px;padding:28px;width:300px;max-width:90vw;color:var(--text-main);">
+            <h3 style="margin:0 0 6px;font-size:1rem;"><i class="fas fa-key" style="color:var(--accent);margin-right:8px;"></i>Reset Password</h3>
+            <p style="margin:0 0 16px;font-size:0.8rem;color:var(--text-sub);">Operator ID: <strong>${id}</strong></p>
+            <input type="password" id="newPassInput" placeholder="New password (min. 6 chars)" 
+                style="width:100%;padding:10px 12px;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-body);color:var(--text-main);font-size:0.875rem;outline:none;box-sizing:border-box;margin-bottom:14px;">
+            <div style="display:flex;gap:10px;">
+                <button onclick="this.closest('div[style]').remove()" 
+                    style="flex:1;padding:10px;border:1px solid var(--border-color);background:transparent;color:var(--text-sub);border-radius:8px;cursor:pointer;font-weight:600;">Cancel</button>
+                <button id="confirmResetBtn" onclick="confirmReset('${id}', this)" 
+                    style="flex:1;padding:10px;border:none;background:var(--accent);color:white;border-radius:8px;cursor:pointer;font-weight:600;">Confirm</button>
+            </div>
+        </div>`;
+    document.body.appendChild(overlay);
+    setTimeout(() => document.getElementById('newPassInput')?.focus(), 100);
+}
 
-    const { error } = await supabaseClient
-        .from('profiles')
-        .update({ password: newPass })
-        .eq('company_id', id);
-
+async function confirmReset(id, btn) {
+    const newPass = document.getElementById('newPassInput')?.value?.trim();
+    if (!newPass || newPass.length < 6) {
+        return showToast('Password must be at least 6 characters.', 'warning');
+    }
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+    const { error } = await supabaseClient.from('profiles').update({ password: newPass }).eq('company_id', id);
+    btn.closest('div[style]').remove();
     if (error) {
-        alert("Error resetting password: " + error.message);
+        showToast('Error resetting password: ' + error.message, 'error');
     } else {
-        alert("Password for ID " + id + " has been reset to: " + newPass);
+        showToast(`Password for ID ${id} has been reset.`, 'success');
     }
 }
 async function approveUser(id) {
-    // 1. Confirmation box para hindi aksidente ang pag-approve
-    if (confirm("Approve this operator for system access?")) {
-        
-        // 2. Update ang 'is_approved' column sa Supabase
-        const { error } = await supabaseClient
-            .from('profiles')
-            .update({ is_approved: true })
-            .eq('company_id', id);
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9998;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
+    overlay.innerHTML = `
+        <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:16px;padding:28px;width:300px;max-width:90vw;color:var(--text-main);text-align:center;">
+            <div style="font-size:2.5rem;margin-bottom:12px;">✅</div>
+            <h3 style="margin:0 0 8px;font-size:1rem;">Approve Operator?</h3>
+            <p style="margin:0 0 20px;font-size:0.8rem;color:var(--text-sub);">ID: <strong>${id}</strong> will get full system access.</p>
+            <div style="display:flex;gap:10px;">
+                <button onclick="this.closest('div[style]').remove()" 
+                    style="flex:1;padding:10px;border:1px solid var(--border-color);background:transparent;color:var(--text-sub);border-radius:8px;cursor:pointer;font-weight:600;">Cancel</button>
+                <button onclick="doApprove('${id}', this)" 
+                    style="flex:1;padding:10px;border:none;background:#48bb78;color:white;border-radius:8px;cursor:pointer;font-weight:600;">Approve</button>
+            </div>
+        </div>`;
+    document.body.appendChild(overlay);
+}
 
-        if (error) {
-            alert("Approval Failed: " + error.message);
-        } else {
-            alert("Operator " + id + " is now APPROVED!");
-            
-            // 3. I-refresh ang listahan para mawala ang approve button 
-            // at maging 'ACTIVE' ang status badge
-            if (typeof fetchUsers === "function") {
-                fetchUsers();
+async function doApprove(id, btn) {
+    btn.disabled = true; btn.textContent = 'Approving...';
+    const { error } = await supabaseClient.from('profiles').update({ is_approved: true }).eq('company_id', id);
+    btn.closest('div[style]').remove();
+    if (error) {
+        showToast('Approval failed: ' + error.message, 'error');
+    } else {
+        showToast(`Operator ${id} is now APPROVED! ✅`, 'success');
+        if (typeof fetchUsers === 'function') fetchUsers();
+    }
+}
+// --- DELETE USER ---
+async function deleteUser(id) {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9998;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
+    overlay.innerHTML = `
+        <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:16px;padding:28px;width:300px;max-width:90vw;color:var(--text-main);text-align:center;">
+            <div style="font-size:2.5rem;margin-bottom:12px;">🗑️</div>
+            <h3 style="margin:0 0 8px;font-size:1rem;color:#f56565;">Delete Operator?</h3>
+            <p style="margin:0 0 20px;font-size:0.8rem;color:var(--text-sub);">ID: <strong>${id}</strong> will be permanently removed. This cannot be undone.</p>
+            <div style="display:flex;gap:10px;">
+                <button onclick="this.closest('div[style]').remove()" 
+                    style="flex:1;padding:10px;border:1px solid var(--border-color);background:transparent;color:var(--text-sub);border-radius:8px;cursor:pointer;font-weight:600;">Cancel</button>
+                <button onclick="doDelete('${id}', this)" 
+                    style="flex:1;padding:10px;border:none;background:#f56565;color:white;border-radius:8px;cursor:pointer;font-weight:600;">Delete</button>
+            </div>
+        </div>`;
+    document.body.appendChild(overlay);
+}
+
+async function doDelete(id, btn) {
+    btn.disabled = true; btn.textContent = 'Deleting...';
+    const { error } = await supabaseClient.from('profiles').delete().eq('company_id', id);
+    btn.closest('div[style]').remove();
+    if (error) {
+        showToast('Error deleting user: ' + error.message, 'error');
+    } else {
+        showToast('Operator deleted successfully.', 'success');
+        fetchUsers();
+    }
+}
+        // ─── TOAST HELPER ────────────────────────────────────────
+        function showToast(message, type = 'info', duration = 3500) {
+            const icons = { success: 'fa-check-circle', error: 'fa-times-circle', info: 'fa-info-circle', warning: 'fa-exclamation-triangle' };
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<i class="fas ${icons[type]}"></i><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'toastFadeOut 0.3s ease forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        // ─── MOBILE SIDEBAR (UNIFIED with backdrop) ──────────────
+        function toggleSidebarMobile() {
+            const sidebar   = document.getElementById('sidebar');
+            const backdrop  = document.getElementById('sidebar-backdrop');
+            const icon      = document.querySelector('.mobile-nav-btn i');
+            const isOpen    = sidebar.classList.contains('active');
+
+            sidebar.classList.toggle('active');
+            backdrop.classList.toggle('active', !isOpen);
+            if (icon) {
+                icon.classList.toggle('fa-bars',  isOpen);
+                icon.classList.toggle('fa-times', !isOpen);
             }
         }
-    }
-}
-// --- FUNCTION PARA SA PAG-DELETE NG USER ---
-async function deleteUser(id) {
-    if (confirm("Are you sure you want to PERMANENTLY delete this operator?")) {
-        const { error } = await supabaseClient
-            .from('profiles')
-            .delete()
-            .eq('company_id', id);
 
-        if (error) {
-            alert("Error deleting user: " + error.message);
-        } else {
-            alert("User deleted successfully.");
-            fetchUsers(); // I-refresh ang table para mawala na siya sa listahan
+        function closeSidebarMobile() {
+            const sidebar  = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            const icon     = document.querySelector('.mobile-nav-btn i');
+            sidebar.classList.remove('active');
+            backdrop.classList.remove('active');
+            if (icon) { icon.className = 'fas fa-bars'; }
         }
-    }
-}
-        function toggleSidebarMobile() {
-    const sidebar = document.getElementById('sidebar');
-    const burgerIcon = document.querySelector('.mobile-nav-btn i');
-    
-    // I-toggle ang 'active' class
-    sidebar.classList.toggle('active');
-    
-    // Palitan ang icon (Bars to X)
-    if (sidebar.classList.contains('active')) {
-        burgerIcon.classList.replace('fa-bars', 'fa-times');
-    } else {
-        burgerIcon.classList.replace('fa-times', 'fa-bars');
-    }
-}       
 async function masterSync() {
     console.log("🚀 Powercon Master Sync: Refreshing all data...");
     try {
@@ -2192,5 +2287,6 @@ window.mainSyncInterval = setInterval(() => {
 // 4. Tawagin agad para may data pagka-load
 masterSync();
     </script>
+    <script src="quiz-maker-module.js"></script>
 </body>
 </html>
