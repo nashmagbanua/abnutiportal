@@ -777,50 +777,53 @@ nav.scrolled {
         }
     }
 
-    // ─── LOGIN ─────────────────────────────────────────────────
-    async function handleLogin() {
-        const id   = document.getElementById('loginID').value.trim();
-        const pass = document.getElementById('loginPass').value;
+   // ─── LOGIN ─────────────────────────────────────────────────
+async function handleLogin() {
+    const id   = document.getElementById('loginID').value.trim();
+    const pass = document.getElementById('loginPass').value;
 
-        if (!id || !pass) {
-            return showToast('Pakisulat ang ID at Password.', 'warning');
-        }
-
-        setLoading('loginBtn', true, 'SIGN IN');
-
-        // DATABASE LOGIN (bypass removed – authenticate through DB only)
-        const { data, error } = await supabaseClient
-            .from('profiles')
-            .select('*')
-            .eq('company_id', id)
-            .eq('password', pass)
-            .single();
-
-        setLoading('loginBtn', false, 'SIGN IN');
-
-        if (error || !data) {
-            return showToast('Maling ID o Password.', 'error');
-        }
-
-        const role = data.role.toLowerCase().trim();
-
-        if (role !== 'supervisor' && !data.is_approved) {
-            return showToast('Pending pa ang iyong account. Hintayin ang approval ng supervisor.', 'warning', 5000);
-        }
-
-        // FIX: Save ALL user data including avatar
-        localStorage.setItem('userName',   data.full_name);
-        localStorage.setItem('userRole',   role);
-        localStorage.setItem('userCode',   id);
-        localStorage.setItem('userAvatar', data.avatar_url || 'avatar1.svg');
-
-        showToast(`Welcome back, ${data.full_name}! 👋`, 'success', 2000);
-
-        // SMART ROUTING WITH DELAY (150ms lets localStorage flush)
-        setTimeout(() => {
-            window.location.href = (role === 'supervisor') ? 'index.html' : 'tools.html';
-        }, 600);
+    if (!id || !pass) {
+        return showToast('Pakisulat ang ID at Password.', 'warning');
     }
+
+    setLoading('loginBtn', true, 'SIGN IN');
+
+    // DATABASE LOGIN (bypass removed – authenticate through DB only)
+    const { data, error } = await supabaseClient
+        .from('profiles')
+        .select('*')
+        .eq('company_id', id)
+        .eq('password', pass)
+        .single();
+
+    setLoading('loginBtn', false, 'SIGN IN');
+
+    if (error || !data) {
+        return showToast('Maling ID o Password.', 'error');
+    }
+
+    const role = data.role.toLowerCase().trim();
+
+    if (role !== 'supervisor' && !data.is_approved) {
+        return showToast('Pending pa ang iyong account. Hintayin ang approval ng supervisor.', 'warning', 5000);
+    }
+
+    // FIX: Save ALL user data including avatar
+    localStorage.setItem('userName',   data.full_name);
+    localStorage.setItem('userRole',   role);
+    localStorage.setItem('userCode',   id);
+    localStorage.setItem('userAvatar', data.avatar_url || 'avatar1.svg');
+    
+    // DAGDAG NA LINE: Ito ang gagamitin ng Quiz Maker Module para sa ID ng Supervisor
+    localStorage.setItem('currentUser', JSON.stringify(data));
+
+    showToast(`Welcome back, ${data.full_name}! 👋`, 'success', 2000);
+
+    // SMART ROUTING WITH DELAY (150ms lets localStorage flush)
+    setTimeout(() => {
+        window.location.href = (role === 'supervisor') ? 'index.html' : 'tools.html';
+    }, 600);
+}
    // --- MOBILE MENU LOGIC ---
 const burger = document.getElementById('burger-menu');
 const navMenu = document.getElementById('nav-menu');
