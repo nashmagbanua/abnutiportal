@@ -386,9 +386,34 @@ nav.scrolled {
         .footer-col a:hover { color: var(--primary); padding-left: 5px; }
         
         .footer-bottom { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #2d3748; color: #4a5568; font-size: 0.85rem; }
+
+        /* --- TOAST NOTIFICATION --- */
+        #toast-container { position: fixed; top: 80px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast {
+            display: flex; align-items: center; gap: 12px;
+            padding: 14px 18px; border-radius: 12px; min-width: 260px; max-width: 340px;
+            color: white; font-size: 0.875rem; font-weight: 500;
+            animation: slideInToast 0.3s ease forwards;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
+        }
+        .toast.success { background: rgba(56,161,105,0.92); border: 1px solid rgba(72,187,120,0.4); }
+        .toast.error   { background: rgba(197,48,48,0.92);  border: 1px solid rgba(245,101,101,0.4); }
+        .toast.info    { background: rgba(49,130,206,0.92); border: 1px solid rgba(66,153,225,0.4); }
+        .toast.warning { background: rgba(214,158,46,0.92); border: 1px solid rgba(246,173,85,0.4); }
+        .toast i { font-size: 1.1rem; flex-shrink: 0; }
+        @keyframes slideInToast { from { opacity:0; transform: translateX(40px); } to { opacity:1; transform: translateX(0); } }
+        @keyframes fadeOutToast { from { opacity:1; } to { opacity:0; transform: translateX(40px); } }
+
+        /* --- LOGIN BUTTON LOADING STATE --- */
+        .login-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none !important; }
+        .login-btn .btn-spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
+
+<div id="toast-container"></div>
 
 <nav id="navbar">
     <div class="logo-container">
@@ -439,7 +464,7 @@ nav.scrolled {
                 <label>Password</label>
                 <input type="password" id="loginPass" placeholder="••••••••">
             </div>
-            <button class="login-btn" onclick="handleLogin()">SIGN IN</button>
+            <button class="login-btn" id="loginBtn" onclick="handleLogin()">SIGN IN</button>
             <p style="text-align:center; font-size:0.85rem; margin-top:20px; cursor:pointer;" onclick="toggleForms()">No account? <span style="color:var(--primary)">Register</span></p>
         </div>
 
@@ -457,7 +482,7 @@ nav.scrolled {
             <div class="input-group"><input type="date" id="regDOB"></div>
             <div class="avatar-grid" id="avatarGrid"></div>
             <div class="input-group"><input type="password" id="regPass" placeholder="Password"></div>
-            <button class="login-btn" onclick="handleRegister()">REGISTER</button>
+            <button class="login-btn" id="registerBtn" onclick="handleRegister()">REGISTER</button>
             <p style="text-align:center; font-size:0.85rem; margin-top:10px; cursor:pointer;" onclick="toggleForms()">Back to Login</p>
         </div>
     </div>
@@ -699,71 +724,103 @@ nav.scrolled {
         selectedAvatar = name;
     }
 
+    // ─── TOAST HELPER ──────────────────────────────────────────
+    function showToast(message, type = 'info', duration = 3500) {
+        const icons = { success: 'fa-check-circle', error: 'fa-times-circle', info: 'fa-info-circle', warning: 'fa-exclamation-triangle' };
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `<i class="fas ${icons[type]}"></i><span>${message}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.style.animation = 'fadeOutToast 0.3s ease forwards';
+            setTimeout(() => toast.remove(), 300);
+        }, duration);
+    }
+
+    // ─── LOADING STATE HELPERS ─────────────────────────────────
+    function setLoading(btnId, loading, defaultText) {
+        const btn = document.getElementById(btnId);
+        if (!btn) return;
+        btn.disabled = loading;
+        btn.innerHTML = loading
+            ? `<span class="btn-spinner"></span> Please wait...`
+            : defaultText;
+    }
+
+    // ─── REGISTER ──────────────────────────────────────────────
     async function handleRegister() {
-        const id = document.getElementById('regID').value;
-        const name = document.getElementById('regName').value;
-        const dob = document.getElementById('regDOB').value;
+        const id   = document.getElementById('regID').value.trim();
+        const name = document.getElementById('regName').value.trim();
+        const dob  = document.getElementById('regDOB').value;
         const role = document.getElementById('regRole').value;
         const pass = document.getElementById('regPass').value;
-        if(!id || !name || !selectedAvatar || !pass) return alert("Please fill all fields!");
 
+        if (!id || !name || !selectedAvatar || !pass) {
+            return showToast('Please fill all fields and choose an avatar.', 'warning');
+        }
+        if (pass.length < 6) {
+            return showToast('Password must be at least 6 characters.', 'warning');
+        }
+
+        setLoading('registerBtn', true, 'REGISTER');
         const { error } = await supabaseClient.from('profiles').insert([
             { company_id: id, full_name: name, dob: dob, role: role, avatar_url: selectedAvatar, password: pass, is_approved: false }
         ]);
-        if(error) alert(error.message);
-        else { alert("Registration successful! Please wait for supervisor approval."); toggleForms(); }
-    }
+        setLoading('registerBtn', false, 'REGISTER');
 
-  async function handleLogin() {
-    const id = document.getElementById('loginID').value;
-    const pass = document.getElementById('loginPass').value;
-    
-    if(!id || !pass) return alert("Pakisulat ang ID at Password");
-
-    // 1. EMERGENCY BYPASS
-   if (id === "090909" && pass === "090909") {
-    localStorage.setItem('userCode', id);
-    localStorage.setItem('userName', "System Admin");
-    localStorage.setItem('userRole', "supervisor");
-    localStorage.setItem('userAvatar', "avatar1.svg"); // or default avatar
-    
-    setTimeout(() => { 
-        window.location.href = "index.html"; 
-    }, 150);
-    return;
-}
-
-    // 2. DATABASE LOGIN
-    const { data, error } = await supabaseClient
-        .from('profiles')
-        .select('*')
-        .eq('company_id', id)
-        .eq('password', pass)
-        .single();
-    
-    if (error || !data) {
-        return alert("Maling ID o Password.");
-    }
-
-    const role = data.role.toLowerCase().trim();
-
-    if (role !== 'supervisor' && !data.is_approved) {
-        return alert("Pending pa ang iyong account.");
-    }
-
-    // Siguraduhin ang pagsulat sa localStorage
-    localStorage.setItem('userName', data.full_name);
-    localStorage.setItem('userRole', role);
-    localStorage.setItem('userCode', id);
-    // 3. SMART ROUTING WITH DELAY
-    setTimeout(() => {
-        if (role === 'supervisor') {
-            window.location.href = "index.html"; 
+        if (error) {
+            showToast(error.message, 'error');
         } else {
-            window.location.href = "tools.html"; 
+            showToast('Registration successful! Waiting for supervisor approval.', 'success', 4500);
+            toggleForms();
         }
-    }, 150); // Ang 150ms delay na ito ang lunas sa kick-out loop
-}
+    }
+
+    // ─── LOGIN ─────────────────────────────────────────────────
+    async function handleLogin() {
+        const id   = document.getElementById('loginID').value.trim();
+        const pass = document.getElementById('loginPass').value;
+
+        if (!id || !pass) {
+            return showToast('Pakisulat ang ID at Password.', 'warning');
+        }
+
+        setLoading('loginBtn', true, 'SIGN IN');
+
+        // DATABASE LOGIN (bypass removed – authenticate through DB only)
+        const { data, error } = await supabaseClient
+            .from('profiles')
+            .select('*')
+            .eq('company_id', id)
+            .eq('password', pass)
+            .single();
+
+        setLoading('loginBtn', false, 'SIGN IN');
+
+        if (error || !data) {
+            return showToast('Maling ID o Password.', 'error');
+        }
+
+        const role = data.role.toLowerCase().trim();
+
+        if (role !== 'supervisor' && !data.is_approved) {
+            return showToast('Pending pa ang iyong account. Hintayin ang approval ng supervisor.', 'warning', 5000);
+        }
+
+        // FIX: Save ALL user data including avatar
+        localStorage.setItem('userName',   data.full_name);
+        localStorage.setItem('userRole',   role);
+        localStorage.setItem('userCode',   id);
+        localStorage.setItem('userAvatar', data.avatar_url || 'avatar1.svg');
+
+        showToast(`Welcome back, ${data.full_name}! 👋`, 'success', 2000);
+
+        // SMART ROUTING WITH DELAY (150ms lets localStorage flush)
+        setTimeout(() => {
+            window.location.href = (role === 'supervisor') ? 'index.html' : 'tools.html';
+        }, 600);
+    }
    // --- MOBILE MENU LOGIC ---
 const burger = document.getElementById('burger-menu');
 const navMenu = document.getElementById('nav-menu');
