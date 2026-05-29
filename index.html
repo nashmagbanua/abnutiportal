@@ -2688,109 +2688,94 @@ function renderChemList() {
         container.innerHTML = currentChemView === 'chem' ? globalChemSummary.chemicals : globalChemSummary.areas;
     }
 }
- // ====================================================================
-// 🚀 BOILER STEAM PRESSURE MONITORING ENGINE (BARS & TOGGLE CONTROLS)
 // ====================================================================
-
-// Kumuha o mag-set ng default configurations sa localStorage para persistent ang toggle state
-let boilerStates = JSON.parse(localStorage.getItem('dash_boiler_modes')) || {
-    A: 'MAIN',
-    B: 'BACKUP'
-};
+// 🚀 THERMAL-SYNCED BOILER STEAM & FURNACE OSCILLATION SIMULATOR
+// ====================================================================
 
 async function fetchBoilerSteamData() {
     try {
-        // Ang Maximum target pressure limit sa planta ay 12.0 bars gaya ng iyong request
-        const svMax = 12.0; 
+        // Time-based factor para sa natural at swabe na pag-alon ng mga numero
+        const timeFactor = Math.sin(Date.now() / 20000); 
 
-        // 🎛️ BOILER A SIMULATION RUNTIME LOGIC
+        // --- 🔴 CONFIGURATION PARA SA BOILER A ---
+        let svA = 8.5; 
         let pvA = 0;
         let tempA = 0;
+
         if (boilerStates.A === 'MAIN') {
-            // Lalangoy sa 11.15 hanggang 11.85 bars kapag MAIN para makatotohanan ang galaw sa planta
-            pvA = (11.15 + (Math.random() * 0.70)).toFixed(2);
-            // Furnace temperature para sa main load
-            tempA = 210 + Math.floor(Math.random() * 15);
+            svA = 8.5;
+            // MAIN: Maglalaro sa 8.05 hanggang 8.48 bars (hinahabol ang 8.5 setpoint)
+            pvA = (8.25 + (timeFactor * 0.22)).toFixed(2);
+            
+            // 🌡️ FURNACE TEMP: Maglalaro sa 300°C - 600°C base sa iyong thermal actuals
+            // Kapag paakyat ang pressure (pa-peak sa 8.5 bars), ang temp ay aakyat sa ~480°C - 530°C
+            tempA = Math.floor(450 + (timeFactor * 60) + (Math.random() * 10));
+            
+            // Siguraduhing hindi lalampas sa natural bounds ng normal running limits mo (300-600)
+            if (tempA > 600) tempA = 595;
+            if (tempA < 300) tempA = 305;
         } else {
-            // Mababang standby pressure/leak lines kapag BACK-UP mode
-            pvA = (1.90 + (Math.random() * 0.45)).toFixed(2);
-            tempA = 72 + Math.floor(Math.random() * 8);
+            // BACK-UP: Naka-standby sa 6.5 bars gaya ng nakasanayan
+            svA = 6.5;
+            pvA = (6.22 + (timeFactor * 0.22)).toFixed(2);
+            
+            // Kapag standby/backup mode, mas mababa ang furnace temp dahil low-fire o pilot lang
+            tempA = Math.floor(165 + (timeFactor * 15) + (Math.random() * 5));
         }
 
-        // 🎛️ BOILER B SIMULATION RUNTIME LOGIC
+
+        // --- 🟢 CONFIGURATION PARA SA BOILER B ---
+        let svB = 8.5;
         let pvB = 0;
         let tempB = 0;
+
+        // Gagamit ng cosine para may kaunting time-lag o hindi sabay na sabay ang kaway ng Boiler B sa Boiler A
+        const timeFactorB = Math.cos(Date.now() / 22000); 
+
         if (boilerStates.B === 'MAIN') {
-            // Lalangoy sa 11.20 hanggang 11.80 bars kapag MAIN
-            pvB = (11.20 + (Math.random() * 0.60)).toFixed(2);
-            tempB = 206 + Math.floor(Math.random() * 12);
+            svB = 8.5;
+            // MAIN: Maglalaro sa 8.00 hanggang 8.45 bars
+            pvB = (8.22 + (timeFactorB * 0.22)).toFixed(2);
+            
+            // FURNACE TEMP: Sumasabay sa 300°C - 600°C range ng operating limits niyo
+            tempB = Math.floor(440 + (timeFactorB * 55) + (Math.random() * 10));
+            
+            if (tempB > 600) tempB = 590;
+            if (tempB < 300) tempB = 310;
         } else {
-            // Standby temperature at pressure level
-            pvB = (1.75 + (Math.random() * 0.50)).toFixed(2);
-            tempB = 68 + Math.floor(Math.random() * 10);
+            // BACK-UP: Naka-standby sa 6.5 bars
+            svB = 6.5;
+            pvB = (6.22 + (timeFactorB * 0.22)).toFixed(2);
+            tempB = Math.floor(160 + (timeFactorB * 15) + (Math.random() * 5));
         }
 
-        // 🔴 INJECT DATA SA BOILER A NODES (PV = Red, SV = Green na kontrolado ng HTML styles)
+
+        // --- 🖥️ PHYSICAL TABLE INJECTION NODES ---
+
+        // BOILER A GRAPHICS RENDERING
         if (document.getElementById('boilerA_PV')) {
             document.getElementById('boilerA_PV').innerHTML = `${pvA} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal;">bars</span>`;
         }
         if (document.getElementById('boilerA_SP')) {
-            document.getElementById('boilerA_SP').innerHTML = `${svMax.toFixed(1)} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal;">bars</span>`;
+            document.getElementById('boilerA_SP').innerHTML = `${svA.toFixed(1)} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal;">bars</span>`;
         }
         if (document.getElementById('boilerA_Temp')) {
             document.getElementById('boilerA_Temp').innerText = `${tempA}°C`;
         }
 
-        // 🟢 INJECT DATA SA BOILER B NODES
+        // BOILER B GRAPHICS RENDERING
         if (document.getElementById('boilerB_PV')) {
             document.getElementById('boilerB_PV').innerHTML = `${pvB} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal;">bars</span>`;
         }
         if (document.getElementById('boilerB_SP')) {
-            document.getElementById('boilerB_SP').innerHTML = `${svMax.toFixed(1)} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal;">bars</span>`;
+            document.getElementById('boilerB_SP').innerHTML = `${svB.toFixed(1)} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal;">bars</span>`;
         }
         if (document.getElementById('boilerB_Temp')) {
             document.getElementById('boilerB_Temp').innerText = `${tempB}°C`;
         }
 
     } catch (err) {
-        console.error("❌ Error running boiler pressure simulation engine:", err);
-    }
-}
-
-// Handler function para sa pagpindot ng MAIN at BACK-UP button toggles
-function toggleBoilerStatus(boiler, mode) {
-    // I-save ang bagong piniling estado
-    boilerStates[boiler] = mode;
-    localStorage.setItem('dash_boiler_modes', JSON.stringify(boilerStates));
-    
-    // I-refresh agad ang visual styling ng mga toggles at kalkulahin ang simulation values
-    renderBoilerToggleButtons();
-    fetchBoilerSteamData();
-}
-
-// Pagpapakulay at pagpapatigas ng UI active state buttons base sa mode
-function renderBoilerToggleButtons() {
-    const btnAMain = document.getElementById('btnBoilerA_Main');
-    const btnABackup = document.getElementById('btnBoilerA_Backup');
-    const btnBMain = document.getElementById('btnBoilerB_Main');
-    const btnBBackup = document.getElementById('btnBoilerB_Backup');
-
-    // 🔴 BOILER A STYLE ENGINE
-    if (boilerStates.A === 'MAIN') {
-        if(btnAMain) { btnAMain.style.background = "#e53e3e"; btnAMain.style.color = "#ffffff"; }
-        if(btnABackup) { btnABackup.style.background = "transparent"; btnABackup.style.color = "#718096"; }
-    } else {
-        if(btnAMain) { btnAMain.style.background = "transparent"; btnAMain.style.color = "#718096"; }
-        if(btnABackup) { btnABackup.style.background = "#4a5568"; btnABackup.style.color = "#ffffff"; }
-    }
-
-    // 🟢 BOILER B STYLE ENGINE
-    if (boilerStates.B === 'MAIN') {
-        if(btnBMain) { btnBMain.style.background = "#48bb78"; btnBMain.style.color = "#ffffff"; }
-        if(btnBBackup) { btnBBackup.style.background = "transparent"; btnBBackup.style.color = "#718096"; }
-    } else {
-        if(btnBMain) { btnBMain.style.background = "transparent"; btnBMain.style.color = "#718096"; }
-        if(btnBBackup) { btnBBackup.style.background = "#4a5568"; btnBBackup.style.color = "#ffffff"; }
+        console.error("❌ Error running high-fidelity thermal boiler engine:", err);
     }
 }
  // ====================================================================
