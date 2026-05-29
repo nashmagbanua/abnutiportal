@@ -1788,6 +1788,36 @@ async function updateInventoryStats(currentYard) {
                         <div style="color: #4a5568;">Tapon: <span id="dash24hTonsB" style="font-weight: bold;">0.00</span></div>
                     </div>
                 </div>
+                <div class="stat-card" style="border-left-color: #3182ce;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h4 style="margin: 0; font-size: 0.85rem; color: #718096; text-transform: uppercase; tracking-wider: 0.05em;">💧 Clean Steam Generator (CSG)</h4>
+                    
+                    <div style="background: #edf2f7; padding: 2px; border-radius: 6px; display: flex; gap: 2px;">
+                        <button id="btnCsg_4b" onclick="toggleCsgStatus('4B')" style="font-size: 0.6rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; transition: all 0.2s;">4 BARS</button>
+                        <button id="btnCsg_7b" onclick="toggleCsgStatus('7B')" style="font-size: 0.6rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; transition: all 0.2s;">7 BARS</button>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; border-bottom: 1px solid #edf2f7; padding-bottom: 8px;">
+                    <div>
+                        <p style="margin:0; font-size: 0.65rem; font-weight: bold; color: #718096; text-transform: uppercase;">Present Value (PV)</p>
+                        <div style="font-size: 1.9rem; font-weight: 900; color: #e53e3e; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 8px rgba(229, 62, 62, 0.45); letter-spacing: 1px;" id="csg_PV">
+                            0.0 <small style="font-size: 0.75rem; color: #a0aec0; font-weight:normal; font-family: sans-serif;">bars</small>
+                        </div>
+                    </div>
+                    <div style="border-left: 1px solid #edf2f7; padding-left: 10px;">
+                        <p style="margin:0; font-size: 0.65rem; font-weight: bold; color: #718096; text-transform: uppercase;">Set Value (SV)</p>
+                        <div style="font-size: 1.9rem; font-weight: 900; color: #38a169; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 8px rgba(56, 161, 105, 0.45); letter-spacing: 1px;" id="csg_SP">
+                            4.0 <small style="font-size: 0.75rem; color: #a0aec0; font-weight:normal; font-family: sans-serif;">bars</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                    <span style="font-size: 0.75rem; font-weight: bold; color: #718096;">📦 Product Name:</span>
+                    <span style="font-size: 0.95rem; font-weight: 800; color: #2b6cb0; background: #ebf8ff; padding: 2px 8px; border-radius: 4px; text-transform: uppercase;" id="csg_Product">VMR</span>
+                </div>
+            </div>
                 <div style="text-align: right; margin-top: 8px;">
                     <span id="dashCoalLogDate" style="font-size: 0.65rem; background: #f7fafc; padding: 2px 6px; border: 1px solid #e2e8f0; border-radius: 4px; color: #a0aec0;">Loading...</span>
                 </div>
@@ -2706,120 +2736,146 @@ function renderChemList() {
     }
 }
 // ====================================================================
-// 🚀 FIXED & ALIGNED: HIGH-FIDELITY SAFETY & THERMAL BOILER SIMULATOR
+// 🚀 SAFETY, THERMAL & CSG DEPENDENCY ENGINE CONTROLLER
 // ====================================================================
 
-// 1. Siguraduhing may load ng states sa localStorage para sa toggle memory
+// I-initialize ang memory para sa Boiler at CSG states
 if (!window.boilerStates) {
     window.boilerStates = JSON.parse(localStorage.getItem('dash_boiler_modes')) || {
         A: 'MAIN',
         B: 'BACKUP'
     };
 }
+if (!window.csgState) {
+    window.csgState = localStorage.getItem('dash_csg_mode') || '4B';
+}
 
 async function fetchBoilerSteamData() {
     try {
-        // Time-based factor para sa natural at swabe na pag-alon ng mga numero (cycling wave)
         const timeFactor = Math.sin(Date.now() / 20000); 
+        const states = window.boilerStates;
+        const csgMode = window.csgState;
 
-        // Siguraduhing hindi mag-error kung sakaling hindi pa nababasa ang global variable
-        const states = window.boilerStates || { A: 'MAIN', B: 'BACKUP' };
-
-        // --- 🔴 CONFIGURATION PARA SA BOILER A ---
-        let svA = 8.5; // Operational setpoint para sa safety limit niyo
+        // --- 🔴 BOILER A LOGIC ---
+        let svA = 8.5;
         let pvA = 0;
         let tempA = 0;
 
         if (states.A === 'MAIN') {
             svA = 8.5;
-            // MAIN: Maglalaro sa 8.05 hanggang 8.48 bars (hinahabol ang 8.5 setpoint)
-            pvA = (8.25 + (timeFactor * 0.22)).toFixed(2);
-            
-            // 🌡️ FURNACE TEMP (MAIN): Naglalaro sa 300°C - 600°C.
-            // Kapag nasa 400°C - 500°C, madaling naaabot ang 8.5 bars pressure.
+            pvA = parseFloat((8.25 + (timeFactor * 0.22)).toFixed(2));
             tempA = Math.floor(450 + (timeFactor * 60) + (Math.random() * 10));
-            
-            // Pwersahing pumasok sa operational limits na 300°C - 600°C
             if (tempA > 600) tempA = 595;
             if (tempA < 300) tempA = 305;
         } else {
-            // BACK-UP: Naka-standby sa 6.5 bars max (PV lalaro sa 6.0 - 6.5)
             svA = 6.5;
-            pvA = (6.22 + (timeFactor * 0.22)).toFixed(2);
-            // Standby/low-fire furnace temperature para sa backup
+            pvA = parseFloat((6.22 + (timeFactor * 0.22)).toFixed(2));
             tempA = Math.floor(165 + (timeFactor * 15) + (Math.random() * 5));
         }
 
-
-        // --- 🟢 CONFIGURATION PARA SA BOILER B ---
+        // --- 🟢 BOILER B LOGIC ---
         let svB = 8.5;
         let pvB = 0;
         let tempB = 0;
-
-        // Gagamit ng cosine para may kaunting natural time-lag (hindi sabay ang dalawang boiler)
         const timeFactorB = Math.cos(Date.now() / 22000); 
 
         if (states.B === 'MAIN') {
             svB = 8.5;
-            // MAIN: Maglalaro sa 8.00 hanggang 8.45 bars
-            pvB = (8.22 + (timeFactorB * 0.22)).toFixed(2);
-            
-            // FURNACE TEMP (MAIN): Sumasabay sa 300°C - 600°C operating limits niyo
+            pvB = parseFloat((8.22 + (timeFactorB * 0.22)).toFixed(2));
             tempB = Math.floor(440 + (timeFactorB * 55) + (Math.random() * 10));
-            
             if (tempB > 600) tempB = 590;
             if (tempB < 300) tempB = 310;
         } else {
-            // BACK-UP: Naka-standby sa 6.5 bars max (PV lalaro sa 6.0 - 6.5)
             svB = 6.5;
-            pvB = (6.22 + (timeFactorB * 0.22)).toFixed(2);
+            pvB = parseFloat((6.22 + (timeFactorB * 0.22)).toFixed(2));
             tempB = Math.floor(160 + (timeFactorB * 15) + (Math.random() * 5));
         }
 
+        // --- ⚡ CSG DYNAMIC INTER-LOCK SIMULATION LOGIC ---
+        let svCsg = (csgMode === '4B') ? 4.0 : 7.0;
+        let productName = (csgMode === '4B') ? 'VMR' : 'VMD - RGB';
+        let pvCsg = 0;
 
-        // --- 🖥️ GRAPHICS NODE INJECTION CONTROL ---
+        // Kunin natin ang PV ng kasalukuyang tumatakbong MAIN boiler
+        let activeMainPV = (states.A === 'MAIN') ? pvA : pvB;
 
-        // BOILER A RENDERING
-        if (document.getElementById('boilerA_PV')) {
-            document.getElementById('boilerA_PV').innerHTML = `${pvA} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal;">bars</span>`;
-        }
-        if (document.getElementById('boilerA_SP')) {
-            document.getElementById('boilerA_SP').innerHTML = `${svA.toFixed(1)} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal;">bars</span>`;
-        }
-        if (document.getElementById('boilerA_Temp')) {
-            document.getElementById('boilerA_Temp').innerText = `${tempA}°C`;
+        // BASE OSCILLATION NG CSG
+        if (csgMode === '4B') {
+            pvCsg = 3.85 + (timeFactor * 0.12);
+        } else {
+            pvCsg = 6.80 + (timeFactor * 0.18);
         }
 
-        // BOILER B RENDERING
-        if (document.getElementById('boilerB_PV')) {
-            document.getElementById('boilerB_PV').innerHTML = `${pvB} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal;">bars</span>`;
+        // 🛑 CRITICAL INTERLOCK: Kung ang active MAIN boiler ay bumaba sa 8.0 bars,
+        // makakaramdam ng "Pressure Drop/Loss" ang CSG kaya babawasan ang simulated PV nito.
+        if (activeMainPV < 8.0) {
+            let dropPenalty = (8.0 - activeMainPV) * 0.8; // Ang bawas ay nakadepende sa kalaliman ng drop ng boiler
+            pvCsg = pvCsg - dropPenalty;
         }
-        if (document.getElementById('boilerB_SP')) {
-            document.getElementById('boilerB_SP').innerHTML = `${svB.toFixed(1)} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal;">bars</span>`;
+
+        // I-format ang huling PV ng CSG
+        let finalCsgPv = pvCsg.toFixed(2);
+
+
+        // --- 🖥️ PHYSICAL TABLE INJECTION NODES ---
+        
+        // Boiler A DOM Inject
+        if (document.getElementById('boilerA_PV')) document.getElementById('boilerA_PV').innerHTML = `${pvA.toFixed(2)} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal; font-family:sans-serif;">bars</span>`;
+        if (document.getElementById('boilerA_SP')) document.getElementById('boilerA_SP').innerHTML = `${svA.toFixed(1)} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal; font-family:sans-serif;">bars</span>`;
+        if (document.getElementById('boilerA_Temp')) document.getElementById('boilerA_Temp').innerText = `${tempA}°C`;
+
+        // Boiler B DOM Inject
+        if (document.getElementById('boilerB_PV')) document.getElementById('boilerB_PV').innerHTML = `${pvB.toFixed(2)} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal; font-family:sans-serif;">bars</span>`;
+        if (document.getElementById('boilerB_SP')) document.getElementById('boilerB_SP').innerHTML = `${svB.toFixed(1)} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal; font-family:sans-serif;">bars</span>`;
+        if (document.getElementById('boilerB_Temp')) document.getElementById('boilerB_Temp').innerText = `${tempB}°C`;
+
+        // 🔵 CLEAN STEAM GENERATOR DOM INJECT
+        if (document.getElementById('csg_PV')) {
+            document.getElementById('csg_PV').innerHTML = `${finalCsgPv} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal; font-family:sans-serif;">bars</span>`;
         }
-        if (document.getElementById('boilerB_Temp')) {
-            document.getElementById('boilerB_Temp').innerText = `${tempB}°C`;
+        if (document.getElementById('csg_SP')) {
+            document.getElementById('csg_SP').innerHTML = `${svCsg.toFixed(1)} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal; font-family:sans-serif;">bars</span>`;
+        }
+        if (document.getElementById('csg_Product')) {
+            document.getElementById('csg_Product').innerText = productName;
         }
 
     } catch (err) {
-        console.error("❌ Error running boiler pressure simulation engine:", err);
+        console.error("❌ Error running high-fidelity boiler & csg simulation:", err);
     }
 }
 
-// Handler function para sa pagpindot ng MAIN at BACK-UP button toggles
+// Handler para sa CSG Toggle Button click
+function toggleCsgStatus(mode) {
+    window.csgState = mode;
+    localStorage.setItem('dash_csg_mode', mode);
+    renderCsgToggleButtons();
+    fetchBoilerSteamData();
+}
+
+function renderCsgToggleButtons() {
+    const mode = window.csgState || '4B';
+    const btn4b = document.getElementById('btnCsg_4b');
+    const btn7b = document.getElementById('btnCsg_7b');
+
+    if (mode === '4B') {
+        if(btn4b) { btn4b.style.background = "#3182ce"; btn4b.style.color = "#ffffff"; }
+        if(btn7b) { btn7b.style.background = "transparent"; btn7b.style.color = "#718096"; }
+    } else {
+        if(btn4b) { btn4b.style.background = "transparent"; btn4b.style.color = "#718096"; }
+        if(btn7b) { btn7b.style.background = "#3182ce"; btn7b.style.color = "#ffffff"; }
+    }
+}
+
+// Isama si renderCsgToggleButtons sa tabi ng renderBoilerToggleButtons mo sa setup loader!
 function toggleBoilerStatus(boiler, mode) {
     if (!window.boilerStates) window.boilerStates = { A: 'MAIN', B: 'BACKUP' };
-    
-    // I-save ang bagong piniling estado
     window.boilerStates[boiler] = mode;
     localStorage.setItem('dash_boiler_modes', JSON.stringify(window.boilerStates));
-    
-    // I-refresh agad ang visual styling ng mga toggles at kalkulahin ang simulation values
     renderBoilerToggleButtons();
     fetchBoilerSteamData();
 }
 
-// Pagpapakulay at pagpapatigas ng UI active state buttons base sa mode
 function renderBoilerToggleButtons() {
     const states = window.boilerStates || { A: 'MAIN', B: 'BACKUP' };
     const btnAMain = document.getElementById('btnBoilerA_Main');
@@ -2827,7 +2883,6 @@ function renderBoilerToggleButtons() {
     const btnBMain = document.getElementById('btnBoilerB_Main');
     const btnBBackup = document.getElementById('btnBoilerB_Backup');
 
-    // 🔴 BOILER A STYLE REGULATION
     if (states.A === 'MAIN') {
         if(btnAMain) { btnAMain.style.background = "#e53e3e"; btnAMain.style.color = "#ffffff"; }
         if(btnABackup) { btnABackup.style.background = "transparent"; btnABackup.style.color = "#718096"; }
@@ -2836,7 +2891,6 @@ function renderBoilerToggleButtons() {
         if(btnABackup) { btnABackup.style.background = "#4a5568"; btnABackup.style.color = "#ffffff"; }
     }
 
-    // 🟢 BOILER B STYLE REGULATION
     if (states.B === 'MAIN') {
         if(btnBMain) { btnBMain.style.background = "#48bb78"; btnBMain.style.color = "#ffffff"; }
         if(btnBBackup) { btnBBackup.style.background = "transparent"; btnBBackup.style.color = "#718096"; }
