@@ -8,6 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="assets/abnlogo.ico">
   <link rel="icon" type="image/png" sizes="16x16" href="assets/abnlogo.ico">
   <link rel="shortcut icon" href="assets/abnlogo.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -1697,7 +1698,7 @@ async function updateInventoryStats(currentYard) {
                 <div id="updateStatus" style="font-size: 0.7rem; margin-top: 5px;"></div> 
             </div>
 
-            <div class="stat-card" style="border-left-color: #e53e3e;">
+           <div class="stat-card" style="border-left-color: #e53e3e;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <h4 style="margin: 0; font-size: 0.85rem; color: #718096; text-transform: uppercase; tracking-wider: 0.05em;">🔥 Boiler A Steam Pressure</h4>
                     
@@ -1710,17 +1711,21 @@ async function updateInventoryStats(currentYard) {
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; border-bottom: 1px solid #edf2f7; padding-bottom: 8px;">
                     <div>
                         <p style="margin:0; font-size: 0.65rem; font-weight: bold; color: #718096; text-transform: uppercase;">Present Value (PV)</p>
-                        <div style="font-size: 1.8rem; font-weight: 900; color: #e53e3e;" id="boilerA_PV">0.0 <small style="font-size: 0.75rem; color: #a0aec0; font-weight:normal;">bars</small></div>
+                        <div style="font-size: 1.9rem; font-weight: 900; color: #e53e3e; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 8px rgba(229, 62, 62, 0.45); letter-spacing: 1px;" id="boilerA_PV">
+                            0.0 <small style="font-size: 0.75rem; color: #a0aec0; font-weight:normal; font-family: sans-serif;">bars</small>
+                        </div>
                     </div>
                     <div style="border-left: 1px solid #edf2f7; padding-left: 10px;">
                         <p style="margin:0; font-size: 0.65rem; font-weight: bold; color: #718096; text-transform: uppercase;">Set Value (SV)</p>
-                        <div style="font-size: 1.8rem; font-weight: 900; color: #38a169;" id="boilerA_SP">12.0 <small style="font-size: 0.75rem; color: #a0aec0; font-weight:normal;">bars</small></div>
+                        <div style="font-size: 1.9rem; font-weight: 900; color: #38a169; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 8px rgba(56, 161, 105, 0.45); letter-spacing: 1px;" id="boilerA_SP">
+                            8.5 <small style="font-size: 0.75rem; color: #a0aec0; font-weight:normal; font-family: sans-serif;">bars</small>
+                        </div>
                     </div>
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
                     <span style="font-size: 0.75rem; font-weight: bold; color: #718096;">🌡️ Furnace Temp:</span>
-                    <span style="font-size: 1.1rem; font-weight: 800; color: #2d3748;" id="boilerA_Temp">0°C</span>
+                    <span style="font-size: 1.3rem; font-weight: 900; color: #dd6b20; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 6px rgba(221, 107, 32, 0.45); letter-spacing: 1px;" id="boilerA_Temp">0°C</span>
                 </div>
             </div>
 
@@ -1737,17 +1742,21 @@ async function updateInventoryStats(currentYard) {
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; border-bottom: 1px solid #edf2f7; padding-bottom: 8px;">
                     <div>
                         <p style="margin:0; font-size: 0.65rem; font-weight: bold; color: #718096; text-transform: uppercase;">Present Value (PV)</p>
-                        <div style="font-size: 1.8rem; font-weight: 900; color: #e53e3e;" id="boilerB_PV">0.0 <small style="font-size: 0.75rem; color: #a0aec0; font-weight:normal;">bars</small></div>
+                        <div style="font-size: 1.9rem; font-weight: 900; color: #e53e3e; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 8px rgba(229, 62, 62, 0.45); letter-spacing: 1px;" id="boilerB_PV">
+                            0.0 <small style="font-size: 0.75rem; color: #a0aec0; font-weight:normal; font-family: sans-serif;">bars</small>
+                        </div>
                     </div>
                     <div style="border-left: 1px solid #edf2f7; padding-left: 10px;">
                         <p style="margin:0; font-size: 0.65rem; font-weight: bold; color: #718096; text-transform: uppercase;">Set Value (SV)</p>
-                        <div style="font-size: 1.8rem; font-weight: 900; color: #38a169;" id="boilerB_SP">12.0 <small style="font-size: 0.75rem; color: #a0aec0; font-weight:normal;">bars</small></div>
+                        <div style="font-size: 1.9rem; font-weight: 900; color: #38a169; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 8px rgba(56, 161, 105, 0.45); letter-spacing: 1px;" id="boilerB_SP">
+                            8.5 <small style="font-size: 0.75rem; color: #a0aec0; font-weight:normal; font-family: sans-serif;">bars</small>
+                        </div>
                     </div>
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
                     <span style="font-size: 0.75rem; font-weight: bold; color: #718096;">🌡️ Furnace Temp:</span>
-                    <span style="font-size: 1.1rem; font-weight: 800; color: #2d3748;" id="boilerB_Temp">0°C</span>
+                    <span style="font-size: 1.3rem; font-weight: 900; color: #dd6b20; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 6px rgba(221, 107, 32, 0.45); letter-spacing: 1px;" id="boilerB_Temp">0°C</span>
                 </div>
             </div>
 
