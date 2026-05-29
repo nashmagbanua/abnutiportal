@@ -183,7 +183,11 @@ async function createNewQuiz() {
     }
     
     const isPublic = type === 'public';
-    const publicSlug = isPublic ? generateSlug(title) : null;
+    
+    // FIX FOR 409 CONFLICT: Magdadagdag ng maikling random string (5 characters) sa dulo ng slug
+    // para kahit magkapareho ang Title ng quiz ay hindi mag-duplicate ang unique slug sa database.
+    const randomId = Math.random().toString(36).substring(2, 7); 
+    const publicSlug = isPublic ? `${generateSlug(title)}-${randomId}` : null;
     
     const { data, error } = await supabaseClient
         .from('quizzes')
@@ -206,7 +210,6 @@ async function createNewQuiz() {
     showToast('Quiz created! Start adding questions.', 'success');
     editQuiz(data.id);
 }
-
 async function editQuiz(quizId) {
     const { data, error } = await supabaseClient
         .from('quizzes')
