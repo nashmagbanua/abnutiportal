@@ -1654,7 +1654,7 @@ async function updateInventoryStats(currentYard) {
                 }
             });
         });
-  function loadDashboard() {
+ function loadDashboard() {
     updateSidebarActive(0);
     const content = document.getElementById('cont');
     
@@ -1695,6 +1695,60 @@ async function updateInventoryStats(currentYard) {
                 <div class="value" id="latestGPM">--</div>
                 <div class="label" id="gpmTime">Checking...</div>
                 <div id="updateStatus" style="font-size: 0.7rem; margin-top: 5px;"></div> 
+            </div>
+
+            <div class="stat-card" style="border-left-color: #e53e3e;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h4 style="margin: 0; font-size: 0.85rem; color: #718096; text-transform: uppercase; tracking-wider: 0.05em;">🔥 Boiler A Steam Pressure</h4>
+                    
+                    <div style="background: #edf2f7; padding: 2px; border-radius: 6px; display: flex; gap: 2px;">
+                        <button id="btnBoilerA_Main" onclick="toggleBoilerStatus('A', 'MAIN')" style="font-size: 0.6rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; transition: all 0.2s;">MAIN</button>
+                        <button id="btnBoilerA_Backup" onclick="toggleBoilerStatus('A', 'BACKUP')" style="font-size: 0.6rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; transition: all 0.2s;">BACK-UP</button>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; border-bottom: 1px solid #edf2f7; padding-bottom: 8px;">
+                    <div>
+                        <p style="margin:0; font-size: 0.65rem; font-weight: bold; color: #718096; text-transform: uppercase;">Present Value (PV)</p>
+                        <div style="font-size: 1.8rem; font-weight: 900; color: #e53e3e;" id="boilerA_PV">0.0 <small style="font-size: 0.75rem; color: #a0aec0; font-weight:normal;">bars</small></div>
+                    </div>
+                    <div style="border-left: 1px solid #edf2f7; padding-left: 10px;">
+                        <p style="margin:0; font-size: 0.65rem; font-weight: bold; color: #718096; text-transform: uppercase;">Set Value (SV)</p>
+                        <div style="font-size: 1.8rem; font-weight: 900; color: #38a169;" id="boilerA_SP">12.0 <small style="font-size: 0.75rem; color: #a0aec0; font-weight:normal;">bars</small></div>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                    <span style="font-size: 0.75rem; font-weight: bold; color: #718096;">🌡️ Furnace Temp:</span>
+                    <span style="font-size: 1.1rem; font-weight: 800; color: #2d3748;" id="boilerA_Temp">0°C</span>
+                </div>
+            </div>
+
+            <div class="stat-card" style="border-left-color: #48bb78;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h4 style="margin: 0; font-size: 0.85rem; color: #718096; text-transform: uppercase; tracking-wider: 0.05em;">🔥 Boiler B Steam Pressure</h4>
+                    
+                    <div style="background: #edf2f7; padding: 2px; border-radius: 6px; display: flex; gap: 2px;">
+                        <button id="btnBoilerB_Main" onclick="toggleBoilerStatus('B', 'MAIN')" style="font-size: 0.6rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; transition: all 0.2s;">MAIN</button>
+                        <button id="btnBoilerB_Backup" onclick="toggleBoilerStatus('B', 'BACKUP')" style="font-size: 0.6rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; transition: all 0.2s;">BACK-UP</button>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; border-bottom: 1px solid #edf2f7; padding-bottom: 8px;">
+                    <div>
+                        <p style="margin:0; font-size: 0.65rem; font-weight: bold; color: #718096; text-transform: uppercase;">Present Value (PV)</p>
+                        <div style="font-size: 1.8rem; font-weight: 900; color: #e53e3e;" id="boilerB_PV">0.0 <small style="font-size: 0.75rem; color: #a0aec0; font-weight:normal;">bars</small></div>
+                    </div>
+                    <div style="border-left: 1px solid #edf2f7; padding-left: 10px;">
+                        <p style="margin:0; font-size: 0.65rem; font-weight: bold; color: #718096; text-transform: uppercase;">Set Value (SV)</p>
+                        <div style="font-size: 1.8rem; font-weight: 900; color: #38a169;" id="boilerB_SP">12.0 <small style="font-size: 0.75rem; color: #a0aec0; font-weight:normal;">bars</small></div>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                    <span style="font-size: 0.75rem; font-weight: bold; color: #718096;">🌡️ Furnace Temp:</span>
+                    <span style="font-size: 1.1rem; font-weight: 800; color: #2d3748;" id="boilerB_Temp">0°C</span>
+                </div>
             </div>
 
             <div class="stat-card" style="border-left-color: #2d3748;">
@@ -1776,10 +1830,12 @@ async function updateInventoryStats(currentYard) {
         if (typeof fetchLatestGPM === "function") fetchLatestGPM(); 
         if (typeof checkTodayStatus === "function") checkTodayStatus();
         if (typeof fetch24hCoalConsumption === "function") fetch24hCoalConsumption();
-        
-        // 🔴 TAWAGIN ANG BAGONG ADVANCED CHEMICAL LOG ENGINE:
         if (typeof fetchDashboardChemicals === "function") fetchDashboardChemicals();
         
+        // 🔴 Tawagin ang boiler pressure simulator:
+        if (typeof fetchBoilerSteamData === "function") fetchBoilerSteamData();
+        renderBoilerToggleButtons();
+
         if (typeof syncCoalData === "function") {
             syncCoalData(); 
         }
@@ -2632,7 +2688,112 @@ function renderChemList() {
         container.innerHTML = currentChemView === 'chem' ? globalChemSummary.chemicals : globalChemSummary.areas;
     }
 }
-        // ====================================================================
+ // ====================================================================
+// 🚀 BOILER STEAM PRESSURE MONITORING ENGINE (BARS & TOGGLE CONTROLS)
+// ====================================================================
+
+// Kumuha o mag-set ng default configurations sa localStorage para persistent ang toggle state
+let boilerStates = JSON.parse(localStorage.getItem('dash_boiler_modes')) || {
+    A: 'MAIN',
+    B: 'BACKUP'
+};
+
+async function fetchBoilerSteamData() {
+    try {
+        // Ang Maximum target pressure limit sa planta ay 12.0 bars gaya ng iyong request
+        const svMax = 12.0; 
+
+        // 🎛️ BOILER A SIMULATION RUNTIME LOGIC
+        let pvA = 0;
+        let tempA = 0;
+        if (boilerStates.A === 'MAIN') {
+            // Lalangoy sa 11.15 hanggang 11.85 bars kapag MAIN para makatotohanan ang galaw sa planta
+            pvA = (11.15 + (Math.random() * 0.70)).toFixed(2);
+            // Furnace temperature para sa main load
+            tempA = 210 + Math.floor(Math.random() * 15);
+        } else {
+            // Mababang standby pressure/leak lines kapag BACK-UP mode
+            pvA = (1.90 + (Math.random() * 0.45)).toFixed(2);
+            tempA = 72 + Math.floor(Math.random() * 8);
+        }
+
+        // 🎛️ BOILER B SIMULATION RUNTIME LOGIC
+        let pvB = 0;
+        let tempB = 0;
+        if (boilerStates.B === 'MAIN') {
+            // Lalangoy sa 11.20 hanggang 11.80 bars kapag MAIN
+            pvB = (11.20 + (Math.random() * 0.60)).toFixed(2);
+            tempB = 206 + Math.floor(Math.random() * 12);
+        } else {
+            // Standby temperature at pressure level
+            pvB = (1.75 + (Math.random() * 0.50)).toFixed(2);
+            tempB = 68 + Math.floor(Math.random() * 10);
+        }
+
+        // 🔴 INJECT DATA SA BOILER A NODES (PV = Red, SV = Green na kontrolado ng HTML styles)
+        if (document.getElementById('boilerA_PV')) {
+            document.getElementById('boilerA_PV').innerHTML = `${pvA} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal;">bars</span>`;
+        }
+        if (document.getElementById('boilerA_SP')) {
+            document.getElementById('boilerA_SP').innerHTML = `${svMax.toFixed(1)} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal;">bars</span>`;
+        }
+        if (document.getElementById('boilerA_Temp')) {
+            document.getElementById('boilerA_Temp').innerText = `${tempA}°C`;
+        }
+
+        // 🟢 INJECT DATA SA BOILER B NODES
+        if (document.getElementById('boilerB_PV')) {
+            document.getElementById('boilerB_PV').innerHTML = `${pvB} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal;">bars</span>`;
+        }
+        if (document.getElementById('boilerB_SP')) {
+            document.getElementById('boilerB_SP').innerHTML = `${svMax.toFixed(1)} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal;">bars</span>`;
+        }
+        if (document.getElementById('boilerB_Temp')) {
+            document.getElementById('boilerB_Temp').innerText = `${tempB}°C`;
+        }
+
+    } catch (err) {
+        console.error("❌ Error running boiler pressure simulation engine:", err);
+    }
+}
+
+// Handler function para sa pagpindot ng MAIN at BACK-UP button toggles
+function toggleBoilerStatus(boiler, mode) {
+    // I-save ang bagong piniling estado
+    boilerStates[boiler] = mode;
+    localStorage.setItem('dash_boiler_modes', JSON.stringify(boilerStates));
+    
+    // I-refresh agad ang visual styling ng mga toggles at kalkulahin ang simulation values
+    renderBoilerToggleButtons();
+    fetchBoilerSteamData();
+}
+
+// Pagpapakulay at pagpapatigas ng UI active state buttons base sa mode
+function renderBoilerToggleButtons() {
+    const btnAMain = document.getElementById('btnBoilerA_Main');
+    const btnABackup = document.getElementById('btnBoilerA_Backup');
+    const btnBMain = document.getElementById('btnBoilerB_Main');
+    const btnBBackup = document.getElementById('btnBoilerB_Backup');
+
+    // 🔴 BOILER A STYLE ENGINE
+    if (boilerStates.A === 'MAIN') {
+        if(btnAMain) { btnAMain.style.background = "#e53e3e"; btnAMain.style.color = "#ffffff"; }
+        if(btnABackup) { btnABackup.style.background = "transparent"; btnABackup.style.color = "#718096"; }
+    } else {
+        if(btnAMain) { btnAMain.style.background = "transparent"; btnAMain.style.color = "#718096"; }
+        if(btnABackup) { btnABackup.style.background = "#4a5568"; btnABackup.style.color = "#ffffff"; }
+    }
+
+    // 🟢 BOILER B STYLE ENGINE
+    if (boilerStates.B === 'MAIN') {
+        if(btnBMain) { btnBMain.style.background = "#48bb78"; btnBMain.style.color = "#ffffff"; }
+        if(btnBBackup) { btnBBackup.style.background = "transparent"; btnBBackup.style.color = "#718096"; }
+    } else {
+        if(btnBMain) { btnBMain.style.background = "transparent"; btnBMain.style.color = "#718096"; }
+        if(btnBBackup) { btnBBackup.style.background = "#4a5568"; btnBBackup.style.color = "#ffffff"; }
+    }
+}
+ // ====================================================================
 // NEW FIX: 24-Hour Coal Consumption Engine (daily_bucket_logs)
 // ====================================================================
 async function fetch24hCoalConsumption() {
