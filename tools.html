@@ -73,9 +73,33 @@
             background: rgba(245,101,101,0.1); border: 1px solid var(--danger);
             color: var(--danger); border-radius: 15px; font-weight: bold;
         }
+
+        /* --- COMING SOON CARDS --- */
+        .card.coming-soon { opacity: 0.55; cursor: not-allowed; position: relative; }
+        .card.coming-soon::after {
+            content: 'Coming Soon';
+            position: absolute; top: 8px; right: 10px;
+            background: rgba(246,173,85,0.2); color: #f6ad55;
+            font-size: 0.6rem; font-weight: 800; letter-spacing: 0.5px;
+            padding: 2px 7px; border-radius: 20px; border: 1px solid rgba(246,173,85,0.3);
+            text-transform: uppercase;
+        }
+        .card.coming-soon:active { transform: none; background: var(--glass); }
+
+        /* --- TOAST --- */
+        #toast-container { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; align-items: center; gap: 8px; width: 90%; max-width: 340px; pointer-events: none; }
+        .toast { width: 100%; display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 12px; color: white; font-size: 0.8rem; font-weight: 500; box-shadow: 0 6px 20px rgba(0,0,0,0.5); animation: toastIn 0.3s ease; pointer-events: auto; }
+        .toast.success { background: rgba(56,161,105,0.95); }
+        .toast.error   { background: rgba(197,48,48,0.95); }
+        .toast.info    { background: rgba(49,130,206,0.95); }
+        .toast.warning { background: rgba(214,158,46,0.95); }
+        @keyframes toastIn { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+        @keyframes toastOut { from { opacity:1; } to { opacity:0; transform: translateY(20px); } }
     </style>
 </head>
 <body>
+
+    <div id="toast-container"></div>
 
     <div id="offline-status">NO INTERNET CONNECTION</div>
 
@@ -92,11 +116,11 @@
 
     <div class="section-title">Digital Logbooks</div>
     <div class="grid-container">
-        <a href="#" class="card logbook-card" onclick="alert('Coming Soon')"><i class="fas fa-fire"></i><span>Boiler Logbook</span></a>
-        <a href="#" class="card logbook-card" onclick="alert('Coming Soon')"><i class="fas fa-faucet"></i><span>WTP Logbook</span></a>
-        <a href="#" class="card logbook-card" onclick="alert('Coming Soon')"><i class="fas fa-snowflake"></i><span>Ref Logbook</span></a>
-        <a href="#" class="card logbook-card" onclick="alert('Coming Soon')"><i class="fas fa-wind"></i><span>CDA Logbook</span></a>
-        <a href="#" class="card logbook-card" onclick="alert('Coming Soon')"><i class="fas fa-recycle"></i><span>Wwtp logbok</span></a>
+        <a href="#" class="card logbook-card coming-soon" onclick="return false;"><i class="fas fa-fire"></i><span>Boiler Logbook</span></a>
+        <a href="#" class="card logbook-card coming-soon" onclick="return false;"><i class="fas fa-faucet"></i><span>WTP Logbook</span></a>
+        <a href="#" class="card logbook-card coming-soon" onclick="return false;"><i class="fas fa-snowflake"></i><span>Ref Logbook</span></a>
+        <a href="#" class="card logbook-card coming-soon" onclick="return false;"><i class="fas fa-wind"></i><span>CDA Logbook</span></a>
+        <a href="#" class="card logbook-card coming-soon" onclick="return false;"><i class="fas fa-recycle"></i><span>Wwtp Logbook</span></a>
     </div>
 
     <div class="section-title">Utility Tools</div>
@@ -111,19 +135,30 @@
     <button class="logout-btn" onclick="logout()">LOGOUT SESSION</button>
 
     <script>
-        // --- PROFILE LOADING FIX ---
-        function loadProfile() {
-            // Kunin ang data mula sa localStorage
-            const name = localStorage.getItem('userName');
-            const role = localStorage.getItem('userRole');
-            const avatar = localStorage.getItem('userAvatar'); // Siguraduhin na 'userAvatar' ang key sa login page
+        // --- TOAST HELPER ---
+        function showToast(message, type = 'info', duration = 3000) {
+            const icons = { success: 'fa-check-circle', error: 'fa-times-circle', info: 'fa-info-circle', warning: 'fa-exclamation-triangle' };
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<i class="fas ${icons[type]}"></i><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'toastOut 0.3s ease forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
 
-            // I-display ang data, kung wala, gamitin ang defaults
-            document.getElementById('displayName').innerText = name ? name : "Unknown User";
-            document.getElementById('displayRole').innerText = role ? role.toUpperCase() : "OPERATOR";
-            
+        // --- PROFILE LOADING (FIXED) ---
+        function loadProfile() {
+            const name   = localStorage.getItem('userName');
+            const role   = localStorage.getItem('userRole');
+            const avatar = localStorage.getItem('userAvatar');
+
+            document.getElementById('displayName').innerText = name || 'Unknown User';
+            document.getElementById('displayRole').innerText = role ? role.toUpperCase() : 'OPERATOR';
+
             if (avatar) {
-                // Kung ang avatar ay filename lang (e.g., avatar1.svg), dagdagan ng path
                 document.getElementById('displayAvatar').src = 'assets/' + avatar;
             }
         }
