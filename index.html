@@ -720,34 +720,126 @@ function fetchPowerData(selectedDate) {
         grandTotalDisplay.innerText = "Total: " + totalSum.toFixed(2) + " kWh";
     });
 }
-        function openChemicals() {
+       async function openChemicals() {
     updateSidebarActive(3);
     const content = document.getElementById('cont');
+    
+    // 1. I-render agad ang Layout na may Loading indicators habang naghihintay ng data
     content.innerHTML = `
-        <div class="header-flex">
-            <h1>Chemicals Inventory</h1>
-            <p class="sub-text">Monitor stock levels and consumption of plant chemicals.</p>
-        </div>
-        <div class="stats-grid">
-            <div class="stat-card" style="border-left-color: #9f7aea;">
-                <h4>PAC Stock</h4>
-                <div class="value" id="pacStock">0 bags</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+                <h1 style="font-size: 1.4rem; margin: 0; font-weight: 800; color: #2d3748;">Chemicals Inventory Control</h1>
+                <p class="sub-text" style="font-size: 0.85rem; margin: 3px 0 0 0; color: #718096;">Real-time stock levels and monitoring across all plant areas.</p>
             </div>
-            <div class="stat-card" style="border-left-color: #ed64a6;">
-                <h4>Polymer Stock</h4>
-                <div class="value" id="polyStock">0 liters</div>
+            <div>
+                <button onclick="openChemicals()" style="padding: 6px 12px; background: #319795; color: white; border: none; border-radius: 8px; font-size: 0.75rem; font-weight: bold; cursor: pointer;">
+                    <i class="fas fa-sync-alt"></i> Refresh Stock
+                </button>
             </div>
         </div>
-        <div class="data-card">
-            <p style="text-align:center; color:#a0aec0;">Detailed chemical logs coming soon...</p>
+
+        <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px;">
+            <div class="stat-card" style="border-left-color: #319795;">
+                <h4 style="margin:0; font-size:0.8rem; color:#718096; text-transform:uppercase;">Total Monitored Lines</h4>
+                <div class="value" id="pageChemTotalItems" style="font-size: 1.8rem; font-weight: 900; color: #2d3748; margin-top: 5px;">--</div>
+            </div>
+            <div class="stat-card" style="border-left-color: #e53e3e;">
+                <h4 style="margin:0; font-size:0.8rem; color:#718096; text-transform:uppercase;">Critical Low Stock</h4>
+                <div class="value" id="pageChemCriticalCount" style="font-size: 1.8rem; font-weight: 900; color: #e53e3e; margin-top: 5px;">--</div>
+            </div>
+        </div>
+
+        <div class="data-card" style="background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+            <h4 style="margin: 0 0 12px 0; font-size: 0.95rem; color: #2d3748; font-weight: 700;">Current Stock Level Matrix</h4>
+            
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
+                    <thead>
+                        <tr style="background: #f7fafc; border-bottom: 2px solid #edf2f7;">
+                            <th style="padding: 10px; color: #4a5568; font-weight: 700;">Chemical Name</th>
+                            <th style="padding: 10px; color: #4a5568; font-weight: 700; text-align: right;">Current Stock Balance</th>
+                            <th style="padding: 10px; color: #4a5568; font-weight: 700; text-align: center;">Status Indicator</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pageChemTableBody">
+                        <tr>
+                            <td colspan="3" style="text-align: center; padding: 20px; color: #a0aec0; font-style: italic;">
+                                Connecting to Supabase Cloud Database...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     `;
-    // Fetch logic from Firebase
-    database.ref('inventory/chemicals').on('value', (snap) => {
-        const data = snap.val() || { pac: 0, poly: 0 };
-        document.getElementById('pacStock').innerText = data.pac + " bags";
-        document.getElementById('polyStock').innerText = data.poly + " liters";
-    });
+
+    // 2. Patakbuhin ang Engine para kuhanin ang totoong imbentaryo sa Supabase
+    try {
+        const { data: inventory, error } = await supabaseClient
+            .from('chemical_inventory')
+            .select('chemical, quantity, unit')
+            .order('chemical', { ascending: true });
+
+        if (error) throw error;
+
+        let tableHtml = "";
+        let criticalCount = 0;
+
+        if (!inventory || inventory.length === 0) {
+            tableHtml = `<tr><td colspan="3" style="text-align: center; padding: 20px; color: #a0aec0;">Walang nakitang records sa chemical_inventory table.</td></tr>`;
+        } else {
+            inventory.forEach(item => {
+                const name = item.chemical;
+                const bal = parseFloat(item.quantity || 0);
+                const unit = item.unit;
+
+                // Suriin ang configuration levels ng alarm (tulad ng ginawa natin sa card)
+                let isCritical = false;
+                const lowerName = name.toLowerCase();
+                if ((lowerName.includes('hydro') || lowerName.includes('caustic') || lowerName.includes('chlorine')) && bal <= 10) isCritical = true;
+                else if (lowerName.includes('alum') && bal <= 50) isCritical = true;
+                else if ((lowerName.includes('polymer') || lowerName.includes('amphos')) && bal <= 25) isCritical = true;
+
+                if (isCritical) criticalCount++;
+
+                // Set styles at text para sa status badge
+                const statusText = isCritical ? "CRITICAL LOW" : "GOOD STOCK";
+                const badgeBg = isCritical ? "#fed7d7" : "#c6f6d5";
+                const badgeColor = isCritical ? "#9b2c2c" : "#22543d";
+
+                tableHtml += `
+                    <tr style="border-bottom: 1px solid #edf2f7; transition: background 0.2s; cursor: default;" onmouseover="this.style.backgroundColor='#f7fafc'" onmouseout="this.style.backgroundColor='transparent'">
+                        <td style="padding: 12px 10px; font-weight: bold; color: #2d3748;">${name}</td>
+                        <td style="padding: 12px 10px; text-align: right; font-weight: 800; font-size: 0.95rem; color: ${isCritical ? '#e53e3e' : '#2d3748'};">
+                            ${bal.toLocaleString()} <span style="font-size: 0.75rem; color: #a0aec0; font-weight: normal;">${unit}</span>
+                        </td>
+                        <td style="padding: 12px 10px; text-align: center;">
+                            <span style="background: ${badgeBg}; color: ${badgeColor}; padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: bold; display: inline-block; min-width: 90px;">
+                                ${statusText}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // 3. I-inject ang totoong bilang at listahan sa screen
+        if (document.getElementById('pageChemTableBody')) document.getElementById('pageChemTableBody').innerHTML = tableHtml;
+        if (document.getElementById('pageChemTotalItems')) document.getElementById('pageChemTotalItems').innerText = inventory ? inventory.length : 0;
+        
+        const critBadge = document.getElementById('pageChemCriticalCount');
+        if (critBadge) {
+            critBadge.innerText = criticalCount;
+            critBadge.style.color = criticalCount > 0 ? '#e53e3e' : '#2b6cb0';
+            critBadge.parentElement.style.borderLeftColor = criticalCount > 0 ? '#e53e3e' : '#2b6cb0';
+        }
+
+    } catch (err) {
+        console.error("❌ Error loading full chemical page:", err);
+        if (document.getElementById('pageChemTableBody')) {
+            document.getElementById('pageChemTableBody').innerHTML = `<tr><td colspan="3" style="text-align: center; padding: 20px; color: #e53e3e; font-weight: bold;">Failed to load data from Supabase. Check console logs.</td></tr>`;
+        }
+    }
 }
        // --- COAL YARD MONITORING LOGIC ---
 async function openCoalDelivery() {
@@ -1562,7 +1654,7 @@ async function updateInventoryStats(currentYard) {
                 }
             });
         });
-   function loadDashboard() {
+  function loadDashboard() {
     updateSidebarActive(0);
     const content = document.getElementById('cont');
     
@@ -1617,27 +1709,48 @@ async function updateInventoryStats(currentYard) {
 
             <div class="stat-card" style="border-left-color: #38a169;">
                 <h4 style="margin: 0; font-size: 0.85rem; color: #718096; text-transform: uppercase; tracking-wider: 0.05em;">Total Coal Consumption (24H)</h4>
-                
                 <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 10px; border-bottom: 1px solid #edf2f7; padding-bottom: 8px;">
                     <div style="font-size: 1.6rem; font-weight: 900; color: #2d3748;" id="dash24hCombinedBkt">0 <span style="font-size: 0.8rem; font-weight: normal; color: #a0aec0;">BKT</span></div>
                     <div style="font-size: 1.3rem; font-weight: 900; color: #319795;" id="dash24hCombinedTons">0.00 <span style="font-size: 0.75rem; font-weight: normal; color: #a0aec0;">TPN</span></div>
                 </div>
-
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; font-size: 0.78rem;">
                     <div>
                         <div style="font-weight: bold; color: #38a169;">🔥 Boiler A</div>
-                        <div style="color: #4a5568; margin-top: 2px;">Count: <span id="dash24hBktA" style="font-weight: bold;">0</span> BKT</div>
-                        <div style="color: #4a5568;">Tapon: <span id="dash24hTonsA" style="font-weight: bold;">0.00</span> TPN</div>
+                        <div style="color: #4a5568; margin-top: 2px;">Count: <span id="dash24hBktA" style="font-weight: bold;">0</span></div>
+                        <div style="color: #4a5568;">Tapon: <span id="dash24hTonsA" style="font-weight: bold;">0.00</span></div>
                     </div>
                     <div style="border-left: 1px solid #edf2f7; padding-left: 10px;">
                         <div style="font-weight: bold; color: #48bb78;">🔥 Boiler B</div>
-                        <div style="color: #4a5568; margin-top: 2px;">Count: <span id="dash24hBktB" style="font-weight: bold;">0</span> BKT</div>
-                        <div style="color: #4a5568;">Tapon: <span id="dash24hTonsB" style="font-weight: bold;">0.00</span> TPN</div>
+                        <div style="color: #4a5568; margin-top: 2px;">Count: <span id="dash24hBktB" style="font-weight: bold;">0</span></div>
+                        <div style="color: #4a5568;">Tapon: <span id="dash24hTonsB" style="font-weight: bold;">0.00</span></div>
                     </div>
                 </div>
-
                 <div style="text-align: right; margin-top: 8px;">
                     <span id="dashCoalLogDate" style="font-size: 0.65rem; background: #f7fafc; padding: 2px 6px; border: 1px solid #e2e8f0; border-radius: 4px; color: #a0aec0;">Loading...</span>
+                </div>
+            </div>
+
+            <div class="stat-card" style="border-left-color: #319795;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h4 style="margin: 0; font-size: 0.85rem; color: #718096; text-transform: uppercase; tracking-wider: 0.05em;">Chemical Usage (24H)</h4>
+                    
+                    <div style="background: #edf2f7; padding: 2px; border-radius: 6px; display: flex; gap: 2px;">
+                        <button id="btnChemView" onclick="switchChemView('chem')" style="font-size: 0.65rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; background: #ffffff; color: #2d3748; transition: all 0.2s;">Chemical</button>
+                        <button id="btnAreaView" onclick="switchChemView('area')" style="font-size: 0.65rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; background: transparent; color: #718096; transition: all 0.2s;">Area</button>
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 8px; border-bottom: 1px solid #edf2f7; padding-bottom: 6px;">
+                    <div style="font-size: 1.5rem; font-weight: 900; color: #2d3748;" id="dashChemMainValue">0 <span style="font-size: 0.8rem; font-weight: normal; color: #a0aec0;">TAPS</span></div>
+                    <div style="font-size: 0.75rem; font-weight: bold; color: #a0aec0;" id="dashChemLowAlert">0 CRITICAL</div>
+                </div>
+
+                <div style="margin-top: 8px; font-size: 0.78rem; max-height: 95px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px;" id="dashChemListContainer">
+                    <p style="color: #a0aec0; text-align: center; font-style: italic; padding: 10px 0;">Loading chemical logs...</p>
+                </div>
+
+                <div style="text-align: right; margin-top: 6px;">
+                    <span id="dashChemSyncTime" style="font-size: 0.65rem; background: #f7fafc; padding: 2px 6px; border: 1px solid #e2e8f0; border-radius: 4px; color: #a0aec0;">Syncing...</span>
                 </div>
             </div>
 
@@ -1657,14 +1770,15 @@ async function updateInventoryStats(currentYard) {
         </div>
     `;
 
-    // Delay para masiguro na rendered na ang HTML bago mag-fetch ng data
+    // Engine Delay loader
     setTimeout(() => {
         if (typeof fetchDashboardData === "function") fetchDashboardData(yDate);
         if (typeof fetchLatestGPM === "function") fetchLatestGPM(); 
         if (typeof checkTodayStatus === "function") checkTodayStatus();
-        
-        // 🔴 DAGDAG: Tawagin ang bagong data engine para sa Coal Tracking
         if (typeof fetch24hCoalConsumption === "function") fetch24hCoalConsumption();
+        
+        // 🔴 TAWAGIN ANG BAGONG ADVANCED CHEMICAL LOG ENGINE:
+        if (typeof fetchDashboardChemicals === "function") fetchDashboardChemicals();
         
         if (typeof syncCoalData === "function") {
             syncCoalData(); 
@@ -2379,6 +2493,143 @@ function updateChartRange(rangeValue) {
         syncCoalData(); 
     } else if (typeof masterSync === 'function') {
         masterSync();
+    }
+}
+        // ====================================================================
+// ADVANCED CHEMICAL 24-HOUR MONITORING ENGINE
+// ====================================================================
+let currentChemView = 'chem'; 
+let globalChemSummary = { chemicals: "", areas: "" };
+
+async function fetchDashboardChemicals() {
+    try {
+        const ngayon = new Date();
+        const year = ngayon.getFullYear();
+        const month = String(ngayon.getMonth() + 1).padStart(2, '0');
+        const day = String(ngayon.getDate()).padStart(2, '0');
+        
+        // Target filtering format: 00:00H hanggang 23:59H ngayong araw sa Pilipinas
+        const simulaNgayon = `${year}-${month}-${day}T00:00:00.000Z`;
+        const taposNgayon = `${year}-${month}-${day}T23:59:59.999Z`;
+
+        // Sabay na paghila ng imbentaryo at transaksyon sa Supabase
+        const [invRes, logsRes] = await Promise.all([
+            supabaseClient.from('chemical_inventory').select('chemical, quantity, unit'),
+            supabaseClient.from('chemical_logs').select('chemical, quantity, unit, area').gte('timestamp', simulaNgayon).lte('timestamp', taposNgayon).eq('action', 'OUT')
+        ]);
+
+        if (invRes.error) throw invRes.error;
+        if (logsRes.error) throw logsRes.error;
+
+        const inventory = invRes.data || [];
+        const logs = logsRes.data || [];
+
+        const chemUsage = {};
+        const areaUsage = {};
+        let criticalCount = 0;
+
+        // 1. Suriin ang natitirang stock batay sa mga sensors o alarm configs niyo
+        inventory.forEach(item => {
+            const bal = parseFloat(item.quantity || 0);
+            const lowerName = item.chemical.toLowerCase();
+            if ((lowerName.includes('hydro') || lowerName.includes('caustic') || lowerName.includes('chlorine')) && bal <= 10) criticalCount++;
+            else if (lowerName.includes('alum') && bal <= 50) criticalCount++;
+            else if ((lowerName.includes('polymer') || lowerName.includes('amphos')) && bal <= 25) criticalCount++;
+        });
+
+        // 2. I-summarize ang 24H activity records
+        logs.forEach(log => {
+            const chem = log.chemical;
+            const qty = parseFloat(log.quantity || 0);
+            const unit = log.unit || '';
+            const area = log.area || 'Others';
+
+            // Grouping per chemical name
+            if (!chemUsage[chem]) chemUsage[chem] = { qty: 0, unit: unit };
+            chemUsage[chem].qty += qty;
+
+            // Grouping per application area
+            if (!areaUsage[area]) areaUsage[area] = 0;
+            areaUsage[area] += qty;
+        });
+
+        // 3. HTML Builder para sa Chemical Category View
+        let chemHtml = "";
+        if (Object.keys(chemUsage).length === 0) {
+            chemHtml = `<p style="color: #a0aec0; text-align: center; font-style: italic; padding: 10px 0;">No chemicals used today.</p>`;
+        } else {
+            Object.keys(chemUsage).forEach(key => {
+                let shortName = key.replace('Hydrochloric Acid', 'HCI').replace('Caustic Soda', 'Caustic').replace('Aluminium Sulphate', 'Alum').replace('Ammonium Phosphate', 'Amphos');
+                chemHtml += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 2px 0; border-bottom: 1px dashed #f7fafc;">
+                        <span style="font-weight: 700; color: #4a5568;">🧪 ${shortName}</span>
+                        <span style="color: #e53e3e; font-weight: 800;">-${chemUsage[key].qty} ${chemUsage[key].unit}</span>
+                    </div>
+                `;
+            });
+        }
+
+        // 4. HTML Builder para sa Plant Area Category View
+        let areaHtml = "";
+        if (Object.keys(areaUsage).length === 0) {
+            areaHtml = `<p style="color: #a0aec0; text-align: center; font-style: italic; padding: 10px 0;">No area consumption today.</p>`;
+        } else {
+            Object.keys(areaUsage).forEach(key => {
+                areaHtml += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 2px 0; border-bottom: 1px dashed #f7fafc;">
+                        <span style="font-weight: 700; color: #4a5568;">📍 ${key}</span>
+                        <span style="color: #319795; font-weight: 800;">${areaUsage[key]} units</span>
+                    </div>
+                `;
+            });
+        }
+
+        // Itabi ang HTML strings sa global runtime variable
+        globalChemSummary.chemicals = chemHtml;
+        globalChemSummary.areas = areaHtml;
+
+        // 5. I-push ang actual numbers sa global nodes
+        if (document.getElementById('dashChemMainValue')) {
+            document.getElementById('dashChemMainValue').innerHTML = `${logs.length} <span style="font-size: 0.8rem; font-weight: normal; color: #a0aec0;">TODAY'S TAPS</span>`;
+        }
+        if (document.getElementById('dashChemLowAlert')) {
+            document.getElementById('dashChemLowAlert').innerText = `${criticalCount} CRITICAL`;
+            document.getElementById('dashChemLowAlert').style.color = criticalCount > 0 ? '#e53e3e' : '#a0aec0';
+        }
+        
+        // I-update ang listing list graphics
+        renderChemList();
+
+        if (document.getElementById('dashChemSyncTime')) {
+            document.getElementById('dashChemSyncTime').innerText = `Sync: ${ngayon.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+        }
+
+    } catch (err) {
+        console.error("❌ Error running advanced chemical engine:", err);
+    }
+}
+
+// Controls UI behavior ng toggle buttons
+function switchChemView(view) {
+    currentChemView = view;
+    
+    const btnChem = document.getElementById('btnChemView');
+    const btnArea = document.getElementById('btnAreaView');
+    
+    if (view === 'chem') {
+        if(btnChem) { btnChem.style.background = "#ffffff"; btnChem.style.color = "#2d3748"; }
+        if(btnArea) { btnArea.style.background = "transparent"; btnArea.style.color = "#718096"; }
+    } else {
+        if(btnChem) { btnChem.style.background = "transparent"; btnChem.style.color = "#718096"; }
+        if(btnArea) { btnArea.style.background = "#ffffff"; btnArea.style.color = "#2d3748"; }
+    }
+    renderChemList();
+}
+
+function renderChemList() {
+    const container = document.getElementById('dashChemListContainer');
+    if (container) {
+        container.innerHTML = currentChemView === 'chem' ? globalChemSummary.chemicals : globalChemSummary.areas;
     }
 }
         // ====================================================================
