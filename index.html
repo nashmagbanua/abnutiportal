@@ -1824,17 +1824,25 @@ async function updateInventoryStats(currentYard) {
         </div>
     `;
 
-    // Engine Delay loader
+   // Engine Delay loader at STEAMMMMM SIMULATOR changed in the future updates 
     setTimeout(() => {
         if (typeof fetchDashboardData === "function") fetchDashboardData(yDate);
         if (typeof fetchLatestGPM === "function") fetchLatestGPM(); 
         if (typeof checkTodayStatus === "function") checkTodayStatus();
-        if (typeof fetch24hCoalConsumption === "function") fetch24hCoalConsumption();
+        if (typeof fetch24hCoalConsumption === "function" ? fetch24hCoalConsumption() : null);
         if (typeof fetchDashboardChemicals === "function") fetchDashboardChemicals();
         
-        // 🔴 Tawagin ang boiler pressure simulator:
+        // 🔴 Unang load ng boiler data pagkabukas ng dashboard:
         if (typeof fetchBoilerSteamData === "function") fetchBoilerSteamData();
         renderBoilerToggleButtons();
+
+        // 🔄 AUTOMATIC LIVE LOOP (DITO NATIN ISINAMAK):
+        // Patatakbuhin nito ang simulation kada 2 segundo para mag-isa siyang gagalaw at mag-o-oscillate!
+        setInterval(() => {
+            if (typeof fetchBoilerSteamData === "function") {
+                fetchBoilerSteamData();
+            }
+        }, 2000); 
 
         if (typeof syncCoalData === "function") {
             syncCoalData(); 
