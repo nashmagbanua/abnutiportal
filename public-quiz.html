@@ -2,701 +2,845 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Take Quiz - ABN Quiz Maker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>ABN Quiz</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --primary: #48bb78;
-            --accent: #4299e1;
-            --danger: #f56565;
-            --bg: #1a202c;
-            --bg-light: #edf2f7;
-            --text-dark: #1a202c;
-            --text-light: #f7fafc;
-            --border: #e2e8f0;
+            --accent:  #4299e1;
+            --danger:  #f56565;
+            --warn:    #ed8936;
+            --bg:      #f0f4f8;
+            --white:   #ffffff;
+            --text:    #1a202c;
+            --sub:     #718096;
+            --border:  #e2e8f0;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            color: var(--text);
+        }
+
+        /* ── HEADER ── */
+        .quiz-header {
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+            color: white;
             padding: 20px;
-        }
-
-        .container { width: 100%; max-width: 800px; }
-        
-        .card {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-
-        .header h1 { font-size: 1.8rem; margin-bottom: 5px; }
-        .header p { opacity: 0.9; font-size: 0.95rem; }
-
-        .content { padding: 40px 30px; }
-
-        .loading-state {
-            text-align: center;
-            padding: 60px 20px;
-        }
-
-        .loading-state i { font-size: 2.5rem; color: var(--primary); margin-bottom: 15px; animation: spin 1s linear infinite; }
-        
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        .info-form {
-            background: var(--bg-light);
-            padding: 25px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 600;
-            color: var(--text-dark);
-            font-size: 0.95rem;
-        }
-
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            font-size: 0.95rem;
-            font-family: inherit;
-            background: white;
-            color: var(--text-dark);
-            transition: border-color 0.2s;
-        }
-
-        .form-group input:focus, .form-group select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.1);
-        }
-
-        .question-container {
-            background: var(--bg-light);
-            padding: 25px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-        }
-
-        .question-header {
             display: flex;
-            align-items: start;
-            gap: 15px;
-            margin-bottom: 15px;
+            align-items: center;
+            gap: 14px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.25);
         }
-
-        .question-number {
-            width: 35px;
-            height: 35px;
+        .quiz-header-logo {
+            width: 40px; height: 40px; border-radius: 10px;
             background: var(--primary);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; flex-shrink: 0;
         }
-
-        .question-text {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text-dark);
+        .quiz-header-title { font-size: 1.05rem; font-weight: 700; line-height: 1.2; }
+        .quiz-header-sub   { font-size: 0.75rem; opacity: 0.65; margin-top: 2px; }
+        .timer-pill {
+            margin-left: auto;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 6px 14px; border-radius: 20px;
+            font-weight: 700; font-size: 0.9rem;
+            display: none;
         }
+        .timer-pill.warn { background: rgba(237,137,54,0.25); border-color: var(--warn); color: var(--warn); }
 
-        .required { color: var(--danger); }
-
-        .options {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .option {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
+        /* ── PROGRESS ── */
+        .progress-wrap {
             background: white;
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border);
+            display: none;
         }
-
-        .option:hover {
-            border-color: var(--primary);
-            background: rgba(72, 187, 120, 0.05);
+        .progress-info {
+            display: flex; justify-content: space-between;
+            font-size: 0.78rem; color: var(--sub);
+            margin-bottom: 6px;
         }
-
-        .option input[type="radio"],
-        .option input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-            accent-color: var(--primary);
-        }
-
-        .option label {
-            flex: 1;
-            cursor: pointer;
-            margin: 0;
-            color: var(--text-dark);
-        }
-
         .progress-bar {
-            width: 100%;
-            height: 6px;
-            background: var(--border);
-            border-radius: 3px;
-            overflow: hidden;
-            margin-bottom: 25px;
+            height: 6px; background: var(--border);
+            border-radius: 3px; overflow: hidden;
         }
-
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
-            transition: width 0.3s ease;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transition: width 0.4s ease;
+            width: 0%;
         }
 
-        .buttons {
-            display: flex;
-            gap: 12px;
-            justify-content: space-between;
-            margin-top: 30px;
+        /* ── MAIN CONTENT ── */
+        .main { max-width: 700px; margin: 0 auto; padding: 20px; }
+
+        /* ── CARDS ── */
+        .card {
+            background: var(--white);
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            border: 1px solid var(--border);
+            margin-bottom: 16px;
         }
 
-        button {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 1rem;
+        /* ── INFO FORM ── */
+        .form-group { margin-bottom: 14px; }
+        .form-group label {
+            display: block; margin-bottom: 5px;
+            font-weight: 600; font-size: 0.88rem; color: var(--text);
         }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-            flex: 1;
+        .form-group input, .form-group select {
+            width: 100%; padding: 11px 13px;
+            border: 1.5px solid var(--border); border-radius: 9px;
+            font-size: 0.92rem; font-family: inherit;
+            background: white; color: var(--text);
+            transition: border-color 0.2s;
         }
-
-        .btn-primary:hover { background: #38a169; transform: translateY(-2px); box-shadow: 0 8px 16px rgba(72, 187, 120, 0.3); }
-
-        .btn-secondary {
-            background: var(--border);
-            color: var(--text-dark);
+        .form-group input:focus, .form-group select:focus {
+            outline: none; border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(72,187,120,0.12);
         }
+        .required { color: var(--danger); }
 
-        .btn-secondary:hover { background: #cbd5e0; }
-
-        .success-screen {
-            text-align: center;
-            padding: 60px 30px;
-        }
-
-        .success-icon {
-            width: 80px;
-            height: 80px;
-            background: rgba(72, 187, 120, 0.1);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            font-size: 2.5rem;
-            color: var(--primary);
-        }
-
-        .score {
-            font-size: 3rem;
-            font-weight: bold;
-            color: var(--text-dark);
-            margin: 20px 0;
-        }
-
-        .score-text {
-            font-size: 1.1rem;
-            color: #718096;
-            margin-bottom: 30px;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 8px 16px;
-            background: rgba(72, 187, 120, 0.1);
-            color: var(--primary);
-            border-radius: 20px;
-            font-weight: 600;
-            margin-bottom: 20px;
-        }
-
-        .error-message {
-            background: #fed7d7;
-            color: var(--danger);
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .timer {
-            position: fixed;
-            top: 20px;
-            right: 20px;
+        /* ── QUESTION CARD ── */
+        .q-card {
             background: white;
-            padding: 15px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            font-weight: bold;
-            color: var(--text-dark);
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 14px;
+            transition: border-color 0.2s;
+        }
+        .q-card.answered { border-color: rgba(72,187,120,0.4); }
+        .q-num {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 28px; height: 28px; border-radius: 50%;
+            background: var(--primary); color: white;
+            font-size: 0.78rem; font-weight: 700;
+            margin-right: 10px; flex-shrink: 0;
+        }
+        .q-text {
+            font-size: 1rem; font-weight: 600;
+            color: var(--text); line-height: 1.5;
+            display: flex; align-items: flex-start;
+        }
+        .q-text-content { flex: 1; }
+
+        /* ── OPTIONS ── */
+        .options { margin-top: 14px; display: flex; flex-direction: column; gap: 9px; }
+        .option-label {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 14px;
+            border: 2px solid var(--border); border-radius: 9px;
+            cursor: pointer; transition: all 0.15s;
+            font-size: 0.92rem; color: var(--text);
+            user-select: none;
+        }
+        .option-label:hover { border-color: var(--primary); background: rgba(72,187,120,0.04); }
+        .option-label:active { transform: scale(0.99); }
+        .option-label input[type="radio"],
+        .option-label input[type="checkbox"] {
+            width: 17px; height: 17px;
+            accent-color: var(--primary);
+            flex-shrink: 0; cursor: pointer;
+        }
+        .option-label.selected {
+            border-color: var(--primary);
+            background: rgba(72,187,120,0.06);
         }
 
-        .timer.warning { color: var(--danger); }
+        /* ── RESULT OPTIONS (after submit) ── */
+        .option-label.correct {
+            border-color: var(--primary);
+            background: rgba(72,187,120,0.1);
+        }
+        .option-label.wrong {
+            border-color: var(--danger);
+            background: rgba(245,101,101,0.07);
+        }
+
+        /* ── BUTTONS ── */
+        .btn {
+            padding: 13px 24px; border: none;
+            border-radius: 9px; font-weight: 700;
+            cursor: pointer; font-size: 0.95rem;
+            font-family: inherit; transition: all 0.2s;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-primary {
+            background: var(--primary); color: white;
+        }
+        .btn-primary:hover { background: #38a169; transform: translateY(-1px); }
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-secondary {
+            background: var(--border); color: var(--sub);
+        }
+        .btn-full { width: 100%; justify-content: center; }
+
+        /* ── SUBMIT BAR ── */
+        .submit-bar {
+            position: sticky; bottom: 0;
+            background: white; border-top: 1px solid var(--border);
+            padding: 14px 20px;
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 -4px 16px rgba(0,0,0,0.06);
+        }
+        .submit-bar.visible { display: flex; }
+
+        /* ── SCORE SCREEN ── */
+        .score-screen { text-align: center; padding: 30px 20px; }
+        .score-ring {
+            width: 130px; height: 130px;
+            border-radius: 50%;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            margin: 0 auto 20px;
+            border: 6px solid var(--primary);
+            font-size: 2.2rem; font-weight: 900;
+        }
+        .score-ring.fail { border-color: var(--danger); }
+        .score-ring small { font-size: 0.7rem; font-weight: 500; color: var(--sub); }
+        .result-badge {
+            display: inline-block; padding: 6px 18px;
+            border-radius: 20px; font-weight: 700; font-size: 0.95rem;
+            margin-bottom: 14px;
+        }
+        .result-badge.pass { background: rgba(72,187,120,0.12); color: #276749; }
+        .result-badge.fail { background: rgba(245,101,101,0.12); color: #9b2c2c; }
+
+        .detail-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 10px; margin: 20px 0; text-align: left;
+        }
+        .detail-item {
+            background: var(--bg); border-radius: 10px;
+            padding: 12px 14px;
+        }
+        .detail-item .d-label { font-size: 0.72rem; color: var(--sub); font-weight: 600; text-transform: uppercase; }
+        .detail-item .d-val   { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-top: 3px; }
+
+        /* ── ERROR / LOADING ── */
+        .center-box { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; text-align: center; padding: 20px; }
+        .spinner { font-size: 2.5rem; color: var(--primary); animation: spin 1s linear infinite; margin-bottom: 14px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── REVIEW SECTION ── */
+        .review-q {
+            background: white; border-radius: 12px;
+            padding: 16px; margin-bottom: 12px;
+            border-left: 4px solid var(--border);
+        }
+        .review-q.correct-q { border-left-color: var(--primary); }
+        .review-q.wrong-q   { border-left-color: var(--danger); }
+
+        /* ── MOBILE ── */
+        @media (max-width: 480px) {
+            .main { padding: 12px; }
+            .card { padding: 18px; }
+            .detail-grid { grid-template-columns: 1fr; }
+            .submit-bar { flex-direction: column; }
+            .submit-bar .btn { width: 100%; justify-content: center; }
+            .q-text { font-size: 0.95rem; }
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="card">
-        <div class="header">
-            <h1><i class="fas fa-poll"></i> Quiz</h1>
-            <p>Take the quiz below to get started</p>
-        </div>
+<!-- HEADER -->
+<div class="quiz-header">
+    <div class="quiz-header-logo"><i class="fas fa-poll-h"></i></div>
+    <div>
+        <div class="quiz-header-title" id="quizHeaderTitle">ABN Quiz</div>
+        <div class="quiz-header-sub"  id="quizHeaderSub">Loading...</div>
+    </div>
+    <div class="timer-pill" id="timerPill">⏱ 00:00</div>
+</div>
 
-        <div class="content" id="content">
-            <div class="loading-state">
-                <i class="fas fa-spinner"></i>
-                <p>Loading quiz...</p>
-            </div>
-        </div>
+<!-- PROGRESS -->
+<div class="progress-wrap" id="progressWrap">
+    <div class="progress-info">
+        <span id="progressText">0 / 0 answered</span>
+        <span id="progressPct">0%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+</div>
+
+<!-- MAIN -->
+<div class="main" id="main">
+    <div class="center-box">
+        <i class="fas fa-spinner spinner"></i>
+        <p style="color:var(--sub);">Loading quiz...</p>
     </div>
 </div>
 
-<div class="timer" id="timer" style="display: none;"></div>
+<!-- STICKY SUBMIT BAR -->
+<div class="submit-bar" id="submitBar">
+    <span id="submitBarInfo" style="font-size:0.82rem;color:var(--sub);"></span>
+    <button class="btn btn-primary" onclick="confirmSubmit()">
+        <i class="fas fa-paper-plane"></i> Submit Quiz
+    </button>
+</div>
 
 <script>
-    // Initialize Supabase
-    const SUPABASE_URL = 'https://qbeacrpoyfacgmbzxjcu.supabase.co';
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFiZWFjcnBveWZhY2dtYnp4amN1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2NTM5NTIsImV4cCI6MjA2NDIyOTk1Mn0.6kfxKLJxidW4BcqsMJte61AtzydrTW-1ZJIJytiUBt4";
+// ── SUPABASE ──────────────────────────────────────────────────
+const SUPABASE_URL     = 'https://qbeacrpoyfacgmbzxjcu.supabase.co';
+const SUPABASE_ANON_KEY= 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFiZWFjcnBveWZhY2dtYnp4amN1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2NTM5NTIsImV4cCI6MjA2NDIyOTk1Mn0.6kfxKLJxidW4BcqsMJte61AtzydrTW-1ZJIJytiUBt4';
+const supabaseClient   = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // FIXED: renamed variable to avoid duplicate declaration error
-    const supabaseClient = supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_ANON_KEY
-    );
+// ── STATE ─────────────────────────────────────────────────────
+let currentQuiz      = null;
+let currentQuestions = [];
+let currentAnswers   = {};   // { question_id: value or [values] }
+let respondentInfo   = {};
+let timerInterval    = null;
+let timeRemaining    = 0;
+let quizStartTime    = null;
 
-    let currentQuiz = null;
-    let currentQuestions = [];
-    let currentAnswers = {};
-    let timerInterval = null;
-    let timeRemaining = 0;
+// ── INIT ──────────────────────────────────────────────────────
+async function loadQuiz() {
+    const params = new URLSearchParams(window.location.search);
+    const slug   = params.get('slug');
+    const privId = params.get('id'); // private quiz by id
 
-    async function loadQuiz() {
-        try {
-            const params = new URLSearchParams(window.location.search);
-            const slug = params.get('slug');
+    try {
+        let query = supabaseClient.from('quizzes').select('*').eq('is_published', true);
+        if (slug)   query = query.eq('public_slug', slug);
+        else if (privId) query = query.eq('id', privId);
+        else return showError('Invalid quiz link.');
 
-            if (!slug) {
-                showError('Quiz not found. Invalid link.');
-                return;
-            }
+        const { data: quiz, error: qErr } = await query.single();
+        if (qErr || !quiz) return showError('Quiz not found or not yet published.');
 
-            // Fetch quiz
-            const { data: quiz, error: quizError } = await supabaseClient
-                .from('quizzes')
-                .select('*')
-                .eq('public_slug', slug)
-                .eq('is_published', true)
-                .single();
-
-            if (quizError || !quiz) {
-                showError('Quiz not found or deleted.');
-                return;
-            }
-
-            currentQuiz = quiz;
-
-            // Fetch questions
-            const { data: questions, error: qError } = await supabaseClient
-                .from('quiz_questions')
-                .select('*')
-                .eq('quiz_id', quiz.id)
-                .order('question_order', { ascending: true });
-
-            if (qError || !questions) {
-                showError('Could not load questions.');
-                return;
-            }
-
-            currentQuestions = questions;
-
-            // Private quiz check
-            if (!quiz.is_public) {
-                const { data: { user } } = await supabaseClient.auth.getUser();
-
-                if (!user) {
-                    showError('You need to login first.');
-                    return;
-                }
-            }
-
-            renderQuiz();
-
-        } catch (err) {
-            showError(err.message);
+        // Private quiz — check localStorage session
+        if (!quiz.is_public) {
+            const userCode = localStorage.getItem('userCode');
+            if (!userCode) return showError(
+                'This is a private exam.<br><br>' +
+                '<a href="login.html" style="color:var(--accent);font-weight:600;">' +
+                '<i class="fas fa-sign-in-alt"></i> Login to take this exam</a>');
         }
+
+        currentQuiz = quiz;
+        document.getElementById('quizHeaderTitle').textContent = quiz.title;
+        document.getElementById('quizHeaderSub').textContent   =
+            (quiz.quiz_area ? quiz.quiz_area + ' · ' : '') +
+            (quiz.time_limit_seconds
+                ? Math.round(quiz.time_limit_seconds/60) + ' min limit'
+                : 'No time limit');
+
+        // Fetch questions
+        const { data: questions, error: qsErr } = await supabaseClient
+            .from('quiz_questions')
+            .select('*')
+            .eq('quiz_id', quiz.id)
+            .order('question_order', { ascending: true });
+
+        if (qsErr || !questions || questions.length === 0)
+            return showError('This quiz has no questions yet.');
+
+        // Shuffle if enabled
+        currentQuestions = quiz.shuffle_questions
+            ? [...questions].sort(() => Math.random() - 0.5)
+            : questions;
+
+        // Shuffle choices per question if enabled
+        if (quiz.shuffle_choices) {
+            currentQuestions = currentQuestions.map(q => ({
+                ...q,
+                options: q.options ? [...q.options].sort(() => Math.random()-0.5) : q.options
+            }));
+        }
+
+        renderIntroOrForm();
+    } catch (err) {
+        showError('Error: ' + err.message);
+        console.error(err);
     }
+}
 
-    function renderQuiz() {
-        const content = document.getElementById('content');
+// ── INTRO / USER INFO FORM ────────────────────────────────────
+function renderIntroOrForm() {
+    const main = document.getElementById('main');
 
-        if (currentQuiz.is_public) {
-            content.innerHTML = `
-                <div class="info-form">
-                    <h3 style="margin-bottom:20px;">
-                        Before you start...
-                    </h3>
-
-                    <div class="form-group">
-                        <label>Full Name *</label>
-                        <input type="text" id="nameInput">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Email *</label>
-                        <input type="email" id="emailInput">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Department</label>
-                        <input type="text" id="deptInput">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Employee ID</label>
-                        <input type="text" id="empIdInput">
-                    </div>
-
-                    <button class="btn-primary"
-                        onclick="startQuiz()"
-                        style="width:100%;">
-                        Start Quiz
-                    </button>
-                </div>
-            `;
-        } else {
-            startQuiz();
-        }
-    }
-
-    function startQuiz() {
-
-        let respondentInfo = {
-            name: '',
-            email: '',
-            department: '',
-            employee_id: ''
-        };
-
-        if (currentQuiz.is_public) {
-
-            respondentInfo = {
-                name: document.getElementById('nameInput').value,
-                email: document.getElementById('emailInput').value,
-                department: document.getElementById('deptInput').value,
-                employee_id: document.getElementById('empIdInput').value
-            };
-
-            if (!respondentInfo.name || !respondentInfo.email) {
-                alert('Name and Email required');
-                return;
-            }
-        }
-
-        window.respondentInfo = respondentInfo;
-
-        const content = document.getElementById('content');
-
-        let html = `
-            <div class="progress-bar">
-                <div class="progress-fill" style="width:0%"></div>
+    if (currentQuiz.is_public) {
+        // Public: collect user info
+        main.innerHTML = `
+          <div class="card">
+            <h2 style="margin:0 0 6px;font-size:1.3rem;color:var(--text);">${currentQuiz.title}</h2>
+            <p style="color:var(--sub);font-size:0.88rem;margin-bottom:20px;">
+              ${currentQuiz.description || ''}
+            </p>
+            <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:20px;font-size:0.82rem;">
+              <span style="color:var(--sub);"><i class="fas fa-question-circle" style="margin-right:5px;color:var(--accent);"></i>${currentQuestions.length} questions</span>
+              <span style="color:var(--sub);"><i class="fas fa-star" style="margin-right:5px;color:#f6ad55;"></i>Pass: ${currentQuiz.pass_score || 70}%</span>
+              ${currentQuiz.time_limit_seconds ? `<span style="color:var(--sub);"><i class="fas fa-clock" style="margin-right:5px;color:var(--danger);"></i>${Math.round(currentQuiz.time_limit_seconds/60)} min</span>` : ''}
             </div>
-        `;
+            <hr style="border:none;border-top:1px solid var(--border);margin-bottom:20px;">
+            <h3 style="font-size:0.95rem;margin-bottom:14px;color:var(--text);">
+              <i class="fas fa-user" style="color:var(--primary);margin-right:6px;"></i>
+              Your Information
+            </h3>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div class="form-group" style="grid-column:1/-1;">
+                <label>Full Name <span class="required">*</span></label>
+                <input type="text" id="infoName" placeholder="Juan dela Cruz">
+              </div>
+              <div class="form-group" style="grid-column:1/-1;">
+                <label>Email <span class="required">*</span></label>
+                <input type="email" id="infoEmail" placeholder="juan@abn.com">
+              </div>
+              <div class="form-group">
+                <label>Department</label>
+                <input type="text" id="infoDept" placeholder="e.g. Boiler">
+              </div>
+              <div class="form-group">
+                <label>Employee ID</label>
+                <input type="text" id="infoEmpId" placeholder="EMP-001">
+              </div>
+            </div>
+            <button class="btn btn-primary btn-full" onclick="startPublicQuiz()" style="margin-top:8px;">
+              <i class="fas fa-play"></i> Start Exam
+            </button>
+          </div>`;
+    } else {
+        // Private: auto-fill from localStorage
+        const userName = localStorage.getItem('userName') || '';
+        const userCode = localStorage.getItem('userCode') || '';
+        const userDept = localStorage.getItem('userDept') || '';
+        respondentInfo = { name:userName, email:'', department:userDept, employee_id:userCode };
+        startQuiz();
+    }
+}
 
-        currentQuestions.forEach((q, idx) => {
-            html += renderQuestion(q, idx + 1);
+function startPublicQuiz() {
+    const name  = document.getElementById('infoName')?.value.trim();
+    const email = document.getElementById('infoEmail')?.value.trim();
+    if (!name || !email) {
+        alert('Please fill in your Name and Email.');
+        return;
+    }
+    respondentInfo = {
+        name,
+        email,
+        department : document.getElementById('infoDept')?.value.trim()  || '',
+        employee_id: document.getElementById('infoEmpId')?.value.trim() || '',
+    };
+    quizStartTime = new Date();
+    startQuiz();
+}
+
+function startQuiz() {
+    if (!quizStartTime) quizStartTime = new Date();
+
+    document.getElementById('progressWrap').style.display = 'block';
+    const bar = document.getElementById('submitBar');
+    bar.classList.add('visible');
+
+    if (currentQuiz.time_limit_seconds) {
+        timeRemaining = currentQuiz.time_limit_seconds;
+        document.getElementById('timerPill').style.display = 'block';
+        startTimer();
+    }
+
+    renderQuestions();
+    updateProgress();
+}
+
+// ── RENDER ALL QUESTIONS ──────────────────────────────────────
+function renderQuestions() {
+    const main = document.getElementById('main');
+    main.innerHTML = currentQuestions.map((q, i) => renderQuestion(q, i)).join('');
+}
+
+function renderQuestion(q, idx) {
+    const type    = q.question_type;
+    const options = q.options || [];
+
+    let optionsHtml = '';
+    if (type === 'true_false') {
+        optionsHtml = ['True','False'].map((label, i) => `
+          <label class="option-label" id="opt_${q.id}_${i}"
+                 onclick="selectOption(this, '${q.id}', '${label.toLowerCase()}', 'radio')">
+            <input type="radio" name="q_${q.id}" value="${label.toLowerCase()}"
+                   style="pointer-events:none;">
+            ${label}
+          </label>`).join('');
+    } else if (type === 'multiple_choice') {
+        optionsHtml = options.map((opt, i) => `
+          <label class="option-label" id="opt_${q.id}_${i}"
+                 onclick="selectOption(this, '${q.id}', '${opt.id}', 'radio')">
+            <input type="radio" name="q_${q.id}" value="${opt.id}"
+                   style="pointer-events:none;">
+            ${opt.text}
+          </label>`).join('');
+    } else if (type === 'checkbox') {
+        optionsHtml = options.map((opt, i) => `
+          <label class="option-label" id="opt_${q.id}_${i}"
+                 onclick="selectOption(this, '${q.id}', '${opt.id}', 'checkbox')">
+            <input type="checkbox" name="q_${q.id}" value="${opt.id}"
+                   style="pointer-events:none;">
+            ${opt.text}
+          </label>`).join('');
+    }
+
+    return `
+      <div class="q-card" id="qcard_${q.id}">
+        <div class="q-text">
+          <span class="q-num">${idx + 1}</span>
+          <span class="q-text-content">
+            ${q.question_text}
+            ${q.is_required ? '<span class="required"> *</span>' : ''}
+          </span>
+        </div>
+        <div class="options">${optionsHtml}</div>
+      </div>`;
+}
+
+function selectOption(labelEl, qId, value, type) {
+    const q = currentQuestions.find(q => q.id === qId);
+    if (!q) return;
+
+    if (type === 'radio') {
+        // Unselect all options for this question
+        document.querySelectorAll(`label[id^="opt_${qId}_"]`).forEach(l => {
+            l.classList.remove('selected');
+            const inp = l.querySelector('input');
+            if (inp) inp.checked = false;
         });
+        labelEl.classList.add('selected');
+        const inp = labelEl.querySelector('input');
+        if (inp) inp.checked = true;
+        currentAnswers[qId] = value;
+    } else {
+        // Checkbox: toggle
+        const inp = labelEl.querySelector('input');
+        if (inp) inp.checked = !inp.checked;
+        labelEl.classList.toggle('selected', inp.checked);
 
-        html += `
-            <div class="buttons">
-                <button class="btn-secondary"
-                    onclick="window.location.reload()">
-                    Exit
-                </button>
-
-                <button class="btn-primary"
-                    onclick="submitQuiz()">
-                    Submit Quiz
-                </button>
-            </div>
-        `;
-
-        content.innerHTML = html;
-
-        if (currentQuiz.time_limit_seconds) {
-            timeRemaining = currentQuiz.time_limit_seconds;
-            startTimer();
-            document.getElementById('timer').style.display = 'block';
+        if (!currentAnswers[qId]) currentAnswers[qId] = [];
+        if (inp.checked) {
+            if (!currentAnswers[qId].includes(value)) currentAnswers[qId].push(value);
+        } else {
+            currentAnswers[qId] = currentAnswers[qId].filter(v => v !== value);
+            if (currentAnswers[qId].length === 0) delete currentAnswers[qId];
         }
     }
 
-    function renderQuestion(question, questionNum) {
+    document.getElementById('qcard_' + qId)?.classList.add('answered');
+    updateProgress();
+}
 
-        const type = question.question_type;
-        const options = question.options || [];
+// ── PROGRESS ─────────────────────────────────────────────────
+function updateProgress() {
+    const total    = currentQuestions.length;
+    const answered = Object.keys(currentAnswers).length;
+    const pct      = total > 0 ? Math.round((answered / total) * 100) : 0;
 
-        let html = `
-            <div class="question-container">
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressText').textContent = `${answered} / ${total} answered`;
+    document.getElementById('progressPct').textContent  = pct + '%';
+    document.getElementById('submitBarInfo').textContent =
+        answered < total
+            ? `${total - answered} question${total-answered!==1?'s':''} remaining`
+            : 'All questions answered ✓';
+}
 
-                <div class="question-header">
-                    <div class="question-number">
-                        ${questionNum}
-                    </div>
-
-                    <div class="question-text">
-                        ${question.question_text}
-                    </div>
-                </div>
-
-                <div class="options">
-        `;
-
-        if (type === 'true_false') {
-
-            html += `
-                <div class="option">
-                    <input type="radio"
-                        name="q${question.id}"
-                        value="true"
-                        onchange="updateAnswer('${question.id}','true')">
-
-                    <label>True</label>
-                </div>
-
-                <div class="option">
-                    <input type="radio"
-                        name="q${question.id}"
-                        value="false"
-                        onchange="updateAnswer('${question.id}','false')">
-
-                    <label>False</label>
-                </div>
-            `;
-
-        } else if (type === 'multiple_choice') {
-
-            options.forEach(opt => {
-
-                html += `
-                    <div class="option">
-
-                        <input type="radio"
-                            name="q${question.id}"
-                            value="${opt.id}"
-                            onchange="updateAnswer('${question.id}','${opt.id}')">
-
-                        <label>${opt.text}</label>
-
-                    </div>
-                `;
-            });
-
-        } else if (type === 'checkbox') {
-
-            options.forEach(opt => {
-
-                html += `
-                    <div class="option">
-
-                        <input type="checkbox"
-                            class="q${question.id}"
-                            value="${opt.id}"
-                            onchange="updateCheckboxAnswer('${question.id}')">
-
-                        <label>${opt.text}</label>
-
-                    </div>
-                `;
-            });
-        }
-
-        html += `</div></div>`;
-
-        return html;
-    }
-
-    function updateAnswer(questionId, value) {
-        currentAnswers[questionId] = value;
-        updateProgress();
-    }
-
-    function updateCheckboxAnswer(questionId) {
-
-        const checked = document.querySelectorAll(
-            `.q${questionId}:checked`
-        );
-
-        currentAnswers[questionId] = Array
-            .from(checked)
-            .map(cb => cb.value);
-
-        updateProgress();
-    }
-
-    function updateProgress() {
-
-        const answered = Object.keys(currentAnswers).length;
-        const total = currentQuestions.length;
-
-        const percent = (answered / total) * 100;
-
-        document.querySelector('.progress-fill')
-            .style.width = percent + '%';
-    }
-
-    async function submitQuiz() {
-
-        try {
-
-            const { data: attempt, error } = await supabaseClient
-                .from('quiz_attempts')
-                .insert([{
-                    quiz_id: currentQuiz.id,
-                    respondent_name: window.respondentInfo.name,
-                    respondent_email: window.respondentInfo.email,
-                    respondent_department: window.respondentInfo.department,
-                    respondent_employee_id: window.respondentInfo.employee_id,
-                    total_score: 0,
-                    percentage_score: 0,
-                    start_time: new Date().toISOString(),
-                    end_time: new Date().toISOString()
-                }])
-                .select()
-                .single();
-
-            if (error) throw error;
-
-            for (const [questionId, answer] of Object.entries(currentAnswers)) {
-
-                await supabaseClient
-                    .from('quiz_responses')
-                    .insert([{
-                        quiz_attempt_id: attempt.id,
-                        question_id: questionId,
-                        answer: answer,
-                        is_correct: false,
-                        points_earned: 0
-                    }]);
-            }
-
+// ── TIMER ─────────────────────────────────────────────────────
+function startTimer() {
+    const pill = document.getElementById('timerPill');
+    timerInterval = setInterval(() => {
+        timeRemaining--;
+        const m = Math.floor(timeRemaining / 60);
+        const s = timeRemaining % 60;
+        pill.textContent = `⏱ ${m}:${s.toString().padStart(2,'0')}`;
+        pill.classList.toggle('warn', timeRemaining <= 60);
+        if (timeRemaining <= 0) {
             clearInterval(timerInterval);
-
-            showSuccessScreen();
-
-        } catch (err) {
-
-            alert('Submit Error: ' + err.message);
+            submitQuiz(true);
         }
+    }, 1000);
+}
+
+// ── SUBMIT ────────────────────────────────────────────────────
+function confirmSubmit() {
+    const total    = currentQuestions.length;
+    const answered = Object.keys(currentAnswers).length;
+    const missing  = total - answered;
+
+    if (missing > 0) {
+        if (!confirm(`You have ${missing} unanswered question${missing!==1?'s':''}. Submit anyway?`))
+            return;
     }
+    submitQuiz(false);
+}
 
-    function showSuccessScreen() {
+async function submitQuiz(autoSubmit = false) {
+    clearInterval(timerInterval);
+    document.getElementById('timerPill').style.display = 'none';
+    document.getElementById('submitBar').classList.remove('visible');
+    document.getElementById('progressWrap').style.display = 'none';
+    document.getElementById('main').innerHTML = `
+      <div class="center-box">
+        <i class="fas fa-spinner spinner"></i>
+        <p style="color:var(--sub);">Submitting your exam...</p>
+      </div>`;
 
-        document.getElementById('timer').style.display = 'none';
+    // ── SCORE CALCULATION ──────────────────────────────────────
+    let totalEarned = 0;
+    let maxScore    = 0;
+    const responseData = [];
 
-        document.getElementById('content').innerHTML = `
-            <div class="success-screen">
+    for (const q of currentQuestions) {
+        const pts     = q.points || 10;
+        maxScore     += pts;
+        const answer  = currentAnswers[q.id];
+        const options = q.options || [];
+        let isCorrect = false;
 
-                <div class="success-icon">
-                    ✓
-                </div>
-
-                <h2>Quiz Submitted!</h2>
-
-                <p>
-                    Your responses have been recorded successfully.
-                </p>
-
-            </div>
-        `;
-    }
-
-    function startTimer() {
-
-        const timerEl = document.getElementById('timer');
-
-        timerInterval = setInterval(() => {
-
-            timeRemaining--;
-
-            const minutes = Math.floor(timeRemaining / 60);
-            const seconds = timeRemaining % 60;
-
-            timerEl.innerHTML =
-                `⏱️ ${minutes}:${seconds.toString().padStart(2, '0')}`;
-
-            if (timeRemaining <= 60) {
-                timerEl.classList.add('warning');
+        if (answer !== undefined && answer !== null &&
+            !(Array.isArray(answer) && answer.length === 0)) {
+            if (q.question_type === 'true_false') {
+                const correctOpt = options.find(o => o.is_correct);
+                if (correctOpt)
+                    isCorrect = answer === correctOpt.text.toLowerCase();
+            } else if (q.question_type === 'multiple_choice') {
+                const correctOpt = options.find(o => o.is_correct);
+                if (correctOpt) isCorrect = answer === correctOpt.id;
+            } else if (q.question_type === 'checkbox') {
+                const correctIds = options.filter(o=>o.is_correct).map(o=>o.id).sort();
+                const answerIds  = Array.isArray(answer) ? [...answer].sort() : [];
+                isCorrect = JSON.stringify(correctIds) === JSON.stringify(answerIds);
             }
+        }
 
-            if (timeRemaining <= 0) {
+        const ptsEarned = isCorrect ? pts : 0;
+        totalEarned += ptsEarned;
 
-                clearInterval(timerInterval);
-
-                submitQuiz();
-            }
-
-        }, 1000);
+        responseData.push({
+            question_id  : q.id,
+            answer       : answer ?? null,
+            is_correct   : isCorrect,
+            points_earned: ptsEarned,
+        });
     }
 
-    function showError(message) {
+    const pct      = maxScore > 0 ? Math.round((totalEarned / maxScore) * 100) : 0;
+    const isPassed = pct >= (currentQuiz.pass_score || 70);
+    const endTime  = new Date();
+    const timeSecs = quizStartTime
+        ? Math.round((endTime - quizStartTime) / 1000)
+        : null;
 
-        document.getElementById('content').innerHTML = `
-            <div class="error-message">
-                ${message}
+    try {
+        // Save attempt
+        const { data: attempt, error: aErr } = await supabaseClient
+            .from('quiz_attempts')
+            .insert([{
+                quiz_id              : currentQuiz.id,
+                respondent_code      : localStorage.getItem('userCode') || null,
+                respondent_name      : respondentInfo.name      || null,
+                respondent_email     : respondentInfo.email     || null,
+                respondent_department: respondentInfo.department|| null,
+                respondent_employee_id: respondentInfo.employee_id || null,
+                start_time           : quizStartTime?.toISOString(),
+                end_time             : endTime.toISOString(),
+                time_spent_seconds   : timeSecs,
+                total_score          : totalEarned,
+                max_score            : maxScore,
+                percentage_score     : pct,
+                is_passed            : isPassed,
+            }])
+            .select().single();
+
+        if (aErr) throw aErr;
+
+        // Save responses
+        for (const r of responseData) {
+            await supabaseClient.from('quiz_responses').insert([{
+                quiz_attempt_id: attempt.id,
+                question_id    : r.question_id,
+                answer         : r.answer,
+                is_correct     : r.is_correct,
+                points_earned  : r.points_earned,
+            }]);
+        }
+
+        // Generate certificate if passed
+        if (isPassed) {
+            const certCode = 'ABN-' + Date.now().toString(36).toUpperCase() +
+                             '-' + Math.random().toString(36).substring(2,6).toUpperCase();
+            await supabaseClient.from('quiz_certificates').insert([{
+                quiz_attempt_id : attempt.id,
+                quiz_id         : currentQuiz.id,
+                certificate_code: certCode,
+                issued_to       : respondentInfo.name || localStorage.getItem('userName'),
+                score           : pct,
+                passed          : true,
+            }]);
+        }
+
+        showResultScreen(pct, totalEarned, maxScore, isPassed, timeSecs, responseData);
+    } catch (err) {
+        document.getElementById('main').innerHTML = `
+          <div class="center-box">
+            <i class="fas fa-exclamation-triangle" style="font-size:2.5rem;color:var(--danger);margin-bottom:14px;"></i>
+            <p style="color:var(--sub);">Submit failed: ${err.message}</p>
+            <button class="btn btn-primary" onclick="location.reload()" style="margin-top:16px;">
+              Try Again
+            </button>
+          </div>`;
+        console.error(err);
+    }
+}
+
+// ── RESULT SCREEN ─────────────────────────────────────────────
+function showResultScreen(pct, earned, maxScore, passed, timeSecs, responseData) {
+    const correct = responseData.filter(r => r.is_correct).length;
+    const total   = currentQuestions.length;
+    const minutes = timeSecs ? Math.floor(timeSecs/60) : '--';
+    const seconds = timeSecs ? (timeSecs%60).toString().padStart(2,'0') : '--';
+
+    document.getElementById('quizHeaderSub').textContent = 'Exam Submitted';
+
+    const showAnswers = currentQuiz.show_correct_answers;
+    const reviewHtml = showAnswers ? currentQuestions.map((q, i) => {
+        const r       = responseData.find(r => r.question_id === q.id);
+        const options = q.options || [];
+        const isCorrect = r?.is_correct;
+        const answer    = r?.answer;
+
+        let optHtml = '';
+        if (q.question_type === 'true_false') {
+            ['True','False'].forEach(label => {
+                const val        = label.toLowerCase();
+                const correctOpt = options.find(o=>o.is_correct);
+                const isAns      = answer === val;
+                const isRight    = correctOpt?.text?.toLowerCase() === val;
+                let cls = '';
+                if (isRight)       cls = 'correct';
+                else if (isAns)    cls = 'wrong';
+                optHtml += `<div class="option-label ${cls}" style="cursor:default;">
+                    ${isRight ? '✅' : isAns ? '❌' : '○'} ${label}</div>`;
+            });
+        } else {
+            options.forEach(opt => {
+                const isAns   = Array.isArray(answer) ? answer.includes(opt.id) : answer === opt.id;
+                let cls = '';
+                if (opt.is_correct) cls = 'correct';
+                else if (isAns)     cls = 'wrong';
+                optHtml += `<div class="option-label ${cls}" style="cursor:default;">
+                    ${opt.is_correct ? '✅' : isAns ? '❌' : '○'} ${opt.text}</div>`;
+            });
+        }
+
+        return `
+          <div class="review-q ${isCorrect?'correct-q':'wrong-q'}">
+            <div class="q-text" style="margin-bottom:10px;">
+              <span class="q-num" style="background:${isCorrect?'var(--primary)':'var(--danger)'};">
+                ${i+1}
+              </span>
+              <span class="q-text-content">${q.question_text}</span>
             </div>
-        `;
-    }
+            <div class="options" style="gap:6px;">${optHtml}</div>
+            ${q.explanation ? `<div style="margin-top:10px;font-size:0.82rem;color:var(--sub);
+                background:var(--bg);padding:10px;border-radius:8px;">
+                💡 ${q.explanation}</div>` : ''}
+          </div>`;
+    }).join('') : '';
 
-    loadQuiz();
+    document.getElementById('main').innerHTML = `
+      <div class="card score-screen">
+        <div class="score-ring ${passed?'':'fail'}" style="color:${passed?'var(--primary)':'var(--danger)'};">
+          ${pct}%
+          <small>score</small>
+        </div>
+
+        <div class="result-badge ${passed?'pass':'fail'}">
+          ${passed ? '🎉 PASSED' : '❌ FAILED'}
+        </div>
+
+        <h2 style="font-size:1.1rem;margin-bottom:6px;">${currentQuiz.title}</h2>
+        <p style="color:var(--sub);font-size:0.85rem;margin-bottom:20px;">
+          ${respondentInfo.name || localStorage.getItem('userName') || ''}
+        </p>
+
+        <div class="detail-grid">
+          <div class="detail-item">
+            <div class="d-label">Score</div>
+            <div class="d-val" style="color:${passed?'var(--primary)':'var(--danger)'};">
+              ${earned} / ${maxScore} pts
+            </div>
+          </div>
+          <div class="detail-item">
+            <div class="d-label">Correct</div>
+            <div class="d-val">${correct} / ${total} items</div>
+          </div>
+          <div class="detail-item">
+            <div class="d-label">Pass Score</div>
+            <div class="d-val">${currentQuiz.pass_score || 70}%</div>
+          </div>
+          <div class="detail-item">
+            <div class="d-label">Time</div>
+            <div class="d-val">${timeSecs ? `${minutes}m ${seconds}s` : '—'}</div>
+          </div>
+        </div>
+
+        ${passed ? `
+          <div style="background:rgba(72,187,120,0.08);border:1px solid rgba(72,187,120,0.2);
+                      border-radius:10px;padding:14px;margin-bottom:16px;font-size:0.85rem;color:#276749;">
+            <i class="fas fa-certificate" style="margin-right:6px;color:#f6ad55;"></i>
+            <strong>Congratulations!</strong> A certificate has been issued for this exam.
+          </div>` : `
+          <div style="background:rgba(245,101,101,0.07);border:1px solid rgba(245,101,101,0.2);
+                      border-radius:10px;padding:14px;margin-bottom:16px;font-size:0.85rem;color:#9b2c2c;">
+            <i class="fas fa-redo" style="margin-right:6px;"></i>
+            ${currentQuiz.allow_retry !== false
+                ? 'Review the material and try again.'
+                : 'Contact your supervisor for next steps.'}
+          </div>`}
+
+        ${currentQuiz.allow_retry !== false ? `
+          <button class="btn btn-primary btn-full" onclick="location.reload()" style="margin-bottom:10px;">
+            <i class="fas fa-redo"></i> Take Again
+          </button>` : ''}
+      </div>
+
+      ${showAnswers && reviewHtml ? `
+        <div style="margin-top:4px;">
+          <h3 style="margin-bottom:12px;font-size:1rem;color:var(--text);padding:0 4px;">
+            <i class="fas fa-list-check" style="color:var(--accent);margin-right:6px;"></i>
+            Answer Review
+          </h3>
+          ${reviewHtml}
+        </div>` : ''}`;
+}
+
+// ── ERROR ─────────────────────────────────────────────────────
+function showError(msg) {
+    document.getElementById('quizHeaderSub').textContent = 'Error';
+    document.getElementById('main').innerHTML = `
+      <div class="center-box">
+        <i class="fas fa-exclamation-circle" style="font-size:2.5rem;color:var(--danger);margin-bottom:14px;"></i>
+        <p style="color:var(--sub);line-height:1.6;">${msg}</p>
+      </div>`;
+}
+
+loadQuiz();
 </script>
 </body>
 </html>
