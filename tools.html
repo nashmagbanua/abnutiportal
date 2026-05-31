@@ -8,179 +8,361 @@
     <link rel="icon" type="image/png" sizes="32x32" href="assets/abnlogo.ico">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/abnlogo.ico">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --primary: #48bb78;
-            --accent: #4299e1;
-            --danger: #f56565;
-            --bg: #1a202c;
-            --glass: rgba(255, 255, 255, 0.05);
-            --border: rgba(255, 255, 255, 0.1);
+            --accent:  #4299e1;
+            --danger:  #f56565;
+            --bg:      #1a202c;
+            --glass:   rgba(255,255,255,0.05);
+            --border:  rgba(255,255,255,0.1);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; padding-bottom: 30px; }
+        body { margin:0; font-family:'Segoe UI',sans-serif; background:var(--bg); color:white; padding-bottom:40px; }
 
-        /* --- OFFLINE ALERT --- */
+        /* OFFLINE */
         #offline-status {
-            position: fixed; top: 0; left: 0; width: 100%; background: var(--danger);
-            color: white; text-align: center; padding: 10px; font-weight: bold;
-            z-index: 9999; display: none; font-size: 0.8rem;
+            position:fixed; top:0; left:0; width:100%;
+            background:var(--danger); color:white;
+            text-align:center; padding:10px;
+            font-weight:bold; z-index:9999;
+            display:none; font-size:0.8rem;
         }
 
-        /* --- STICKY HEADER (UX) --- */
+        /* HEADER */
         .app-header {
-            position: sticky; top: 0; z-index: 100;
-            padding: 25px 20px;
-            background: rgba(26, 32, 44, 0.95);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: space-between;
+            position:sticky; top:0; z-index:100;
+            padding:20px 20px;
+            background:rgba(26,32,44,0.97);
+            backdrop-filter:blur(12px);
+            border-bottom:1px solid var(--border);
+            display:flex; align-items:center; justify-content:space-between;
         }
-        .user-info { display: flex; align-items: center; gap: 15px; }
-        .user-avatar { 
-            width: 55px; height: 55px; border-radius: 50%; 
-            border: 2px solid var(--primary); background: #2d3748;
-            object-fit: cover;
+        .user-info { display:flex; align-items:center; gap:14px; }
+        .user-avatar {
+            width:50px; height:50px; border-radius:50%;
+            border:2px solid var(--primary); background:#2d3748;
+            object-fit:cover;
         }
+        .user-name { font-size:1rem; font-weight:700; }
+        .user-role { font-size:0.7rem; color:#a0aec0; margin-top:2px; }
 
-        /* --- GRID DESIGN --- */
+        /* SECTION TITLE */
         .section-title {
-            padding: 25px 20px 10px;
-            font-size: 0.9rem; font-weight: 800; color: var(--primary);
-            text-transform: uppercase; letter-spacing: 1px;
+            padding:22px 20px 10px;
+            font-size:0.82rem; font-weight:800;
+            color:var(--primary);
+            text-transform:uppercase; letter-spacing:1.5px;
+            display:flex; align-items:center; gap:8px;
         }
+
+        /* GRID */
         .grid-container {
-            padding: 0 15px;
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
+            padding:0 15px;
+            display:grid; grid-template-columns:repeat(2,1fr); gap:12px;
         }
 
-        /* --- CARDS --- */
+        /* BASE CARD */
         .card {
-            background: var(--glass); border: 1px solid var(--border);
-            padding: 25px 10px; border-radius: 20px;
-            text-align: center; text-decoration: none; color: white;
-            display: flex; flex-direction: column; align-items: center; gap: 10px;
-            transition: 0.1s;
+            background:var(--glass); border:1px solid var(--border);
+            padding:22px 10px; border-radius:18px;
+            text-align:center; text-decoration:none; color:white;
+            display:flex; flex-direction:column; align-items:center; gap:9px;
+            transition:0.15s; position:relative; overflow:hidden;
         }
-        .card:active { transform: scale(0.95); background: rgba(255,255,255,0.1); }
-        .card i { font-size: 1.8rem; }
-        .logbook-card i { color: #f6e05e; }
-        .tool-card i { color: var(--accent); }
+        .card:active { transform:scale(0.95); background:rgba(255,255,255,0.09); }
+        .card i { font-size:1.7rem; }
+        .card span { font-size:0.85rem; font-weight:600; }
 
-        .logout-btn {
-            margin: 40px 20px; width: calc(100% - 40px); padding: 16px;
-            background: rgba(245,101,101,0.1); border: 1px solid var(--danger);
-            color: var(--danger); border-radius: 15px; font-weight: bold;
-        }
+        /* LOGBOOK ICON COLOR */
+        .logbook-card i { color:#f6e05e; }
 
-        /* --- COMING SOON CARDS --- */
-        .card.coming-soon { opacity: 0.55; cursor: not-allowed; position: relative; }
+        /* COMING SOON */
+        .card.coming-soon { opacity:0.5; cursor:not-allowed; }
         .card.coming-soon::after {
-            content: 'Coming Soon';
-            position: absolute; top: 8px; right: 10px;
-            background: rgba(246,173,85,0.2); color: #f6ad55;
-            font-size: 0.6rem; font-weight: 800; letter-spacing: 0.5px;
-            padding: 2px 7px; border-radius: 20px; border: 1px solid rgba(246,173,85,0.3);
-            text-transform: uppercase;
+            content:'Coming Soon';
+            position:absolute; top:7px; right:8px;
+            background:rgba(246,173,85,0.18); color:#f6ad55;
+            font-size:0.58rem; font-weight:800; letter-spacing:0.5px;
+            padding:2px 7px; border-radius:20px;
+            border:1px solid rgba(246,173,85,0.3);
         }
-        .card.coming-soon:active { transform: none; background: var(--glass); }
+        .card.coming-soon:active { transform:none; background:var(--glass); }
 
-        /* --- TOAST --- */
-        #toast-container { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; align-items: center; gap: 8px; width: 90%; max-width: 340px; pointer-events: none; }
-        .toast { width: 100%; display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 12px; color: white; font-size: 0.8rem; font-weight: 500; box-shadow: 0 6px 20px rgba(0,0,0,0.5); animation: toastIn 0.3s ease; pointer-events: auto; }
-        .toast.success { background: rgba(56,161,105,0.95); }
-        .toast.error   { background: rgba(197,48,48,0.95); }
-        .toast.info    { background: rgba(49,130,206,0.95); }
-        .toast.warning { background: rgba(214,158,46,0.95); }
-        @keyframes toastIn { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
-        @keyframes toastOut { from { opacity:1; } to { opacity:0; transform: translateY(20px); } }
+        /* HAS EXAM BADGE */
+        .card.has-exam::before {
+            content:'TAKE EXAM';
+            position:absolute; top:7px; left:8px;
+            background:rgba(245,101,101,0.2); color:#fc8181;
+            font-size:0.55rem; font-weight:800; letter-spacing:0.5px;
+            padding:2px 7px; border-radius:20px;
+            border:1px solid rgba(245,101,101,0.3);
+            animation:pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%,100% { opacity:1; }
+            50%      { opacity:0.5; }
+        }
+        .card.has-exam { border-color:rgba(245,101,101,0.3); cursor:pointer; opacity:1; }
+        .card.has-exam:active { transform:scale(0.95); }
+
+        /* TOOL CARD */
+        .tool-card i { color:var(--accent); }
+
+        /* EXAM CARD (private) */
+        .exam-card {
+            background:linear-gradient(135deg,rgba(66,153,225,0.12),rgba(72,187,120,0.08));
+            border:1px solid rgba(66,153,225,0.25);
+        }
+        .exam-card i { color:var(--accent); }
+        .exam-card .exam-meta {
+            font-size:0.7rem; color:#a0aec0; margin-top:-4px;
+        }
+        .exam-card .exam-area-badge {
+            font-size:0.62rem; font-weight:700; padding:2px 8px;
+            border-radius:10px; margin-top:2px;
+        }
+
+        /* LOGOUT */
+        .logout-btn {
+            margin:35px 20px 0; width:calc(100% - 40px); padding:15px;
+            background:rgba(245,101,101,0.1); border:1px solid var(--danger);
+            color:var(--danger); border-radius:14px; font-weight:bold;
+            font-size:0.9rem; cursor:pointer;
+        }
+
+        /* TOAST */
+        #toast-container {
+            position:fixed; bottom:70px; left:50%; transform:translateX(-50%);
+            z-index:9999; display:flex; flex-direction:column; align-items:center;
+            gap:8px; width:90%; max-width:340px; pointer-events:none;
+        }
+        .toast {
+            width:100%; display:flex; align-items:center; gap:10px;
+            padding:12px 16px; border-radius:12px; color:white;
+            font-size:0.8rem; font-weight:500;
+            box-shadow:0 6px 20px rgba(0,0,0,0.5);
+            animation:toastIn 0.3s ease; pointer-events:auto;
+        }
+        .toast.success { background:rgba(56,161,105,0.95); }
+        .toast.error   { background:rgba(197,48,48,0.95); }
+        .toast.info    { background:rgba(49,130,206,0.95); }
+        .toast.warning { background:rgba(214,158,46,0.95); }
+        @keyframes toastIn  { from{opacity:0;transform:translateY(20px);}  to{opacity:1;transform:translateY(0);} }
+        @keyframes toastOut { from{opacity:1;} to{opacity:0;transform:translateY(20px);} }
     </style>
 </head>
 <body>
 
-    <div id="toast-container"></div>
+<div id="toast-container"></div>
+<div id="offline-status">⚠️ NO INTERNET CONNECTION</div>
 
-    <div id="offline-status">NO INTERNET CONNECTION</div>
-
-    <div class="app-header">
-        <div class="user-info">
-            <img src="" id="displayAvatar" class="user-avatar" onerror="this.src='https://ui-avatars.com/api/?name=User&background=2d3748&color=fff'">
-            <div>
-                <div id="displayName" style="font-size: 1.1rem; font-weight: bold;">Loading...</div>
-                <div id="displayRole" style="font-size: 0.7rem; color: #a0aec0;">OPERATOR</div>
-            </div>
+<div class="app-header">
+    <div class="user-info">
+        <img src="" id="displayAvatar" class="user-avatar"
+             onerror="this.src='https://ui-avatars.com/api/?name=User&background=2d3748&color=fff'">
+        <div>
+            <div class="user-name" id="displayName">Loading...</div>
+            <div class="user-role" id="displayRole">OPERATOR</div>
         </div>
-        <i class="fas fa-bell" style="color: #4a5568;"></i>
     </div>
+    <i class="fas fa-bell" style="color:#4a5568;font-size:1.1rem;"></i>
+</div>
 
-    <div class="section-title">Digital Logbooks</div>
-    <div class="grid-container">
-        <a href="#" class="card logbook-card coming-soon" onclick="return false;"><i class="fas fa-fire"></i><span>Boiler Logbook</span></a>
-        <a href="#" class="card logbook-card coming-soon" onclick="return false;"><i class="fas fa-faucet"></i><span>WTP Logbook</span></a>
-        <a href="#" class="card logbook-card coming-soon" onclick="return false;"><i class="fas fa-snowflake"></i><span>Ref Logbook</span></a>
-        <a href="#" class="card logbook-card coming-soon" onclick="return false;"><i class="fas fa-wind"></i><span>CDA Logbook</span></a>
-        <a href="#" class="card logbook-card coming-soon" onclick="return false;"><i class="fas fa-recycle"></i><span>Wwtp Logbook</span></a>
+<!-- ── DIGITAL LOGBOOKS ───────────────────────────────── -->
+<div class="section-title">
+    <i class="fas fa-book"></i> Digital Logbooks
+</div>
+<div class="grid-container" id="logbookGrid">
+    <!-- Dynamically updated by initExamCards() -->
+    <a href="#" class="card logbook-card coming-soon" onclick="return false;" data-area="Boiler">
+        <i class="fas fa-fire"></i><span>Boiler Logbook</span>
+    </a>
+    <a href="#" class="card logbook-card coming-soon" onclick="return false;" data-area="WTP">
+        <i class="fas fa-faucet"></i><span>WTP Logbook</span>
+    </a>
+    <a href="#" class="card logbook-card coming-soon" onclick="return false;" data-area="Ref">
+        <i class="fas fa-snowflake"></i><span>Ref Logbook</span>
+    </a>
+    <a href="#" class="card logbook-card coming-soon" onclick="return false;" data-area="CDA">
+        <i class="fas fa-wind"></i><span>CDA Logbook</span>
+    </a>
+    <a href="#" class="card logbook-card coming-soon" onclick="return false;" data-area="WWTP">
+        <i class="fas fa-recycle"></i><span>Wwtp Logbook</span>
+    </a>
+</div>
+
+<!-- ── ASSIGNED EXAMS (Private quizzes) ──────────────── -->
+<div id="privateExamsSection" style="display:none;">
+    <div class="section-title">
+        <i class="fas fa-clipboard-list"></i> My Assigned Exams
     </div>
-
-    <div class="section-title">Utility Tools</div>
-    <div class="grid-container">
-        <a href="https://gpmcalculatorv2.vercel.app/" target="_blank" class="card tool-card"><i class="fas fa-calculator"></i><span>GPM Calc</span></a>
-        <a href="https://abnpowercon.vercel.app/" target="_blank" class="card tool-card"><i class="fas fa-bolt"></i><span>PowerCon</span></a>
-        <a href="https://abnchemical.vercel.app/" target="_blank" class="card tool-card"><i class="fas fa-flask"></i><span>Chemicals</span></a>
-        <a href="https://abncoaldumping.vercel.app/" target="_blank" class="card tool-card"><i class="fas fa-dumpster"></i><span>Coal Dump</span></a>
-        <a href="https://abncoaldelivery.vercel.app/" target="_blank" class="card tool-card"><i class="fas fa-truck"></i><span>Coal Delivery</span></a>
+    <div class="grid-container" id="privateExamsGrid">
+        <!-- Filled by initExamCards() -->
     </div>
+</div>
 
-    <button class="logout-btn" onclick="logout()">LOGOUT SESSION</button>
+<!-- ── UTILITY TOOLS ──────────────────────────────────── -->
+<div class="section-title">
+    <i class="fas fa-tools"></i> Utility Tools
+</div>
+<div class="grid-container">
+    <a href="https://gpmcalculatorv2.vercel.app/" target="_blank" class="card tool-card">
+        <i class="fas fa-calculator"></i><span>GPM Calc</span>
+    </a>
+    <a href="https://abnpowercon.vercel.app/" target="_blank" class="card tool-card">
+        <i class="fas fa-bolt"></i><span>PowerCon</span>
+    </a>
+    <a href="https://abnchemical.vercel.app/" target="_blank" class="card tool-card">
+        <i class="fas fa-flask"></i><span>Chemicals</span>
+    </a>
+    <a href="https://abncoaldumping.vercel.app/" target="_blank" class="card tool-card">
+        <i class="fas fa-dumpster"></i><span>Coal Dump</span>
+    </a>
+    <a href="https://abncoaldelivery.vercel.app/" target="_blank" class="card tool-card">
+        <i class="fas fa-truck"></i><span>Coal Delivery</span>
+    </a>
+</div>
 
-    <script>
-        // --- TOAST HELPER ---
-        function showToast(message, type = 'info', duration = 3000) {
-            const icons = { success: 'fa-check-circle', error: 'fa-times-circle', info: 'fa-info-circle', warning: 'fa-exclamation-triangle' };
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.innerHTML = `<i class="fas ${icons[type]}"></i><span>${message}</span>`;
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.style.animation = 'toastOut 0.3s ease forwards';
-                setTimeout(() => toast.remove(), 300);
-            }, duration);
+<button class="logout-btn" onclick="logout()">
+    <i class="fas fa-sign-out-alt" style="margin-right:8px;"></i>LOGOUT SESSION
+</button>
+
+<script>
+    // ── SUPABASE ───────────────────────────────────────────────
+    const SUPABASE_URL      = 'https://qbeacrpoyfacgmbzxjcu.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFiZWFjcnBveWZhY2dtYnp4amN1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2NTM5NTIsImV4cCI6MjA2NDIyOTk1Mn0.6kfxKLJxidW4BcqsMJte61AtzydrTW-1ZJIJytiUBt4';
+    const supabaseClient    = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // ── TOAST ─────────────────────────────────────────────────
+    function showToast(message, type = 'info', duration = 3000) {
+        const icons = { success:'fa-check-circle', error:'fa-times-circle',
+                        info:'fa-info-circle', warning:'fa-exclamation-triangle' };
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `<i class="fas ${icons[type]}"></i><span>${message}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.style.animation = 'toastOut 0.3s ease forwards';
+            setTimeout(() => toast.remove(), 300);
+        }, duration);
+    }
+
+    // ── PROFILE ───────────────────────────────────────────────
+    function loadProfile() {
+        const name   = localStorage.getItem('userName');
+        const role   = localStorage.getItem('userRole');
+        const avatar = localStorage.getItem('userAvatar');
+
+        document.getElementById('displayName').innerText =
+            name || 'Unknown User';
+        document.getElementById('displayRole').innerText =
+            role ? role.toUpperCase() : 'OPERATOR';
+
+        if (avatar) {
+            document.getElementById('displayAvatar').src = 'assets/' + avatar;
         }
+    }
 
-        // --- PROFILE LOADING (FIXED) ---
-        function loadProfile() {
-            const name   = localStorage.getItem('userName');
-            const role   = localStorage.getItem('userRole');
-            const avatar = localStorage.getItem('userAvatar');
+    // ── DYNAMIC EXAM CARDS ────────────────────────────────────
+    async function initExamCards() {
+        try {
+            const userCode = localStorage.getItem('userCode');
 
-            document.getElementById('displayName').innerText = name || 'Unknown User';
-            document.getElementById('displayRole').innerText = role ? role.toUpperCase() : 'OPERATOR';
+            // Fetch all published quizzes
+            const { data: quizzes, error } = await supabaseClient
+                .from('quizzes')
+                .select('id, title, is_public, public_slug, quiz_area, pass_score, time_limit_seconds')
+                .eq('is_published', true);
 
-            if (avatar) {
-                document.getElementById('displayAvatar').src = 'assets/' + avatar;
+            if (error || !quizzes || quizzes.length === 0) return;
+
+            const base = window.location.href.replace(/\/[^/]*$/, '');
+
+            // ── 1. PUBLIC QUIZZES → stamp area logbook cards ──
+            const publicQuizzes = quizzes.filter(q => q.is_public && q.public_slug);
+            const areaMap = {};
+            publicQuizzes.forEach(q => {
+                if (q.quiz_area) areaMap[q.quiz_area] = q;
+            });
+
+            document.querySelectorAll('#logbookGrid .card[data-area]').forEach(card => {
+                const area = card.getAttribute('data-area');
+                if (areaMap[area]) {
+                    const quiz = areaMap[area];
+                    const link = `${base}/public-quiz.html?slug=${quiz.public_slug}`;
+                    card.classList.remove('coming-soon');
+                    card.classList.add('has-exam');
+                    card.removeAttribute('onclick');
+                    card.href = link;
+                    // Remove target="_blank" so it opens in same tab on mobile
+                }
+            });
+
+            // ── 2. PRIVATE QUIZZES → show in My Assigned Exams ──
+            const privateQuizzes = quizzes.filter(q => !q.is_public);
+            if (privateQuizzes.length > 0 && userCode) {
+                const section = document.getElementById('privateExamsSection');
+                const grid    = document.getElementById('privateExamsGrid');
+                section.style.display = 'block';
+
+                const areaColors = {
+                    'Boiler':'#ed8936','WTP':'#4299e1','Ref':'#9f7aea',
+                    'CDA':'#38b2ac','WWTP':'#667eea'
+                };
+                const areaIcons = {
+                    'Boiler':'fa-fire','WTP':'fa-faucet','Ref':'fa-snowflake',
+                    'CDA':'fa-wind','WWTP':'fa-recycle'
+                };
+
+                grid.innerHTML = privateQuizzes.map(quiz => {
+                    const link  = `${base}/public-quiz.html?id=${quiz.id}`;
+                    const area  = quiz.quiz_area || 'General';
+                    const color = areaColors[area] || '#48bb78';
+                    const icon  = areaIcons[area]  || 'fa-clipboard-check';
+                    const timeTxt = quiz.time_limit_seconds
+                        ? Math.round(quiz.time_limit_seconds/60) + ' min'
+                        : 'No limit';
+                    return `
+                      <a href="${link}" class="card exam-card">
+                        <i class="fas ${icon}" style="color:${color};"></i>
+                        <span>${quiz.title}</span>
+                        <div class="exam-meta">Pass: ${quiz.pass_score||70}% &nbsp;•&nbsp; ${timeTxt}</div>
+                        <div class="exam-area-badge" style="background:${color}22;color:${color};">
+                          ${area}
+                        </div>
+                      </a>`;
+                }).join('');
             }
-        }
 
-        // --- NETWORK CHECK ---
-        function checkStatus() {
-            document.getElementById('offline-status').style.display = navigator.onLine ? 'none' : 'block';
+        } catch (err) {
+            console.error('Exam cards error:', err.message);
         }
+    }
 
-        window.addEventListener('online', checkStatus);
-        window.addEventListener('offline', checkStatus);
-        
-        function logout() {
-            if(confirm("Logout?")) {
-                localStorage.clear();
-                window.location.href = "index.html";
-            }
+    // ── NETWORK CHECK ─────────────────────────────────────────
+    function checkStatus() {
+        document.getElementById('offline-status').style.display =
+            navigator.onLine ? 'none' : 'block';
+    }
+    window.addEventListener('online',  checkStatus);
+    window.addEventListener('offline', checkStatus);
+
+    // ── LOGOUT ────────────────────────────────────────────────
+    function logout() {
+        if (confirm('Logout ng session?')) {
+            localStorage.clear();
+            window.location.href = 'login.html';
         }
+    }
 
-        // Run functions
-        loadProfile();
-        checkStatus();
-    </script>
+    // ── RUN ───────────────────────────────────────────────────
+    loadProfile();
+    checkStatus();
+    initExamCards();
+</script>
 </body>
 </html>
