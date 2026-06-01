@@ -1579,6 +1579,7 @@ function injectScores() {
     `;
 }
 
+// --- NAV LINKS CLICK LOGIC (Huwag galawin, okay na ito) ---
 document.querySelectorAll('.nav-links a').forEach(link => {
     link.addEventListener('click', () => {
         if(!link.classList.contains('dropdown-toggle')) {
@@ -1591,25 +1592,19 @@ document.querySelectorAll('.nav-links a').forEach(link => {
     });
 });
 
-document.querySelectorAll('.area-card').forEach(card => {
-    card.style.cursor = 'pointer';
-    card.addEventListener('click', function() {
-        const url = this.getAttribute('data-url');
-        if (url) {
-            window.location.href = url;
-        } else {
-            console.log("Wala pang link itong card na ito.");
-        }
-    });
-});
-
+// --- AREA CARDS LOGIC (PINAGSAMA AT INAYOS PARA SA MOBILE AT DESKTOP) ---
 document.querySelectorAll('.area-card').forEach(card => {
     card.style.cursor = 'pointer';
     card.addEventListener('click', function(e) {
+        // 1. Kung desktop screen (mas malawak sa 820px), hover lang ang gamit kaya walang gagawin sa click ng card mismo
         if (window.innerWidth > 820) return;
-        if (e.target.classList.contains('btn-action')) {
+
+        // 2. Kung ang mismong action buttons (.btn-action tulad ng Process Flow) ang clinick, hayaan lang at huwag harangan
+        if (e.target.classList.contains('btn-action') || e.target.closest('.btn-action')) {
             return;
         }
+
+        // 3. Para sa mobile: I-toggle ang 'show-actions' class para lumabas ang buttons at isara ang ibang cards
         e.preventDefault(); 
         document.querySelectorAll('.area-card').forEach(c => {
             if (c !== card) c.classList.remove('show-actions');
@@ -1618,6 +1613,7 @@ document.querySelectorAll('.area-card').forEach(card => {
     });
 });
     
+// --- LOGOUT SYSTEM CONTROL ---
 function logout() {
     localStorage.clear();
     window.location.href = "login.html"; 
