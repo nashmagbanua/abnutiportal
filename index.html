@@ -2768,142 +2768,105 @@ if (!window.csgState) {
 }
 
 // ====================================================================
-// 🔴 LIVE BOILER & CSG MONITOR — Supabase boiler_status table
+// 🔴 LIVE BOILER & CSG MONITOR — Firebase Realtime Database
 // ====================================================================
-// Table: public.boiler_status
-// Rows:  id='boilerA', id='boilerB', id='csg'
-// Columns: pres_pv, pres_sv, temp_pv, role, product_name,
-//          steam_mode, operator_name, updated_at
+// Firebase data structure expected at: live_monitor/
+// {
+//   boilerA: { pv: 8.25, sv: 8.5, temp: 480, updated: <timestamp> },
+//   boilerB: { pv: 8.22, sv: 8.5, temp: 440, updated: <timestamp> },
+//   csg:     { pv: 3.85, sv: 4.0, product: "VMR", updated: <timestamp> }
+// }
+// Push data to these paths from your ESP32 / sensor controller.
 // ====================================================================
 
 let _boilerListenerActive = false;
 
-async function startBoilerLiveListener() {
+function startBoilerLiveListener() {
     if (_boilerListenerActive) return;
     _boilerListenerActive = true;
 
-    // 1. Initial fetch — load all rows at once
-    const { data, error } = await supabaseClient
-        .from('boiler_status')
-        .select('*');
+    database.ref('live_monitor').on('value', (snapshot) => {
+        const d = snapshot.val();
 
-    if (error) {
-        console.error('❌ boiler_status fetch error:', error.message);
-        runBoilerSimulation();
-        return;
-    }
+        if (!d) {
+            // No Firebase data yet — fall back to simulation
+            runBoilerSimulation();
+            return;
+        }
 
-    if (!data || data.length === 0) {
-        console.warn('⚠️ boiler_status table is empty — running simulation fallback.');
-        runBoilerSimulation();
-        return;
-    }
+        const states  = window.boilerStates || { A: 'MAIN', B: 'BACKUP' };
+        const csgMode = window.csgState || '4B';
 
-    // Render all rows on first load
-    data.forEach(row => _applyBoilerRow(row));
+        // ── BOILER A ──────────────────────────────────────────────
+        if (d.boilerA) {
+            const pvA   = parseFloat(d.boilerA.pv   || 0);
+            const svA   = parseFloat(d.boilerA.sv   || (states.A === 'MAIN' ? 8.5 : 6.5));
+            const tempA = parseFloat(d.boilerA.temp || 0);
+            const ageA  = d.boilerA.updated
+                ? Math.round((Date.now() - d.boilerA.updated) / 1000)
+                : null;
 
-    // Sync toggle button states from DB
-    const boilerA = data.find(r => r.id === 'boilerA');
-    const boilerB = data.find(r => r.id === 'boilerB');
-    const csg     = data.find(r => r.id === 'csg');
+            if (document.getElementById('boilerA_PV'))
+                document.getElementById('boilerA_PV').innerHTML =
+                    `${pvA.toFixed(2)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
+            if (document.getElementById('boilerA_SP'))
+                document.getElementById('boilerA_SP').innerHTML =
+                    `${svA.toFixed(1)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
+            if (document.getElementById('boilerA_Temp'))
+                document.getElementById('boilerA_Temp').innerText = `${tempA}°C`;
+            _setBadge('boilerA_badge', ageA);
+        }
 
-    if (boilerA) {
-        window.boilerStates = window.boilerStates || {};
-        window.boilerStates.A = boilerA.role || 'MAIN';
-    }
-    if (boilerB) {
-        window.boilerStates = window.boilerStates || {};
-        window.boilerStates.B = boilerB.role || 'BACKUP';
-    }
-    if (csg) {
-        window.csgState = csg.steam_mode || '4B';
-    }
+        // ── BOILER B ──────────────────────────────────────────────
+        if (d.boilerB) {
+            const pvB   = parseFloat(d.boilerB.pv   || 0);
+            const svB   = parseFloat(d.boilerB.sv   || (states.B === 'MAIN' ? 8.5 : 6.5));
+            const tempB = parseFloat(d.boilerB.temp || 0);
+            const ageB  = d.boilerB.updated
+                ? Math.round((Date.now() - d.boilerB.updated) / 1000)
+                : null;
 
-    renderBoilerToggleButtons();
-    renderCsgToggleButtons();
+            if (document.getElementById('boilerB_PV'))
+                document.getElementById('boilerB_PV').innerHTML =
+                    `${pvB.toFixed(2)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
+            if (document.getElementById('boilerB_SP'))
+                document.getElementById('boilerB_SP').innerHTML =
+                    `${svB.toFixed(1)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
+            if (document.getElementById('boilerB_Temp'))
+                document.getElementById('boilerB_Temp').innerText = `${tempB}°C`;
+            _setBadge('boilerB_badge', ageB);
+        }
 
-    // 2. Realtime subscription — fires on every UPDATE to boiler_status
-    supabaseClient
-        .channel('boiler-live-channel')
-        .on('postgres_changes',
-            { event: 'UPDATE', schema: 'public', table: 'boiler_status' },
-            payload => {
-                if (payload.new) _applyBoilerRow(payload.new);
-            }
-        )
-        .subscribe();
+        // ── CSG ───────────────────────────────────────────────────
+        if (d.csg) {
+            const pvCsg  = parseFloat(d.csg.pv      || 0);
+            const svCsg  = parseFloat(d.csg.sv      || (csgMode === '4B' ? 4.0 : 7.0));
+            const prod   = d.csg.product || (csgMode === '4B' ? 'VMR' : 'VMD - RGB');
+            const ageCsg = d.csg.updated
+                ? Math.round((Date.now() - d.csg.updated) / 1000)
+                : null;
+
+            if (document.getElementById('csg_PV'))
+                document.getElementById('csg_PV').innerHTML =
+                    `${pvCsg.toFixed(2)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
+            if (document.getElementById('csg_SP'))
+                document.getElementById('csg_SP').innerHTML =
+                    `${svCsg.toFixed(1)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
+            if (document.getElementById('csg_Product'))
+                document.getElementById('csg_Product').innerText = prod;
+            _setBadge('csg_badge', ageCsg);
+        }
+    });
 }
 
-// Map one boiler_status row → DOM update
-function _applyBoilerRow(row) {
-    const id      = row.id;
-    const pvPres  = parseFloat(row.pres_pv  || 0);
-    const svPres  = parseFloat(row.pres_sv  || 0);
-    const tempPv  = parseInt(row.temp_pv    || 0);
-    const product = row.product_name        || '';
-    const updAt   = row.updated_at ? new Date(row.updated_at) : null;
-    const ageSec  = updAt ? Math.round((Date.now() - updAt.getTime()) / 1000) : null;
-
-    if (id === 'boilerA') {
-        if (document.getElementById('boilerA_PV'))
-            document.getElementById('boilerA_PV').innerHTML =
-                `${pvPres.toFixed(1)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
-        if (document.getElementById('boilerA_SP'))
-            document.getElementById('boilerA_SP').innerHTML =
-                `${svPres.toFixed(1)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
-        if (document.getElementById('boilerA_Temp'))
-            document.getElementById('boilerA_Temp').innerText = `${tempPv}°C`;
-        _setBadge('boilerA_badge', ageSec);
-
-        // Keep toggle state in sync
-        if (row.role) {
-            window.boilerStates = window.boilerStates || {};
-            window.boilerStates.A = row.role;
-            renderBoilerToggleButtons();
-        }
-    }
-
-    if (id === 'boilerB') {
-        if (document.getElementById('boilerB_PV'))
-            document.getElementById('boilerB_PV').innerHTML =
-                `${pvPres.toFixed(1)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
-        if (document.getElementById('boilerB_SP'))
-            document.getElementById('boilerB_SP').innerHTML =
-                `${svPres.toFixed(1)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
-        if (document.getElementById('boilerB_Temp'))
-            document.getElementById('boilerB_Temp').innerText = `${tempPv}°C`;
-        _setBadge('boilerB_badge', ageSec);
-
-        if (row.role) {
-            window.boilerStates = window.boilerStates || {};
-            window.boilerStates.B = row.role;
-            renderBoilerToggleButtons();
-        }
-    }
-
-    if (id === 'csg') {
-        if (document.getElementById('csg_PV'))
-            document.getElementById('csg_PV').innerHTML =
-                `${pvPres.toFixed(1)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
-        if (document.getElementById('csg_SP'))
-            document.getElementById('csg_SP').innerHTML =
-                `${svPres.toFixed(1)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
-        if (document.getElementById('csg_Product') && product)
-            document.getElementById('csg_Product').innerText = product;
-        _setBadge('csg_badge', ageSec);
-
-        if (row.steam_mode) {
-            window.csgState = row.steam_mode;
-            renderCsgToggleButtons();
-        }
-    }
-}
-
-// LIVE / STALE badge helper
+// Show a LIVE / STALE badge based on data age (seconds)
 function _setBadge(badgeId, ageSec) {
     const el = document.getElementById(badgeId);
     if (!el) return;
-    if (ageSec === null || ageSec < 30) {
+    if (ageSec === null) {
+        el.textContent = '● LIVE';
+        el.style.color = '#48bb78';
+    } else if (ageSec < 30) {
         el.textContent = '● LIVE';
         el.style.color = '#48bb78';
     } else if (ageSec < 120) {
@@ -2915,82 +2878,56 @@ function _setBadge(badgeId, ageSec) {
     }
 }
 
-// ── TOGGLE HANDLERS — now UPDATE Supabase ───────────────────
-async function toggleBoilerStatus(boiler, mode) {
-    const id = boiler === 'A' ? 'boilerA' : 'boilerB';
-
-    // Optimistic UI
-    window.boilerStates = window.boilerStates || {};
-    window.boilerStates[boiler] = mode;
-    localStorage.setItem('dash_boiler_modes', JSON.stringify(window.boilerStates));
-    renderBoilerToggleButtons();
-
-    // Persist to Supabase
-    const { error } = await supabaseClient
-        .from('boiler_status')
-        .update({ role: mode, updated_at: new Date().toISOString() })
-        .eq('id', id);
-
-    if (error) {
-        console.error('❌ boiler toggle update error:', error.message);
-        showToast('Error updating boiler mode', 'error');
-    }
-}
-
-async function toggleCsgStatus(mode) {
-    window.csgState = mode;
-    localStorage.setItem('dash_csg_mode', mode);
-    renderCsgToggleButtons();
-
-    const { error } = await supabaseClient
-        .from('boiler_status')
-        .update({ steam_mode: mode, updated_at: new Date().toISOString() })
-        .eq('id', 'csg');
-
-    if (error) {
-        console.error('❌ CSG toggle update error:', error.message);
-        showToast('Error updating CSG mode', 'error');
-    }
-}
-
-// ── SIMULATION FALLBACK (runs when boiler_status table is empty) ──
+// ── SIMULATION FALLBACK (used when Firebase has no live_monitor data) ──
 function runBoilerSimulation() {
     const timeFactor  = Math.sin(Date.now() / 20000);
     const timeFactorB = Math.cos(Date.now() / 22000);
     const states  = window.boilerStates || { A: 'MAIN', B: 'BACKUP' };
     const csgMode = window.csgState || '4B';
 
-    const pvA  = states.A === 'MAIN' ? parseFloat((8.25 + timeFactor * 0.22).toFixed(1)) : parseFloat((6.22 + timeFactor * 0.22).toFixed(1));
-    const svA  = states.A === 'MAIN' ? 8.5 : 6.5;
-    const tmpA = states.A === 'MAIN' ? Math.min(600, Math.max(305, Math.floor(450 + timeFactor * 60 + Math.random() * 10))) : Math.floor(165 + timeFactor * 15 + Math.random() * 5);
+    let svA = states.A === 'MAIN' ? 8.5 : 6.5;
+    let pvA = states.A === 'MAIN'
+        ? parseFloat((8.25 + timeFactor * 0.22).toFixed(2))
+        : parseFloat((6.22 + timeFactor * 0.22).toFixed(2));
+    let tempA = states.A === 'MAIN'
+        ? Math.min(600, Math.max(305, Math.floor(450 + timeFactor * 60 + Math.random() * 10)))
+        : Math.floor(165 + timeFactor * 15 + Math.random() * 5);
 
-    const pvB  = states.B === 'MAIN' ? parseFloat((8.22 + timeFactorB * 0.22).toFixed(1)) : parseFloat((6.22 + timeFactorB * 0.22).toFixed(1));
-    const svB  = states.B === 'MAIN' ? 8.5 : 6.5;
-    const tmpB = states.B === 'MAIN' ? Math.min(600, Math.max(310, Math.floor(440 + timeFactorB * 55 + Math.random() * 10))) : Math.floor(160 + timeFactorB * 15 + Math.random() * 5);
+    let svB = states.B === 'MAIN' ? 8.5 : 6.5;
+    let pvB = states.B === 'MAIN'
+        ? parseFloat((8.22 + timeFactorB * 0.22).toFixed(2))
+        : parseFloat((6.22 + timeFactorB * 0.22).toFixed(2));
+    let tempB = states.B === 'MAIN'
+        ? Math.min(600, Math.max(310, Math.floor(440 + timeFactorB * 55 + Math.random() * 10)))
+        : Math.floor(160 + timeFactorB * 15 + Math.random() * 5);
 
     const svCsg = csgMode === '4B' ? 4.0 : 7.0;
     const prod  = csgMode === '4B' ? 'VMR' : 'VMD - RGB';
     let pvCsg   = csgMode === '4B' ? 3.85 + timeFactor * 0.12 : 6.80 + timeFactor * 0.18;
-    if ((states.A === 'MAIN' ? pvA : pvB) < 8.0) pvCsg -= (8.0 - (states.A === 'MAIN' ? pvA : pvB)) * 0.8;
+    const activePV = states.A === 'MAIN' ? pvA : pvB;
+    if (activePV < 8.0) pvCsg -= (8.0 - activePV) * 0.8;
 
-    if (document.getElementById('boilerA_PV')) document.getElementById('boilerA_PV').innerHTML = `${pvA.toFixed(1)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
+    if (document.getElementById('boilerA_PV')) document.getElementById('boilerA_PV').innerHTML = `${pvA.toFixed(2)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
     if (document.getElementById('boilerA_SP')) document.getElementById('boilerA_SP').innerHTML = `${svA.toFixed(1)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
-    if (document.getElementById('boilerA_Temp')) document.getElementById('boilerA_Temp').innerText = `${tmpA}°C`;
-    if (document.getElementById('boilerB_PV')) document.getElementById('boilerB_PV').innerHTML = `${pvB.toFixed(1)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
+    if (document.getElementById('boilerA_Temp')) document.getElementById('boilerA_Temp').innerText = `${tempA}°C`;
+    if (document.getElementById('boilerB_PV')) document.getElementById('boilerB_PV').innerHTML = `${pvB.toFixed(2)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
     if (document.getElementById('boilerB_SP')) document.getElementById('boilerB_SP').innerHTML = `${svB.toFixed(1)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
-    if (document.getElementById('boilerB_Temp')) document.getElementById('boilerB_Temp').innerText = `${tmpB}°C`;
-    if (document.getElementById('csg_PV')) document.getElementById('csg_PV').innerHTML = `${pvCsg.toFixed(1)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
+    if (document.getElementById('boilerB_Temp')) document.getElementById('boilerB_Temp').innerText = `${tempB}°C`;
+    if (document.getElementById('csg_PV')) document.getElementById('csg_PV').innerHTML = `${pvCsg.toFixed(2)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
     if (document.getElementById('csg_SP')) document.getElementById('csg_SP').innerHTML = `${svCsg.toFixed(1)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
     if (document.getElementById('csg_Product')) document.getElementById('csg_Product').innerText = prod;
 
+    // Mark all badges as simulated
     ['boilerA_badge','boilerB_badge','csg_badge'].forEach(id => {
         const el = document.getElementById(id);
         if (el) { el.textContent = '◌ SIM'; el.style.color = '#a0aec0'; }
     });
 }
 
-// Stub kept so existing dashboard setTimeout() calls don't crash
+// Keep this for toggle button clicks — now just saves state & lets Firebase listener update UI
 async function fetchBoilerSteamData() {
+    // If Firebase listener is active it handles updates automatically.
+    // Only run simulation if listener hasn't started yet.
     if (!_boilerListenerActive) runBoilerSimulation();
 }
 
@@ -3133,6 +3070,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 30000); 
 });
     </script>
-    <script> src="quiz-maker-module.js"></script>
+    <script src="quiz-maker-module.js"></script>
 </body>
 </html>
