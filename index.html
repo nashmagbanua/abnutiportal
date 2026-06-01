@@ -480,13 +480,7 @@ function updateSidebarActive(index) {
     });
 }
     async function openGPMCalculator() {
-    updateSidebarActive(1);
-    const today = new Date().toISOString().split('T')[0];
-    const content = document.getElementById('cont');
-
-    content.innerHTML = `
-        <div style="margin-bottom: 20px;">
-            <h1 id="greet" style="font-size: 1.2rem;">GPM & Deepwell Monitoring</h1>
+    updateSidebarActive(2); // GPM Calculator is nav index 2
             <p class="sub-text" style="margin:0;">System logs for Flow Rate, Pump Status, and Frequencies.</p>
         </div>
 
@@ -630,13 +624,7 @@ async function fetchGPMLogs() {
     }
 }
 function openPowerMonitor() {
-    updateSidebarActive(2);
-    const today = new Date().toISOString().split('T')[0];
-    const content = document.getElementById('cont');
-
-    content.innerHTML = `
-    <div style="margin-bottom: 20px;">
-        <h1 id="greet" style="font-size: 1.2rem;">Power Consumption</h1>
+    updateSidebarActive(3); // Power Consumption is nav index 3
         <p class="sub-text" style="margin:0;">Live utility tracking and historical logs.</p>
     </div>
 
@@ -737,11 +725,7 @@ function fetchPowerData(selectedDate) {
     });
 }
        async function openChemicals() {
-    updateSidebarActive(3);
-    const content = document.getElementById('cont');
-    
-    // 1. I-render agad ang Layout na may Loading indicators habang naghihintay ng data
-    content.innerHTML = `
+    updateSidebarActive(4); // Chemicals is nav index 4
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <div>
                 <h1 style="font-size: 1.4rem; margin: 0; font-weight: 800; color: #2d3748;">Chemicals Inventory Control</h1>
@@ -1612,22 +1596,24 @@ async function updateInventoryStats(currentYard) {
        function login() {
     const val = document.getElementById('passCode').value;
     if(db[val]) {
+        // Save full user info to localStorage (needed by loadDashboard & other pages)
         localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('userCode', val);
+        localStorage.setItem('userCode',   val);
+        localStorage.setItem('userName',   db[val].n);
+        localStorage.setItem('userRole',   db[val].r);
+        localStorage.setItem('userAvatar', db[val].p);
 
         document.getElementById('login-page').style.display = 'none';
         document.getElementById('main-app').style.display = 'block';
         
-        // --- ETO ANG DAGDAG: SET DYNAMIC PROFILE PIC ---
         const profilePath = 'assets/' + db[val].p;
         document.getElementById('profileBtn').style.backgroundImage = `url('${profilePath}')`;
-        
         document.getElementById('pName').innerText = db[val].n;
         document.getElementById('pRole').innerText = db[val].r;
         
         loadDashboard(); 
     } else { 
-        alert("Access Denied!"); 
+        showToast('Access Denied! Invalid credentials.', 'error');
     }
 }
 
@@ -1716,9 +1702,12 @@ function loadDashboard() {
             <div class="stat-card" style="border-left-color: #e53e3e;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <h4 style="margin: 0; font-size: 0.85rem; color: #718096; text-transform: uppercase; tracking-wider: 0.05em;">🔥 Boiler A Steam Pressure</h4>
-                    <div style="background: #edf2f7; padding: 2px; border-radius: 6px; display: flex; gap: 2px;">
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <span id="boilerA_badge" style="font-size:0.6rem;font-weight:700;color:#a0aec0;">◌ SIM</span>
+                        <div style="background: #edf2f7; padding: 2px; border-radius: 6px; display: flex; gap: 2px;">
                         <button id="btnBoilerA_Main" onclick="toggleBoilerStatus('A', 'MAIN')" style="font-size: 0.6rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; transition: all 0.2s;">MAIN</button>
                         <button id="btnBoilerA_Backup" onclick="toggleBoilerStatus('A', 'BACKUP')" style="font-size: 0.6rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; transition: all 0.2s;">BACK-UP</button>
+                        </div>
                     </div>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; border-bottom: 1px solid #edf2f7; padding-bottom: 8px;">
@@ -1744,9 +1733,12 @@ function loadDashboard() {
             <div class="stat-card" style="border-left-color: #48bb78;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <h4 style="margin: 0; font-size: 0.85rem; color: #718096; text-transform: uppercase; tracking-wider: 0.05em;">🔥 Boiler B Steam Pressure</h4>
-                    <div style="background: #edf2f7; padding: 2px; border-radius: 6px; display: flex; gap: 2px;">
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <span id="boilerB_badge" style="font-size:0.6rem;font-weight:700;color:#a0aec0;">◌ SIM</span>
+                        <div style="background: #edf2f7; padding: 2px; border-radius: 6px; display: flex; gap: 2px;">
                         <button id="btnBoilerB_Main" onclick="toggleBoilerStatus('B', 'MAIN')" style="font-size: 0.6rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; transition: all 0.2s;">MAIN</button>
                         <button id="btnBoilerB_Backup" onclick="toggleBoilerStatus('B', 'BACKUP')" style="font-size: 0.6rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; transition: all 0.2s;">BACK-UP</button>
+                        </div>
                     </div>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; border-bottom: 1px solid #edf2f7; padding-bottom: 8px;">
@@ -1772,9 +1764,12 @@ function loadDashboard() {
             <div class="stat-card" style="border-left-color: #3182ce;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <h4 style="margin: 0; font-size: 0.85rem; color: #718096; text-transform: uppercase; tracking-wider: 0.05em;">💧 Clean Steam Generator (CSG)</h4>
-                    <div style="background: #edf2f7; padding: 2px; border-radius: 6px; display: flex; gap: 2px;">
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <span id="csg_badge" style="font-size:0.6rem;font-weight:700;color:#a0aec0;">◌ SIM</span>
+                        <div style="background: #edf2f7; padding: 2px; border-radius: 6px; display: flex; gap: 2px;">
                         <button id="btnCsg_4b" onclick="toggleCsgStatus('4B')" style="font-size: 0.6rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; transition: all 0.2s;">4 BARS</button>
                         <button id="btnCsg_7b" onclick="toggleCsgStatus('7B')" style="font-size: 0.6rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; transition: all 0.2s;">7 BARS</button>
+                        </div>
                     </div>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; border-bottom: 1px solid #edf2f7; padding-bottom: 8px;">
@@ -1874,17 +1869,10 @@ function loadDashboard() {
         if (typeof fetch24hCoalConsumption === "function") fetch24hCoalConsumption();
         if (typeof fetchDashboardChemicals === "function") fetchDashboardChemicals();
         
-        // 🔴 Unang load at kulay ng Boiler at CSG states pagkabukas:
-        if (typeof fetchBoilerSteamData === "function") fetchBoilerSteamData();
+        // 🔴 Start live Firebase listener for Boiler A/B and CSG
+        if (typeof startBoilerLiveListener === "function") startBoilerLiveListener();
         if (typeof renderBoilerToggleButtons === "function") renderBoilerToggleButtons();
         if (typeof renderCsgToggleButtons === "function") renderCsgToggleButtons();
-
-        // 🔄 AUTOMATIC LIVE LOOP: Tumatakbo kada 2 segundo
-        setInterval(() => {
-            if (typeof fetchBoilerSteamData === "function") {
-                fetchBoilerSteamData();
-            }
-        }, 2000); 
 
         if (typeof syncCoalData === "function") {
             syncCoalData(); 
@@ -2208,15 +2196,21 @@ window.onload = function() {
         document.getElementById('profileBtn').style.backgroundImage = `url('${profilePath}')`;
     }
 
-    // 4. Supabase Realtime Subscription
+    // 4. Supabase Realtime Subscription (INSERT + DELETE)
     const gpmSubscription = supabaseClient
-        .channel('custom-all-channel')
-        .on('postgres_changes', 
-            { event: 'INSERT', schema: 'public', table: 'gpm_readings' }, 
-            payload => {
-                if(document.getElementById('latestGPM')) fetchLatestGPM(); 
-                if(document.getElementById('updateStatus')) checkTodayStatus();
-                if(document.getElementById('gpmTableBody')) fetchGPMLogs(); 
+        .channel('gpm-live-channel')
+        .on('postgres_changes',
+            { event: 'INSERT', schema: 'public', table: 'gpm_readings' },
+            () => {
+                if (document.getElementById('latestGPM'))   fetchLatestGPM();
+                if (document.getElementById('updateStatus')) checkTodayStatus();
+                if (document.getElementById('gpmTableBody')) fetchGPMLogs();
+            }
+        )
+        .on('postgres_changes',
+            { event: 'DELETE', schema: 'public', table: 'gpm_readings' },
+            () => {
+                if (document.getElementById('gpmTableBody')) fetchGPMLogs();
             }
         )
         .subscribe();
@@ -2503,39 +2497,59 @@ async function doDelete(id, btn) {
         // ====================================================================
 // NEW FIX: Function para sa pagbura ng GPM Log nang walang Auth dependency
 // ====================================================================
-async function deleteGPMLog(logId) {
-    // 1. Magpakita ng confirmation prompt para hindi aksidenteng mabura
-    if (!confirm("Sigurado ka bang gusto mong burahin ang GPM reading na ito?")) {
-        return;
-    }
+function deleteGPMLog(logId) {
+    // Styled confirmation modal — no browser confirm()
+    const overlay = document.createElement('div');
+    overlay.id = 'delGpmOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px);';
+    overlay.innerHTML = `
+      <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:14px;
+                  padding:26px;width:300px;max-width:90vw;color:var(--text-main);text-align:center;
+                  box-shadow:0 20px 40px rgba(0,0,0,0.3);">
+        <div style="font-size:2.2rem;margin-bottom:10px;">🗑️</div>
+        <h3 style="margin:0 0 8px;font-size:1rem;color:#e53e3e;">Delete GPM Log?</h3>
+        <p style="margin:0 0 20px;font-size:0.82rem;color:var(--text-sub);">
+          This reading will be permanently removed and cannot be undone.
+        </p>
+        <div style="display:flex;gap:10px;">
+          <button onclick="document.getElementById('delGpmOverlay').remove()"
+            style="flex:1;padding:10px;border:1px solid var(--border-color);background:transparent;
+                   color:var(--text-sub);border-radius:8px;cursor:pointer;font-weight:600;">
+            Cancel
+          </button>
+          <button id="confirmDelBtn" onclick="confirmDeleteGPMLog('${logId}')"
+            style="flex:1;padding:10px;border:none;background:#e53e3e;color:white;
+                   border-radius:8px;cursor:pointer;font-weight:600;">
+            Delete
+          </button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+}
+
+async function confirmDeleteGPMLog(logId) {
+    const btn = document.getElementById('confirmDelBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Deleting...'; }
 
     try {
-        console.log(`🗑️ Sinusubukang burahin ang log ID: ${logId}`);
-
-        // 2. I-delete ang record mula sa Supabase table ng gpm logs
-        // Paalala: Siguraduhin na 'gpm_readings' o kung ano man ang tamang pangalan ng table mo sa Supabase
         const { error } = await supabaseClient
-            .from('gpm_readings') 
+            .from('gpm_readings')
             .delete()
             .eq('id', logId);
 
         if (error) throw error;
 
-        // 3. Magpakita ng tagumpay na alert/toast (kung may showToast ka)
-        if (typeof showToast === 'function') {
-            showToast('Matagumpay na nabura ang GPM log!', 'success');
-        } else {
-            alert('Matagumpay na nabura ang GPM log!');
-        }
+        document.getElementById('delGpmOverlay')?.remove();
+        showToast('GPM log deleted successfully.', 'success');
 
-        // 4. Awtomatikong i-refresh ang screen para maglaho ang binurang linya sa table
-        if (typeof masterSync === 'function') {
-            masterSync();
-        }
+        // ✅ Directly refresh the GPM table — NOT masterSync()
+        // masterSync refreshes all modules; this refreshes only what's visible
+        await fetchGPMLogs();
 
     } catch (err) {
-        console.error("❌ Error sa pagbura ng GPM Log:", err);
-        alert("Hindi nabura ang log: " + err.message);
+        console.error('❌ GPM delete error:', err);
+        document.getElementById('delGpmOverlay')?.remove();
+        showToast('Error deleting log: ' + err.message, 'error');
     }
 }
 
@@ -2753,99 +2767,231 @@ if (!window.csgState) {
     window.csgState = localStorage.getItem('dash_csg_mode') || '4B';
 }
 
-async function fetchBoilerSteamData() {
-    try {
-        const timeFactor = Math.sin(Date.now() / 20000); 
-        const states = window.boilerStates;
-        const csgMode = window.csgState;
+// ====================================================================
+// 🔴 LIVE BOILER & CSG MONITOR — Supabase boiler_status table
+// ====================================================================
+// Table: public.boiler_status
+// Rows:  id='boilerA', id='boilerB', id='csg'
+// Columns: pres_pv, pres_sv, temp_pv, role, product_name,
+//          steam_mode, operator_name, updated_at
+// ====================================================================
 
-        // --- 🔴 BOILER A LOGIC ---
-        let svA = 8.5;
-        let pvA = 0;
-        let tempA = 0;
+let _boilerListenerActive = false;
 
-        if (states.A === 'MAIN') {
-            svA = 8.5;
-            pvA = parseFloat((8.25 + (timeFactor * 0.22)).toFixed(2));
-            tempA = Math.floor(450 + (timeFactor * 60) + (Math.random() * 10));
-            if (tempA > 600) tempA = 595;
-            if (tempA < 300) tempA = 305;
-        } else {
-            svA = 6.5;
-            pvA = parseFloat((6.22 + (timeFactor * 0.22)).toFixed(2));
-            tempA = Math.floor(165 + (timeFactor * 15) + (Math.random() * 5));
-        }
+async function startBoilerLiveListener() {
+    if (_boilerListenerActive) return;
+    _boilerListenerActive = true;
 
-        // --- 🟢 BOILER B LOGIC ---
-        let svB = 8.5;
-        let pvB = 0;
-        let tempB = 0;
-        const timeFactorB = Math.cos(Date.now() / 22000); 
+    // 1. Initial fetch — load all rows at once
+    const { data, error } = await supabaseClient
+        .from('boiler_status')
+        .select('*');
 
-        if (states.B === 'MAIN') {
-            svB = 8.5;
-            pvB = parseFloat((8.22 + (timeFactorB * 0.22)).toFixed(2));
-            tempB = Math.floor(440 + (timeFactorB * 55) + (Math.random() * 10));
-            if (tempB > 600) tempB = 590;
-            if (tempB < 300) tempB = 310;
-        } else {
-            svB = 6.5;
-            pvB = parseFloat((6.22 + (timeFactorB * 0.22)).toFixed(2));
-            tempB = Math.floor(160 + (timeFactorB * 15) + (Math.random() * 5));
-        }
-
-        // --- ⚡ CSG DYNAMIC INTER-LOCK SIMULATION LOGIC ---
-        let svCsg = (csgMode === '4B') ? 4.0 : 7.0;
-        let productName = (csgMode === '4B') ? 'VMR' : 'VMD - RGB';
-        let pvCsg = 0;
-
-        // Kunin natin ang PV ng kasalukuyang tumatakbong MAIN boiler
-        let activeMainPV = (states.A === 'MAIN') ? pvA : pvB;
-
-        // BASE OSCILLATION NG CSG
-        if (csgMode === '4B') {
-            pvCsg = 3.85 + (timeFactor * 0.12);
-        } else {
-            pvCsg = 6.80 + (timeFactor * 0.18);
-        }
-
-        // 🛑 CRITICAL INTERLOCK: Kung ang active MAIN boiler ay bumaba sa 8.0 bars,
-        // makakaramdam ng "Pressure Drop/Loss" ang CSG kaya babawasan ang simulated PV nito.
-        if (activeMainPV < 8.0) {
-            let dropPenalty = (8.0 - activeMainPV) * 0.8; // Ang bawas ay nakadepende sa kalaliman ng drop ng boiler
-            pvCsg = pvCsg - dropPenalty;
-        }
-
-        // I-format ang huling PV ng CSG
-        let finalCsgPv = pvCsg.toFixed(2);
-
-
-        // --- 🖥️ PHYSICAL TABLE INJECTION NODES ---
-        
-        // Boiler A DOM Inject
-        if (document.getElementById('boilerA_PV')) document.getElementById('boilerA_PV').innerHTML = `${pvA.toFixed(2)} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal; font-family:sans-serif;">bars</span>`;
-        if (document.getElementById('boilerA_SP')) document.getElementById('boilerA_SP').innerHTML = `${svA.toFixed(1)} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal; font-family:sans-serif;">bars</span>`;
-        if (document.getElementById('boilerA_Temp')) document.getElementById('boilerA_Temp').innerText = `${tempA}°C`;
-
-        // Boiler B DOM Inject
-        if (document.getElementById('boilerB_PV')) document.getElementById('boilerB_PV').innerHTML = `${pvB.toFixed(2)} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal; font-family:sans-serif;">bars</span>`;
-        if (document.getElementById('boilerB_SP')) document.getElementById('boilerB_SP').innerHTML = `${svB.toFixed(1)} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal; font-family:sans-serif;">bars</span>`;
-        if (document.getElementById('boilerB_Temp')) document.getElementById('boilerB_Temp').innerText = `${tempB}°C`;
-
-        // 🔵 CLEAN STEAM GENERATOR DOM INJECT
-        if (document.getElementById('csg_PV')) {
-            document.getElementById('csg_PV').innerHTML = `${finalCsgPv} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal; font-family:sans-serif;">bars</span>`;
-        }
-        if (document.getElementById('csg_SP')) {
-            document.getElementById('csg_SP').innerHTML = `${svCsg.toFixed(1)} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal; font-family:sans-serif;">bars</span>`;
-        }
-        if (document.getElementById('csg_Product')) {
-            document.getElementById('csg_Product').innerText = productName;
-        }
-
-    } catch (err) {
-        console.error("❌ Error running high-fidelity boiler & csg simulation:", err);
+    if (error) {
+        console.error('❌ boiler_status fetch error:', error.message);
+        runBoilerSimulation();
+        return;
     }
+
+    if (!data || data.length === 0) {
+        console.warn('⚠️ boiler_status table is empty — running simulation fallback.');
+        runBoilerSimulation();
+        return;
+    }
+
+    // Render all rows on first load
+    data.forEach(row => _applyBoilerRow(row));
+
+    // Sync toggle button states from DB
+    const boilerA = data.find(r => r.id === 'boilerA');
+    const boilerB = data.find(r => r.id === 'boilerB');
+    const csg     = data.find(r => r.id === 'csg');
+
+    if (boilerA) {
+        window.boilerStates = window.boilerStates || {};
+        window.boilerStates.A = boilerA.role || 'MAIN';
+    }
+    if (boilerB) {
+        window.boilerStates = window.boilerStates || {};
+        window.boilerStates.B = boilerB.role || 'BACKUP';
+    }
+    if (csg) {
+        window.csgState = csg.steam_mode || '4B';
+    }
+
+    renderBoilerToggleButtons();
+    renderCsgToggleButtons();
+
+    // 2. Realtime subscription — fires on every UPDATE to boiler_status
+    supabaseClient
+        .channel('boiler-live-channel')
+        .on('postgres_changes',
+            { event: 'UPDATE', schema: 'public', table: 'boiler_status' },
+            payload => {
+                if (payload.new) _applyBoilerRow(payload.new);
+            }
+        )
+        .subscribe();
+}
+
+// Map one boiler_status row → DOM update
+function _applyBoilerRow(row) {
+    const id      = row.id;
+    const pvPres  = parseFloat(row.pres_pv  || 0);
+    const svPres  = parseFloat(row.pres_sv  || 0);
+    const tempPv  = parseInt(row.temp_pv    || 0);
+    const product = row.product_name        || '';
+    const updAt   = row.updated_at ? new Date(row.updated_at) : null;
+    const ageSec  = updAt ? Math.round((Date.now() - updAt.getTime()) / 1000) : null;
+
+    if (id === 'boilerA') {
+        if (document.getElementById('boilerA_PV'))
+            document.getElementById('boilerA_PV').innerHTML =
+                `${pvPres.toFixed(1)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
+        if (document.getElementById('boilerA_SP'))
+            document.getElementById('boilerA_SP').innerHTML =
+                `${svPres.toFixed(1)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
+        if (document.getElementById('boilerA_Temp'))
+            document.getElementById('boilerA_Temp').innerText = `${tempPv}°C`;
+        _setBadge('boilerA_badge', ageSec);
+
+        // Keep toggle state in sync
+        if (row.role) {
+            window.boilerStates = window.boilerStates || {};
+            window.boilerStates.A = row.role;
+            renderBoilerToggleButtons();
+        }
+    }
+
+    if (id === 'boilerB') {
+        if (document.getElementById('boilerB_PV'))
+            document.getElementById('boilerB_PV').innerHTML =
+                `${pvPres.toFixed(1)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
+        if (document.getElementById('boilerB_SP'))
+            document.getElementById('boilerB_SP').innerHTML =
+                `${svPres.toFixed(1)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
+        if (document.getElementById('boilerB_Temp'))
+            document.getElementById('boilerB_Temp').innerText = `${tempPv}°C`;
+        _setBadge('boilerB_badge', ageSec);
+
+        if (row.role) {
+            window.boilerStates = window.boilerStates || {};
+            window.boilerStates.B = row.role;
+            renderBoilerToggleButtons();
+        }
+    }
+
+    if (id === 'csg') {
+        if (document.getElementById('csg_PV'))
+            document.getElementById('csg_PV').innerHTML =
+                `${pvPres.toFixed(1)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
+        if (document.getElementById('csg_SP'))
+            document.getElementById('csg_SP').innerHTML =
+                `${svPres.toFixed(1)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
+        if (document.getElementById('csg_Product') && product)
+            document.getElementById('csg_Product').innerText = product;
+        _setBadge('csg_badge', ageSec);
+
+        if (row.steam_mode) {
+            window.csgState = row.steam_mode;
+            renderCsgToggleButtons();
+        }
+    }
+}
+
+// LIVE / STALE badge helper
+function _setBadge(badgeId, ageSec) {
+    const el = document.getElementById(badgeId);
+    if (!el) return;
+    if (ageSec === null || ageSec < 30) {
+        el.textContent = '● LIVE';
+        el.style.color = '#48bb78';
+    } else if (ageSec < 120) {
+        el.textContent = `⏱ ${ageSec}s ago`;
+        el.style.color = '#f6ad55';
+    } else {
+        el.textContent = '⚠ STALE';
+        el.style.color = '#e53e3e';
+    }
+}
+
+// ── TOGGLE HANDLERS — now UPDATE Supabase ───────────────────
+async function toggleBoilerStatus(boiler, mode) {
+    const id = boiler === 'A' ? 'boilerA' : 'boilerB';
+
+    // Optimistic UI
+    window.boilerStates = window.boilerStates || {};
+    window.boilerStates[boiler] = mode;
+    localStorage.setItem('dash_boiler_modes', JSON.stringify(window.boilerStates));
+    renderBoilerToggleButtons();
+
+    // Persist to Supabase
+    const { error } = await supabaseClient
+        .from('boiler_status')
+        .update({ role: mode, updated_at: new Date().toISOString() })
+        .eq('id', id);
+
+    if (error) {
+        console.error('❌ boiler toggle update error:', error.message);
+        showToast('Error updating boiler mode', 'error');
+    }
+}
+
+async function toggleCsgStatus(mode) {
+    window.csgState = mode;
+    localStorage.setItem('dash_csg_mode', mode);
+    renderCsgToggleButtons();
+
+    const { error } = await supabaseClient
+        .from('boiler_status')
+        .update({ steam_mode: mode, updated_at: new Date().toISOString() })
+        .eq('id', 'csg');
+
+    if (error) {
+        console.error('❌ CSG toggle update error:', error.message);
+        showToast('Error updating CSG mode', 'error');
+    }
+}
+
+// ── SIMULATION FALLBACK (runs when boiler_status table is empty) ──
+function runBoilerSimulation() {
+    const timeFactor  = Math.sin(Date.now() / 20000);
+    const timeFactorB = Math.cos(Date.now() / 22000);
+    const states  = window.boilerStates || { A: 'MAIN', B: 'BACKUP' };
+    const csgMode = window.csgState || '4B';
+
+    const pvA  = states.A === 'MAIN' ? parseFloat((8.25 + timeFactor * 0.22).toFixed(1)) : parseFloat((6.22 + timeFactor * 0.22).toFixed(1));
+    const svA  = states.A === 'MAIN' ? 8.5 : 6.5;
+    const tmpA = states.A === 'MAIN' ? Math.min(600, Math.max(305, Math.floor(450 + timeFactor * 60 + Math.random() * 10))) : Math.floor(165 + timeFactor * 15 + Math.random() * 5);
+
+    const pvB  = states.B === 'MAIN' ? parseFloat((8.22 + timeFactorB * 0.22).toFixed(1)) : parseFloat((6.22 + timeFactorB * 0.22).toFixed(1));
+    const svB  = states.B === 'MAIN' ? 8.5 : 6.5;
+    const tmpB = states.B === 'MAIN' ? Math.min(600, Math.max(310, Math.floor(440 + timeFactorB * 55 + Math.random() * 10))) : Math.floor(160 + timeFactorB * 15 + Math.random() * 5);
+
+    const svCsg = csgMode === '4B' ? 4.0 : 7.0;
+    const prod  = csgMode === '4B' ? 'VMR' : 'VMD - RGB';
+    let pvCsg   = csgMode === '4B' ? 3.85 + timeFactor * 0.12 : 6.80 + timeFactor * 0.18;
+    if ((states.A === 'MAIN' ? pvA : pvB) < 8.0) pvCsg -= (8.0 - (states.A === 'MAIN' ? pvA : pvB)) * 0.8;
+
+    if (document.getElementById('boilerA_PV')) document.getElementById('boilerA_PV').innerHTML = `${pvA.toFixed(1)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
+    if (document.getElementById('boilerA_SP')) document.getElementById('boilerA_SP').innerHTML = `${svA.toFixed(1)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
+    if (document.getElementById('boilerA_Temp')) document.getElementById('boilerA_Temp').innerText = `${tmpA}°C`;
+    if (document.getElementById('boilerB_PV')) document.getElementById('boilerB_PV').innerHTML = `${pvB.toFixed(1)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
+    if (document.getElementById('boilerB_SP')) document.getElementById('boilerB_SP').innerHTML = `${svB.toFixed(1)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
+    if (document.getElementById('boilerB_Temp')) document.getElementById('boilerB_Temp').innerText = `${tmpB}°C`;
+    if (document.getElementById('csg_PV')) document.getElementById('csg_PV').innerHTML = `${pvCsg.toFixed(1)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
+    if (document.getElementById('csg_SP')) document.getElementById('csg_SP').innerHTML = `${svCsg.toFixed(1)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
+    if (document.getElementById('csg_Product')) document.getElementById('csg_Product').innerText = prod;
+
+    ['boilerA_badge','boilerB_badge','csg_badge'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.textContent = '◌ SIM'; el.style.color = '#a0aec0'; }
+    });
+}
+
+// Stub kept so existing dashboard setTimeout() calls don't crash
+async function fetchBoilerSteamData() {
+    if (!_boilerListenerActive) runBoilerSimulation();
 }
 
 // Handler para sa CSG Toggle Button click
