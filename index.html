@@ -3582,11 +3582,22 @@ async function generateSmartSchedule() {
     `;
 
     // 6. ISALPAK ANG MGA SMART ASSIGNED VALUE SA MGA COMPONENT SELECT BOX NODES
-    const slots = { day_boiler, night_boiler, day_wtp, night_wtp, day_wwtp, night_wwtp };
+    // Dito natin tinama ang mapping para tugma ang variable names sa data attributes ng HTML
+    const slots = { 
+        day_boiler: dayBoiler, 
+        night_boiler: nightBoiler, 
+        day_wtp: dayWtp, 
+        night_wtp: nightWtp, 
+        day_wwtp: dayWwtp, 
+        night_wwtp: nightWwtp 
+    };
+
     document.querySelectorAll('.sched-select-node').forEach((selectNode) => {
         const shift = selectNode.getAttribute('data-shift');
         const area = selectNode.getAttribute('data-area');
         const slotIdx = parseInt(selectNode.getAttribute('data-slot')) - 1;
+        
+        // Dito ay malinis na makukuha ang array gamit ang shift at area (hal. slots["day_boiler"][0])
         selectNode.value = slots[`${shift}_${area}`][slotIdx];
     });
 }
