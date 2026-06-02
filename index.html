@@ -3333,8 +3333,8 @@ async function openManpowerScheduler() {
     const months = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
     const nextMonthIdx = (new Date().getMonth() + 1) % 12;
 
-    // 1. Initial Outer Frame Layout
     content.innerHTML = `
+        <!-- Top Title Bar & Month Selector -->
         <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px;">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;">
                 <div>
@@ -3343,7 +3343,8 @@ async function openManpowerScheduler() {
                 </div>
                 <div style="display:flex; gap:12px; align-items:center;">
                     <label style="font-weight:bold; font-size:0.85rem; color:#4a5568;">SCHEDULE MONTH:</label>
-                    <select id="schedMonthSelect" style="padding:8px 12px; border:1px solid #cbd5e0; border-radius:6px; background:white; font-weight:bold; color:#1a202c;">
+                    <!-- Nagdagdag ng onchange="checkAndLoadExistingSchedule()" para mag-trigger tuwing magpapalit ng buwan -->
+                    <select id="schedMonthSelect" onchange="checkAndLoadExistingSchedule()" style="padding:8px 12px; border:1px solid #cbd5e0; border-radius:6px; background:white; font-weight:bold; color:#1a202c;">
                         ${months.map((m, idx) => `<option value="${idx + 1}" ${idx === nextMonthIdx ? 'selected' : ''}>${m} ${new Date().getFullYear()}</option>`).join('')}
                     </select>
                 </div>
@@ -3352,32 +3353,40 @@ async function openManpowerScheduler() {
 
         <div style="display: grid; grid-template-columns: 1fr 3fr; gap: 20px; align-items: start;">
             
-            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <!-- LEFT PANEL: CREW STATUS FILTER -->
+            <div id="schedulerLeftPanel" style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                 <h4 style="margin:0 0 5px 0; color:#2d3748; font-size:1rem; font-weight:900;">👥 CREW STATUS FILTER</h4>
                 <p style="color:#718096; font-size:0.75rem; margin-bottom:15px;">I-uncheck ang pangalan kung ang operator ay Suspended, Absent, o On-Leave para hindi maisama sa rota.</p>
                 
                 <div id="crewFilterListContainer" style="display:flex; flex-direction:column; gap:10px;">
-                    <div style="text-align:center; color:#a0aec0; font-size:0.85rem; padding:10px;">Loading crew from database...</div>
+                    <div style="text-align:center; color:#a0aec0; font-size:0.85rem; padding:10px;">Loading crew...</div>
                 </div>
 
-                <button onclick="generateSmartSchedule()" style="width:100%; margin-top:20px; background: linear-gradient(135deg, #d69e2e, #b7791f); color:white; border:none; padding:12px; border-radius:6px; font-weight:950; cursor:pointer; box-shadow:0 4px 10px rgba(183,121,31,0.25); font-size:0.9rem;">
-                    <i class="fas fa-bolt"></i> One-Click Auto Rotate
-                </button>
+                <!-- Lalagyan ng dynamic button (Auto Rotate o Blocked Mode) -->
+                <div id="schedulerActionButtonZone" style="margin-top:20px;">
+                    <button onclick="generateSmartSchedule()" style="width:100%; background: linear-gradient(135deg, #d69e2e, #b7791f); color:white; border:none; padding:12px; border-radius:6px; font-weight:950; cursor:pointer; box-shadow:0 4px 10px rgba(183,121,31,0.25); font-size:0.9rem;">
+                        <i class="fas fa-bolt"></i> One-Click Auto Rotate
+                    </button>
+                </div>
             </div>
 
+            <!-- RIGHT PANEL: INTERACTIVE PREVIEW & REVIEW GRID -->
             <div id="schedulerGridContainer">
                 <div style="text-align:center; padding:70px; background:white; border-radius:12px; color:#a0aec0; border: 2px dashed #e2e8f0;">
-                    <i class="fas fa-calendar-alt" style="font-size:3.5rem; margin-bottom:12px; color:#cbd5e0;"></i>
-                    <p style="font-weight:bold; margin:0; font-size:1rem; color:#718096;">Suriin ang crew availability sa kaliwa, pagkatapos ay i-click ang "One-Click Auto Rotate".</p>
+                    <i class="fas fa-spinner fa-spin" style="font-size:3.5rem; margin-bottom:12px; color:#cbd5e0;"></i>
+                    <p style="font-weight:bold; margin:0; font-size:1rem; color:#718096;">Chine-check ang mga dating schedule sa database...</p>
                 </div>
             </div>
 
         </div>
     `;
 
-    // Kunin agad ang tunay na data mula sa profiles table ng Supabase
+    // 1. I-load ang mga tao sa filter list
     await fetchCrewForFiltering();
+    // 2. I-check agad kung may schedule na para sa default month na naka-select
+    await checkAndLoadExistingSchedule();
 }
+        
 
 // Helper: Kinukuha ang listahan ng mga tao na may position na 'opscrew' para gawing checkboxes sa gilid
 async function fetchCrewForFiltering() {
@@ -3416,6 +3425,210 @@ async function fetchCrewForFiltering() {
     } catch (err) {
         listContainer.innerHTML = `<div style="color:red; font-size:0.8rem;">❌ Error sa pagkarga ng crew: ${err.message}</div>`;
     }
+}
+    
+
+async function checkAndLoadExistingSchedule() {
+    const gridContainer = document.getElementById('schedulerGridContainer');
+    const buttonZone = document.getElementById('schedulerActionButtonZone');
+    const monthSelect = document.getElementById('schedMonthSelect');
+    if (!gridContainer || !monthSelect) return;
+
+    const monthText = monthSelect.options[monthSelect.selectedIndex].text; // Hal. "JULY 2026"
+
+    gridContainer.innerHTML = `
+        <div style="text-align:center; padding:70px; background:white; border-radius:12px; color:#a0aec0;">
+            <i class="fas fa-spinner fa-spin" style="font-size:3rem; margin-bottom:12px;"></i>
+            <p>Sinusuri ang schedule para sa ${monthText}...</p>
+        </div>
+    `;
+
+    try {
+        // Hahanapin sa database kung may entry na para sa buwan na ito
+        const { data, error } = await supabaseClient
+            .from('duty_schedules')
+            .select('*')
+            .eq('schedule_month', monthText);
+
+        if (error) throw error;
+
+        // KASO A: MAY NAKASAVE NANG OPISYAL NA SCHEDULE!
+        if (data && data.length > 0) {
+            console.log(`📌 May nahanap na opisyal na schedule para sa ${monthText}`);
+            
+            // 1. Gawing disabled o paalala lang ang Auto Rotate button sa gilid para iwas aksidente
+            if (buttonZone) {
+                buttonZone.innerHTML = `
+                    <div style="background:#edf2f7; color:#4a5568; padding:10px; border-radius:6px; font-size:0.75rem; font-weight:bold; text-align:center; border:1px dashed #cbd5e0;">
+                        🔒 Naka-lock ang Auto-Rotate dahil may opisyal na schedule na ito. Pindutin ang "Revise" para baguhin.
+                    </div>
+                `;
+            }
+
+            // 2. I-render ang data sa "Official View Mode" (Naka-disable ang dropdowns)
+            renderScheduleGrid(data, true); // True ibig sabihin: LOCKED MODE
+            
+        } 
+        // KASO B: BLANKO AT WALA PANG SCHEDULE NA NAGAGAWA TALAGA!
+        else {
+            console.log(`💡 Blanko ang buwan ng ${monthText}. Handa para sa bagong schedule.`);
+            
+            // ibalik ang orihinal na gumaganang Auto Rotate button sa kaliwa
+            if (buttonZone) {
+                buttonZone.innerHTML = `
+                    <button onclick="generateSmartSchedule()" style="width:100%; background: linear-gradient(135deg, #d69e2e, #b7791f); color:white; border:none; padding:12px; border-radius:6px; font-weight:950; cursor:pointer; box-shadow:0 4px 10px rgba(183,121,31,0.25); font-size:0.9rem;">
+                        <i class="fas fa-bolt"></i> One-Click Auto Rotate
+                    </button>
+                `;
+            }
+
+            // Ibalik sa orihinal na dashed blank template na naghihintay ng click
+            gridContainer.innerHTML = `
+                <div style="text-align:center; padding:70px; background:white; border-radius:12px; color:#a0aec0; border: 2px dashed #e2e8f0;">
+                    <i class="fas fa-calendar-alt" style="font-size:3.5rem; margin-bottom:12px; color:#cbd5e0;"></i>
+                    <p style="font-weight:bold; margin:0; font-size:1rem; color:#718096;">Walang nakitang opisyal na rota para sa ${monthText}. Pindutin ang "One-Click Auto Rotate" sa kaliwa.</p>
+                </div>
+            `;
+        }
+
+    } catch (err) {
+        console.error(err);
+        gridContainer.innerHTML = `<div style="color:red; padding:20px;">❌ Error sa pag-check ng schedule: ${err.message}</div>`;
+    }
+}
+        function renderScheduleGrid(scheduleData, isLocked) {
+    const gridContainer = document.getElementById('schedulerGridContainer');
+    if (!gridContainer) return;
+
+    const monthText = document.getElementById('schedMonthSelect').options[document.getElementById('schedMonthSelect').selectedIndex].text;
+
+    // I-convert ang array data mula sa Supabase papunta sa isang madaling basahing object map
+    const slotsMap = {};
+    scheduleData.forEach(item => {
+        slotsMap[`${item.shift}_${item.area}_${item.slot_number}`] = item.operator_name;
+    });
+
+    const dropdownOptionsHtml = `<option value="⚠️ VACANT (Need Hire)">⚠️ VACANT (Need Hire)</option>` + 
+        window.activeOpscrewPool.map(c => `<option value="${c.full_name}">${c.full_name}</option>`).join('');
+
+    // Helper para mag-render ng Slot (Dropdown kung editable, Text span naman kung Locked)
+    function renderSlotField(shift, area, slotNum) {
+        const currentSavedValue = slotsMap[`${shift}_${area}_${slotNum}`] || "⚠️ VACANT (Need Hire)";
+        
+        if (isLocked) {
+            // Kung Locked Mode: Malinis na badge lang ang ipapakita, hindi dropdown!
+            return `
+                <div style="background: white; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 6px; font-weight: bold; color: #2d3748; display:flex; align-items:center; gap:8px; font-size:0.85rem;">
+                    <i class="fas fa-user-check" style="color:#3182ce;"></i> ${currentSavedValue}
+                </div>
+            `;
+        } else {
+            // Kung Revise Mode: Dropdown menu para pwedeng palitan ni sir ang pangalan
+            return `
+                <select class="sched-select-node" data-shift="${shift}" data-area="${area}" data-slot="${slotNum}" style="width:100%; padding:8px; border:1px solid #cbd5e0; border-radius:6px; margin-bottom:6px; background:white; font-size:0.85rem; font-weight:bold;">
+                    ${dropdownOptionsHtml}
+                </select>
+            `;
+        }
+    }
+
+    gridContainer.innerHTML = `
+        <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+            <div style="border-bottom: 2px dashed #cbd5e0; padding-bottom:12px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <h3 style="margin:0; color:#1a202c; font-size:1.2rem;">${isLocked ? '📋 Official Saved Schedule' : '✏️ Revise Schedule Mode'} — ${monthText}</h3>
+                    <small style="color:#718096;">Status: <strong>${isLocked ? '🟢 Published & Active' : '🟠 Editing Draft'}</strong></small>
+                </div>
+                <div>
+                    ${isLocked ? 
+                        `<button onclick="enableReviseMode(${JSON.stringify(scheduleData).replace(/"/g, '&quot;')})" style="background:#3182ce; color:white; border:none; padding:8px 16px; border-radius:6px; font-weight:bold; cursor:pointer;"><i class="fas fa-edit"></i> Revise Schedule</button>` :
+                        `<span style="background:#feebc8; color:#c05621; padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:bold;">Suriin ang mga babaguhin</span>`
+                    }
+                </div>
+            </div>
+
+            <!-- Main Split View Grid -->
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom:25px;">
+                
+                <!-- DAY SHIFT -->
+                <div style="background:#f7fafc; border:1px solid #e2e8f0; border-radius:10px; padding:15px;">
+                    <div style="background:#ed8936; color:white; padding:8px 12px; font-weight:950; border-radius:6px; font-size:0.9rem; margin-bottom:15px;">☀️ DAY SHIFT</div>
+                    <div style="margin-bottom:12px;">
+                        <label style="display:block; font-size:0.75rem; font-weight:900; color:#4a5568; margin-bottom:4px;">🔥 BOILER AREA</label>
+                        ${renderSlotField('day', 'boiler', 1)}
+                        ${renderSlotField('day', 'boiler', 2)}
+                        ${renderSlotField('day', 'boiler', 3)}
+                    </div>
+                    <div style="margin-bottom:12px;">
+                        <label style="display:block; font-size:0.75rem; font-weight:900; color:#4a5568; margin-bottom:4px;">💧 WTP AREA</label>
+                        ${renderSlotField('day', 'wtp', 1)}
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:0.75rem; font-weight:900; color:#4a5568; margin-bottom:4px;">☣️ WWTP AREA</label>
+                        ${renderSlotField('day', 'wwtp', 1)}
+                    </div>
+                </div>
+
+                <!-- NIGHT SHIFT -->
+                <div style="background:#f7fafc; border:1px solid #e2e8f0; border-radius:10px; padding:15px;">
+                    <div style="background:#4a5568; color:white; padding:8px 12px; font-weight:950; border-radius:6px; font-size:0.9rem; margin-bottom:15px;">🌙 NIGHT SHIFT</div>
+                    <div style="margin-bottom:12px;">
+                        <label style="display:block; font-size:0.75rem; font-weight:900; color:#4a5568; margin-bottom:4px;">🔥 BOILER AREA</label>
+                        ${renderSlotField('night', 'boiler', 1)}
+                        ${renderSlotField('night', 'boiler', 2)}
+                        ${renderSlotField('night', 'boiler', 3)}
+                    </div>
+                    <div style="margin-bottom:12px;">
+                        <label style="display:block; font-size:0.75rem; font-weight:900; color:#4a5568; margin-bottom:4px;">💧 WTP AREA</label>
+                        ${renderSlotField('night', 'wtp', 1)}
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:0.75rem; font-weight:900; color:#4a5568; margin-bottom:4px;">☣️ WWTP AREA</label>
+                        ${renderSlotField('night', 'wwtp', 1)}
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Bottom Control Action Panel -->
+            ${!isLocked ? `
+                <div style="display:flex; justify-content:space-between; align-items:center; background:#edf2f7; padding:12px 20px; border-radius:8px;">
+                    <span style="font-size:0.78rem; color:#4a5568; font-weight:bold;"><i class="fas fa-info-circle"></i> Mode: Revising. Ang pag-save ay mag-uupdate sa kasalukuyang records sa Supabase gamit ang upsert logic.</span>
+                    <div style="display:flex; gap:10px;">
+                        <button onclick="checkAndLoadExistingSchedule()" style="background:#718096; color:white; border:none; padding:10px 15px; border-radius:6px; font-weight:bold; cursor:pointer;">Cancel</button>
+                        <button onclick="saveApprovedSchedule()" style="background:#2f855a; color:white; border:none; padding:10px 22px; border-radius:6px; font-weight:950; cursor:pointer; font-size:0.88rem; box-shadow:0 4px 10px rgba(47,133,90,0.2);">
+                            <i class="fas fa-save"></i> Save Revise Rota
+                        </button>
+                    </div>
+                </div>
+            ` : ''}
+        </div>
+    `;
+
+    // Kung nakabukas ang Revise Mode, kailangan nating i-set ang selected value ng mga dropdowns sa nakasave talaga sa database
+    if (!isLocked) {
+        document.querySelectorAll('.sched-select-node').forEach((selectNode) => {
+            const shift = selectNode.getAttribute('data-shift');
+            const area = selectNode.getAttribute('data-area');
+            const slotIdx = selectNode.getAttribute('data-slot');
+            selectNode.value = slotsMap[`${shift}_${area}_${slotIdx}`] || "⚠️ VACANT (Need Hire)";
+        });
+    }
+}
+
+// Helper para magpalit ng view kapag pinindot ni sir ang "Revise Schedule" button
+function enableReviseMode(scheduleData) {
+    // 1. Ibalik ang kakayahan na mag-Auto Rotate sa kaliwang panel habang nag-eedit
+    const buttonZone = document.getElementById('schedulerActionButtonZone');
+    if (buttonZone) {
+        buttonZone.innerHTML = `
+            <button onclick="generateSmartSchedule()" style="width:100%; background: linear-gradient(135deg, #d69e2e, #b7791f); color:white; border:none; padding:12px; border-radius:6px; font-weight:950; cursor:pointer; box-shadow:0 4px 10px rgba(183,121,31,0.25); font-size:0.9rem;">
+                <i class="fas fa-bolt"></i> One-Click Auto Rotate
+            </button>
+        `;
+    }
+    // 2. I-render ang parehong grid pero `isLocked = false` para maging dynamic dropdowns siya
+    renderScheduleGrid(scheduleData, false);
 }
 
 // SMART AUTO ROTATION ENGINE WITH LAST MONTH BASIS & AUTO-SAVE RETRIEVAL
