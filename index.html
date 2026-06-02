@@ -1882,6 +1882,7 @@ function loadDashboard() {
         if (typeof fetchBoilerSteamData === "function") fetchBoilerSteamData();
         if (typeof renderBoilerToggleButtons === "function") renderBoilerToggleButtons();
         if (typeof renderCsgToggleButtons === "function") renderCsgToggleButtons();
+        if (typeof fetchDashboardDutySchedule === "function") fetchDashboardDutySchedule();
 
         // 🔄 AUTOMATIC LIVE LOOP: Tumatakbo kada 2 segundo
         setInterval(() => {
