@@ -1854,7 +1854,10 @@ function loadDashboard() {
         </div>
 
         <div id="coal-queue-bar" style="margin-top: 15px;"></div>
-
+        
+                                         <!-- 🟢 HETO YUNG BAGONG SINGIT NA CONTAINER PARA SA OPISYAL NA DUTY ROSTER -->
+        <div id="dashboard-duty-roster" style="margin-top: 15px;"></div>
+        
         <div class="chart-container" style="margin-top: 20px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h4 style="margin:0;">Power Consumption Trend</h4>
@@ -1893,6 +1896,114 @@ function loadDashboard() {
     }, 150);
 }
 
+        async function fetchDashboardDutySchedule() {
+    const rosterContainer = document.getElementById('dashboard-duty-roster');
+    if (!rosterContainer) return;
+
+    // Kunin ang kasalukuyang Buwan at Taon (Halimbawa: "JUNE 2026")
+    const months = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
+    const currentMonthText = `${months[new Date().getMonth()]} ${new Date().getFullYear()}`;
+
+    rosterContainer.innerHTML = `
+        <div style="background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; text-align: center; color: #a0aec0;">
+            <i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i> Loading active plant duty roster...
+        </div>
+    `;
+
+    try {
+        // Hila mula sa table gamit ang current month key
+        const { data, error } = await supabaseClient
+            .from('duty_schedules')
+            .select('*')
+            .eq('schedule_month', currentMonthText);
+
+        if (error) throw error;
+
+        // KUNG WALANG SCHEDULE NA NAGAWA PA
+        if (!data || data.length === 0) {
+            rosterContainer.innerHTML = `
+                <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; text-align: center;">
+                    <p style="margin: 0; color: #718096; font-size: 0.85rem; font-weight: bold;">
+                        ⚠️ Walang opisyal na active schedule para sa buwan ng ${currentMonthText}.
+                    </p>
+                </div>
+            `;
+            return;
+        }
+
+        // I-map ang data para madaling i-render sa roster blocks
+        const roster = {};
+        data.forEach(item => {
+            roster[`${item.shift}_${item.area}_${item.slot_number}`] = item.operator_name;
+        });
+
+        // Helper para sa fallback names kung bakante ang slot
+        const getOp = (shift, area, slot) => roster[`${shift}_${area}_${slot}`] || `<span style="color:#a0aec0; font-weight:normal;">Vacant</span>`;
+
+        // I-render ang magandang Dashboard view panel
+        rosterContainer.innerHTML = `
+            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #edf2f7; padding-bottom: 10px; margin-bottom: 15px;">
+                    <h3 style="margin: 0; font-size: 0.95rem; color: #2d3748; font-weight: 900;"><i class="fas fa-clipboard-list" style="color: #3182ce; margin-right: 6px;"></i> OFFICIAL PLANT DUTY ROSTER (${currentMonthText})</h3>
+                    <span style="background: #e6fffa; color: #234e52; font-size: 0.7rem; font-weight: bold; padding: 3px 8px; border-radius: 20px; border: 1px solid #b2f5ea;">LIVE STATIONING</span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    
+                    <!-- ☀️ DAY SHIFT BLOCK -->
+                    <div style="background: #fffaf0; border: 1px solid #feebc8; border-radius: 8px; padding: 12px;">
+                        <div style="color: #dd6b20; font-weight: 900; font-size: 0.8rem; margin-bottom: 10px; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
+                            <span>☀️ DAY SHIFT OPERATORS</span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.82rem;">
+                            <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #feebc8; padding-bottom:4px;">
+                                <strong style="color:#718096;">🔥 Boiler (Slot 1, 2, 3):</strong>
+                                <span style="font-weight:bold; color:#2d3748;">${getOp('day','boiler',1)} | ${getOp('day','boiler',2)} | ${getOp('day','boiler',3)}</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #feebc8; padding-bottom:4px;">
+                                <strong style="color:#718096;">💧 WTP (Slot 1):</strong>
+                                <span style="font-weight:bold; color:#2d3748;">${getOp('day','wtp',1)}</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between;">
+                                <strong style="color:#718096;">☣️ WWTP (Slot 1):</strong>
+                                <span style="font-weight:bold; color:#2d3748;">${getOp('day','wwtp',1)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 🌙 NIGHT SHIFT BLOCK -->
+                    <div style="background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
+                        <div style="color: #4a5568; font-weight: 900; font-size: 0.8rem; margin-bottom: 10px; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
+                            <span>🌙 NIGHT SHIFT OPERATORS</span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.82rem;">
+                            <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #e2e8f0; padding-bottom:4px;">
+                                <strong style="color:#718096;">🔥 Boiler (Slot 1, 2, 3):</strong>
+                                <span style="font-weight:bold; color:#2d3748;">${getOp('night','boiler',1)} | ${getOp('night','boiler',2)} | ${getOp('night','boiler',3)}</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #e2e8f0; padding-bottom:4px;">
+                                <strong style="color:#718096;">💧 WTP (Slot 1):</strong>
+                                <span style="font-weight:bold; color:#2d3748;">${getOp('night','wtp',1)}</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between;">
+                                <strong style="color:#718096;">☣️ WWTP (Slot 1):</strong>
+                                <span style="font-weight:bold; color:#2d3748;">${getOp('night','wwtp',1)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        `;
+    } catch (err) {
+        console.error(err);
+        rosterContainer.innerHTML = `
+            <div style="color: red; background: white; padding: 15px; border-radius: 12px; font-size: 0.8rem;">
+                ❌ Error parsing dashboard roster: ${err.message}
+            </div>
+        `;
+    }
+}
         
 function updateDashboardSidebar() {
     const statusDiv = document.getElementById('dashboard-coal-status');
