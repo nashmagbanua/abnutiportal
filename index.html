@@ -2907,7 +2907,7 @@ function renderBoilerToggleButtons() {
 }
  // ====================================================================
 // NEW FIX: 24-Hour Coal Consumption Engine (daily_bucket_logs)
-// ===================================================================
+// ====================================================================
 async function fetch24hCoalConsumption() {
     try {
         // 1. Kuhanin ang petsa ngayon sa Pilipinas (Format: YYYY-MM-DD)
@@ -2973,7 +2973,7 @@ async function fetch24hCoalConsumption() {
         console.error("❌ Error sa pag-compute ng 24h Coal galing sa daily_bucket_logs:", err);
     }
 }
-        // ==========================================
+// ==========================================
 // FEATURE 1: BIRTHDAY CELEBRANT TEMPLATE MAKER
 // ==========================================
 async function openBirthdayTemplateMaker() {
@@ -2987,7 +2987,7 @@ async function openBirthdayTemplateMaker() {
     const months = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
     const currentMonthIndex = new Date().getMonth();
     const currentMonthName = months[currentMonthIndex];
-
+    
     // 2. I-inject ang Setup View para sa Whiteboard Generator
     content.innerHTML = `
         <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px;">
