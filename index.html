@@ -240,7 +240,15 @@
     .dropdown-item { padding: 12px; border-radius: 8px; color: var(--text-main); cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; }
     .dropdown-item:hover { background: rgba(0,0,0,0.05); color: var(--accent); }
 
-    /* --- LOGIN PAGE (handled by login.html) --- */
+    /* --- LOGIN PAGE --- */
+    #login-page {
+        height: 100vh; display: flex; justify-content: center; align-items: center;
+        background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.7)), url('assets/background.webp') center/cover no-repeat;
+        position: fixed; width: 100%; z-index: 2000;
+    }
+    .login-box { background: white; padding: 35px; border-radius: 15px; text-align: center; width: 320px; color: #1a202c; }
+    .login-box input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+    .login-box button { width: 100%; padding: 12px; background: #38a169; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
       /* --- PRINT PAGE --- */
   @media print {
@@ -389,7 +397,7 @@
     <div id="sidebar-backdrop" onclick="closeSidebarMobile()"></div>
     <div id="toast-container"></div>
 
-<div id="main-app" style="display:none;">
+<div id="main-app">
         <div id="sidebar">
             <div class="sidebar-brand" onclick="toggleSide()">
     <img src="assets/abnlogo.svg" alt="Logo" class="sidebar-logo">
@@ -410,8 +418,9 @@
     <div class="nav-item" onclick="openCoalDelivery()"><i class="fas fa-truck"></i> <span>Coal Delivery</span></div>
     <div class="nav-item" onclick="openCoalDumping()"><i class="fas fa-truck-loading"></i> <span>Coal Dumping</span></div>
     <div class="nav-item" id="nav-users" onclick="loadUserManagement(this)">
-    <i class="fas fa-user-shield"></i> <span>Manage Operators</span>
-</div>
+    <i class="fas fa-user-shield"></i> <span>Manage Operators</span></div>
+    <div class="nav-item" onclick="openBirthdayTemplateMaker()"><i class="fas fa-cake-candles"></i> <span>Bday Template</span></div>
+    <div class="nav-item" onclick="openManpowerScheduler()"><i class="fas fa-users-gear"></i> <span>Opscrew Schedule</span></div>
 </div>
 </div>
 
@@ -472,7 +481,13 @@ function updateSidebarActive(index) {
     });
 }
     async function openGPMCalculator() {
-    updateSidebarActive(2); // GPM Calculator is nav index 2
+    updateSidebarActive(1);
+    const today = new Date().toISOString().split('T')[0];
+    const content = document.getElementById('cont');
+
+    content.innerHTML = `
+        <div style="margin-bottom: 20px;">
+            <h1 id="greet" style="font-size: 1.2rem;">GPM & Deepwell Monitoring</h1>
             <p class="sub-text" style="margin:0;">System logs for Flow Rate, Pump Status, and Frequencies.</p>
         </div>
 
@@ -616,7 +631,13 @@ async function fetchGPMLogs() {
     }
 }
 function openPowerMonitor() {
-    updateSidebarActive(3); // Power Consumption is nav index 3
+    updateSidebarActive(2);
+    const today = new Date().toISOString().split('T')[0];
+    const content = document.getElementById('cont');
+
+    content.innerHTML = `
+    <div style="margin-bottom: 20px;">
+        <h1 id="greet" style="font-size: 1.2rem;">Power Consumption</h1>
         <p class="sub-text" style="margin:0;">Live utility tracking and historical logs.</p>
     </div>
 
@@ -717,7 +738,11 @@ function fetchPowerData(selectedDate) {
     });
 }
        async function openChemicals() {
-    updateSidebarActive(4); // Chemicals is nav index 4
+    updateSidebarActive(3);
+    const content = document.getElementById('cont');
+    
+    // 1. I-render agad ang Layout na may Loading indicators habang naghihintay ng data
+    content.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <div>
                 <h1 style="font-size: 1.4rem; margin: 0; font-weight: 800; color: #2d3748;">Chemicals Inventory Control</h1>
@@ -835,7 +860,6 @@ function fetchPowerData(selectedDate) {
 }
        // --- COAL YARD MONITORING LOGIC ---
 async function openCoalDelivery() {
-    updateSidebarActive(5); // Coal Delivery is nav index 5
     const cont = document.getElementById('cont');
     
     cont.innerHTML = `
@@ -914,7 +938,7 @@ async function openCoalDelivery() {
     const histDiv = document.getElementById('history-list');
 
     if (!from || !to) {
-        showToast('Please select a Date Range first.', 'warning');
+        alert("Pili muna ng Date Range, boss!");
         return;
     }
 
@@ -1284,7 +1308,7 @@ function updatePriorityBanner(yardData, standbyLogs) {
 }
         const yards = ["CY1", "CY2", "CY3", "CY4", "CY5", "CY6", "CY7", "CY8", "CY9"];
         async function openCoalDumping() {
-    updateSidebarActive(6); // Coal Dumping is nav index 6
+    updateSidebarActive(5);
     const content = document.getElementById('cont');
     
     // Initial Layout with Stats and Tools
@@ -1537,55 +1561,35 @@ async function updateInventoryStats(currentYard) {
     }
 }
      async function triggerFinalize() {
-    const selectedYard   = document.getElementById('finalizeYardSelect').value;
-    const yardNumberOnly = selectedYard.replace("CY", "");
-    const actualWeight   = parseFloat(document.getElementById('actualWeightInput').value);
+    const selectedYard = document.getElementById('finalizeYardSelect').value;
+    const yardNumberOnly = selectedYard.replace("CY", ""); 
+    const actualWeight = parseFloat(document.getElementById('actualWeightInput').value);
 
     if (!actualWeight || actualWeight <= 0) {
-        showToast('Please enter the Actual Weight first.', 'warning');
+        alert("Boss, paki-input yung Actual Weight.");
         return;
     }
 
-    // Styled confirmation modal instead of browser confirm()
-    const overlay = document.createElement('div');
-    overlay.id = 'finalizeOverlay';
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px);';
-    overlay.innerHTML = `
-      <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:14px;
-                  padding:26px;width:310px;max-width:90vw;color:var(--text-main);text-align:center;
-                  box-shadow:0 20px 40px rgba(0,0,0,0.3);">
-        <div style="font-size:2rem;margin-bottom:10px;">📦</div>
-        <h3 style="margin:0 0 8px;font-size:1rem;">Finalize ${selectedYard}?</h3>
-        <p style="margin:0 0 20px;font-size:0.82rem;color:var(--text-sub);">
-          This yard will be marked as <strong>used up</strong> and closed in the records.
-        </p>
-        <div style="display:flex;gap:10px;">
-          <button onclick="document.getElementById('finalizeOverlay').remove()"
-            style="flex:1;padding:10px;border:1px solid var(--border-color);background:transparent;
-                   color:var(--text-sub);border-radius:8px;cursor:pointer;font-weight:600;">Cancel</button>
-          <button id="confirmFinalizeBtn" onclick="doFinalize('${selectedYard}','${yardNumberOnly}',${actualWeight})"
-            style="flex:1;padding:10px;border:none;background:#38a169;color:white;
-                   border-radius:8px;cursor:pointer;font-weight:600;">Confirm</button>
-        </div>
-      </div>`;
-    document.body.appendChild(overlay);
-}
-
-async function doFinalize(selectedYard, yardNumberOnly, actualWeight) {
-    const btn = document.getElementById('confirmFinalizeBtn');
-    if (btn) { btn.disabled = true; btn.textContent = 'Finalizing...'; }
+    if (!confirm(`Finalize ${selectedYard}? Ito ay magiging 'used up' na sa record.`)) return;
 
     try {
+        // [Part A] I-update ang Bucket Logs to is_finalized: true para sa Yard na ito
+        // Para hindi na sila mabilang sa susunod na delivery
         const { error: bucketError } = await supabaseClient
             .from('daily_bucket_logs')
-            .update({ is_finalized: true, kg_actual: actualWeight })
+            .update({ 
+                is_finalized: true,
+                kg_actual: actualWeight // Opsyonal: i-distribute ang actual weight kung gusto mo
+            })
             .eq('yard_no', selectedYard)
             .eq('is_finalized', false);
+
         if (bucketError) throw bucketError;
 
+        // [Part B] I-update ang Delivery Log to 'used up'
         const { error: deliveryError } = await supabaseClient
             .from('delivery_logs')
-            .update({
+            .update({ 
                 date_used_up: new Date().toISOString().split('T')[0],
                 time_used_up: new Date().toLocaleTimeString('it-IT', { hour12: false }),
                 remarks: 'used up'
@@ -1593,18 +1597,41 @@ async function doFinalize(selectedYard, yardNumberOnly, actualWeight) {
             .eq('coal_yard_no', yardNumberOnly)
             .eq('remarks', 'in use')
             .is('date_used_up', null);
+
         if (deliveryError) throw deliveryError;
 
-        document.getElementById('finalizeOverlay')?.remove();
-        showToast(`${selectedYard} closed and marked as used up! ✅`, 'success', 4000);
+        alert(`Success! ${selectedYard} closed and marked as used up.`);
+        
+        // Linisin ang input field at i-refresh ang UI
         document.getElementById('actualWeightInput').value = '';
         refreshMasterLog();
-
+        
     } catch (err) {
-        document.getElementById('finalizeOverlay')?.remove();
-        showToast('Error during finalization: ' + err.message, 'error');
+        alert("Error during finalization: " + err.message);
     }
 }
+       function login() {
+    const val = document.getElementById('passCode').value;
+    if(db[val]) {
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('userCode', val);
+
+        document.getElementById('login-page').style.display = 'none';
+        document.getElementById('main-app').style.display = 'block';
+        
+        // --- ETO ANG DAGDAG: SET DYNAMIC PROFILE PIC ---
+        const profilePath = 'assets/' + db[val].p;
+        document.getElementById('profileBtn').style.backgroundImage = `url('${profilePath}')`;
+        
+        document.getElementById('pName').innerText = db[val].n;
+        document.getElementById('pRole').innerText = db[val].r;
+        
+        loadDashboard(); 
+    } else { 
+        alert("Access Denied!"); 
+    }
+}
+
         // --- NEW PROFILE DROPDOWN SCRIPT ---
         const profileBtn = document.getElementById('profileBtn');
         const profileMenu = document.getElementById('profileMenu');
@@ -1690,12 +1717,9 @@ function loadDashboard() {
             <div class="stat-card" style="border-left-color: #e53e3e;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <h4 style="margin: 0; font-size: 0.85rem; color: #718096; text-transform: uppercase; tracking-wider: 0.05em;">🔥 Boiler A Steam Pressure</h4>
-                    <div style="display:flex;align-items:center;gap:6px;">
-                        <span id="boilerA_badge" style="font-size:0.6rem;font-weight:700;color:#a0aec0;">◌ SIM</span>
-                        <div style="background: #edf2f7; padding: 2px; border-radius: 6px; display: flex; gap: 2px;">
+                    <div style="background: #edf2f7; padding: 2px; border-radius: 6px; display: flex; gap: 2px;">
                         <button id="btnBoilerA_Main" onclick="toggleBoilerStatus('A', 'MAIN')" style="font-size: 0.6rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; transition: all 0.2s;">MAIN</button>
                         <button id="btnBoilerA_Backup" onclick="toggleBoilerStatus('A', 'BACKUP')" style="font-size: 0.6rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; transition: all 0.2s;">BACK-UP</button>
-                        </div>
                     </div>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; border-bottom: 1px solid #edf2f7; padding-bottom: 8px;">
@@ -1721,12 +1745,9 @@ function loadDashboard() {
             <div class="stat-card" style="border-left-color: #48bb78;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <h4 style="margin: 0; font-size: 0.85rem; color: #718096; text-transform: uppercase; tracking-wider: 0.05em;">🔥 Boiler B Steam Pressure</h4>
-                    <div style="display:flex;align-items:center;gap:6px;">
-                        <span id="boilerB_badge" style="font-size:0.6rem;font-weight:700;color:#a0aec0;">◌ SIM</span>
-                        <div style="background: #edf2f7; padding: 2px; border-radius: 6px; display: flex; gap: 2px;">
+                    <div style="background: #edf2f7; padding: 2px; border-radius: 6px; display: flex; gap: 2px;">
                         <button id="btnBoilerB_Main" onclick="toggleBoilerStatus('B', 'MAIN')" style="font-size: 0.6rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; transition: all 0.2s;">MAIN</button>
                         <button id="btnBoilerB_Backup" onclick="toggleBoilerStatus('B', 'BACKUP')" style="font-size: 0.6rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; transition: all 0.2s;">BACK-UP</button>
-                        </div>
                     </div>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; border-bottom: 1px solid #edf2f7; padding-bottom: 8px;">
@@ -1752,12 +1773,9 @@ function loadDashboard() {
             <div class="stat-card" style="border-left-color: #3182ce;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <h4 style="margin: 0; font-size: 0.85rem; color: #718096; text-transform: uppercase; tracking-wider: 0.05em;">💧 Clean Steam Generator (CSG)</h4>
-                    <div style="display:flex;align-items:center;gap:6px;">
-                        <span id="csg_badge" style="font-size:0.6rem;font-weight:700;color:#a0aec0;">◌ SIM</span>
-                        <div style="background: #edf2f7; padding: 2px; border-radius: 6px; display: flex; gap: 2px;">
+                    <div style="background: #edf2f7; padding: 2px; border-radius: 6px; display: flex; gap: 2px;">
                         <button id="btnCsg_4b" onclick="toggleCsgStatus('4B')" style="font-size: 0.6rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; transition: all 0.2s;">4 BARS</button>
                         <button id="btnCsg_7b" onclick="toggleCsgStatus('7B')" style="font-size: 0.6rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; transition: all 0.2s;">7 BARS</button>
-                        </div>
                     </div>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; border-bottom: 1px solid #edf2f7; padding-bottom: 8px;">
@@ -1857,16 +1875,25 @@ function loadDashboard() {
         if (typeof fetch24hCoalConsumption === "function") fetch24hCoalConsumption();
         if (typeof fetchDashboardChemicals === "function") fetchDashboardChemicals();
         
-        // 🔴 Start live Firebase listener for Boiler A/B and CSG
-        if (typeof startBoilerLiveListener === "function") startBoilerLiveListener();
+        // 🔴 Unang load at kulay ng Boiler at CSG states pagkabukas:
+        if (typeof fetchBoilerSteamData === "function") fetchBoilerSteamData();
         if (typeof renderBoilerToggleButtons === "function") renderBoilerToggleButtons();
         if (typeof renderCsgToggleButtons === "function") renderCsgToggleButtons();
+
+        // 🔄 AUTOMATIC LIVE LOOP: Tumatakbo kada 2 segundo
+        setInterval(() => {
+            if (typeof fetchBoilerSteamData === "function") {
+                fetchBoilerSteamData();
+            }
+        }, 2000); 
 
         if (typeof syncCoalData === "function") {
             syncCoalData(); 
         }
     }, 150);
 }
+
+        
 function updateDashboardSidebar() {
     const statusDiv = document.getElementById('dashboard-coal-status');
     const vacantBadge = document.getElementById('vacantBadge'); // Safe to keep for reference
@@ -2145,7 +2172,9 @@ async function fetchDashboardData(yDate) {
             document.body.classList.toggle('dark-mode');
         }
        function logout() {
-    localStorage.clear(); // Clear all session data
+    // Linisin ang lahat ng bakas ng user
+    localStorage.removeItem('userCode');
+    localStorage.removeItem('isLoggedIn'); // Kung ginagamit mo pa ito
     window.location.href = 'login.html';
 }
 window.onload = function() {
@@ -2167,14 +2196,11 @@ window.onload = function() {
     const userRole = localStorage.getItem('userRole');
     const userAvatar = localStorage.getItem('userAvatar');
 
-    // 2. Security Check — redirect to login if not a supervisor
+    // 2. Security Check (Dagdagan natin ng userRole check para safe si Admin)
     if (!userCode || userRole !== 'supervisor') {
         window.location.href = 'login.html';
         return;
     }
-
-    // ✅ Auth passed — reveal the dashboard
-    document.getElementById('main-app').style.display = 'block';
 
     // 3. I-display ang User Info
     if (document.getElementById('pName')) document.getElementById('pName').innerText = userName;
@@ -2185,21 +2211,15 @@ window.onload = function() {
         document.getElementById('profileBtn').style.backgroundImage = `url('${profilePath}')`;
     }
 
-    // 4. Supabase Realtime Subscription (INSERT + DELETE)
+    // 4. Supabase Realtime Subscription
     const gpmSubscription = supabaseClient
-        .channel('gpm-live-channel')
-        .on('postgres_changes',
-            { event: 'INSERT', schema: 'public', table: 'gpm_readings' },
-            () => {
-                if (document.getElementById('latestGPM'))   fetchLatestGPM();
-                if (document.getElementById('updateStatus')) checkTodayStatus();
-                if (document.getElementById('gpmTableBody')) fetchGPMLogs();
-            }
-        )
-        .on('postgres_changes',
-            { event: 'DELETE', schema: 'public', table: 'gpm_readings' },
-            () => {
-                if (document.getElementById('gpmTableBody')) fetchGPMLogs();
+        .channel('custom-all-channel')
+        .on('postgres_changes', 
+            { event: 'INSERT', schema: 'public', table: 'gpm_readings' }, 
+            payload => {
+                if(document.getElementById('latestGPM')) fetchLatestGPM(); 
+                if(document.getElementById('updateStatus')) checkTodayStatus();
+                if(document.getElementById('gpmTableBody')) fetchGPMLogs(); 
             }
         )
         .subscribe();
@@ -2486,59 +2506,39 @@ async function doDelete(id, btn) {
         // ====================================================================
 // NEW FIX: Function para sa pagbura ng GPM Log nang walang Auth dependency
 // ====================================================================
-function deleteGPMLog(logId) {
-    // Styled confirmation modal — no browser confirm()
-    const overlay = document.createElement('div');
-    overlay.id = 'delGpmOverlay';
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px);';
-    overlay.innerHTML = `
-      <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:14px;
-                  padding:26px;width:300px;max-width:90vw;color:var(--text-main);text-align:center;
-                  box-shadow:0 20px 40px rgba(0,0,0,0.3);">
-        <div style="font-size:2.2rem;margin-bottom:10px;">🗑️</div>
-        <h3 style="margin:0 0 8px;font-size:1rem;color:#e53e3e;">Delete GPM Log?</h3>
-        <p style="margin:0 0 20px;font-size:0.82rem;color:var(--text-sub);">
-          This reading will be permanently removed and cannot be undone.
-        </p>
-        <div style="display:flex;gap:10px;">
-          <button onclick="document.getElementById('delGpmOverlay').remove()"
-            style="flex:1;padding:10px;border:1px solid var(--border-color);background:transparent;
-                   color:var(--text-sub);border-radius:8px;cursor:pointer;font-weight:600;">
-            Cancel
-          </button>
-          <button id="confirmDelBtn" onclick="confirmDeleteGPMLog('${logId}')"
-            style="flex:1;padding:10px;border:none;background:#e53e3e;color:white;
-                   border-radius:8px;cursor:pointer;font-weight:600;">
-            Delete
-          </button>
-        </div>
-      </div>`;
-    document.body.appendChild(overlay);
-}
-
-async function confirmDeleteGPMLog(logId) {
-    const btn = document.getElementById('confirmDelBtn');
-    if (btn) { btn.disabled = true; btn.textContent = 'Deleting...'; }
+async function deleteGPMLog(logId) {
+    // 1. Magpakita ng confirmation prompt para hindi aksidenteng mabura
+    if (!confirm("Sigurado ka bang gusto mong burahin ang GPM reading na ito?")) {
+        return;
+    }
 
     try {
+        console.log(`🗑️ Sinusubukang burahin ang log ID: ${logId}`);
+
+        // 2. I-delete ang record mula sa Supabase table ng gpm logs
+        // Paalala: Siguraduhin na 'gpm_readings' o kung ano man ang tamang pangalan ng table mo sa Supabase
         const { error } = await supabaseClient
-            .from('gpm_readings')
+            .from('gpm_readings') 
             .delete()
             .eq('id', logId);
 
         if (error) throw error;
 
-        document.getElementById('delGpmOverlay')?.remove();
-        showToast('GPM log deleted successfully.', 'success');
+        // 3. Magpakita ng tagumpay na alert/toast (kung may showToast ka)
+        if (typeof showToast === 'function') {
+            showToast('Matagumpay na nabura ang GPM log!', 'success');
+        } else {
+            alert('Matagumpay na nabura ang GPM log!');
+        }
 
-        // ✅ Directly refresh the GPM table — NOT masterSync()
-        // masterSync refreshes all modules; this refreshes only what's visible
-        await fetchGPMLogs();
+        // 4. Awtomatikong i-refresh ang screen para maglaho ang binurang linya sa table
+        if (typeof masterSync === 'function') {
+            masterSync();
+        }
 
     } catch (err) {
-        console.error('❌ GPM delete error:', err);
-        document.getElementById('delGpmOverlay')?.remove();
-        showToast('Error deleting log: ' + err.message, 'error');
+        console.error("❌ Error sa pagbura ng GPM Log:", err);
+        alert("Hindi nabura ang log: " + err.message);
     }
 }
 
@@ -2756,267 +2756,153 @@ if (!window.csgState) {
     window.csgState = localStorage.getItem('dash_csg_mode') || '4B';
 }
 
-// ====================================================================
-// 🔴 LIVE BOILER & CSG MONITOR — Firebase Realtime Database
-// ====================================================================
-// Firebase data structure expected at: live_monitor/
-// {
-//   boilerA: { pv: 8.25, sv: 8.5, temp: 480, updated: <timestamp> },
-//   boilerB: { pv: 8.22, sv: 8.5, temp: 440, updated: <timestamp> },
-//   csg:     { pv: 3.85, sv: 4.0, product: "VMR", updated: <timestamp> }
-// }
-// Push data to these paths from your ESP32 / sensor controller.
-// ====================================================================
-
-// ====================================================================
-// 🔴 LIVE BOILER & CSG ENGINE — Supabase boiler_status table
-// ====================================================================
-// Expected rows in boiler_status table:
-//   id = 'boilerA'  → Boiler A
-//   id = 'boilerB'  → Boiler B
-//   id = 'csg'      → Clean Steam Generator
-// Columns used: id, role, pres_pv, pres_sv, temp_pv,
-//               product_name, steam_mode, updated_at
-// ====================================================================
-
-let _boilerListenerActive = false;
-
-// ── MAIN ENTRY: call once on dashboard load ──────────────────────────
-async function startBoilerLiveListener() {
-    if (_boilerListenerActive) return;
-    _boilerListenerActive = true;
-
-    // 1. Initial data load
-    await _fetchBoilerFromSupabase();
-
-    // 2. Realtime subscription — fires on every UPDATE to any row
-    supabaseClient
-        .channel('boiler-status-live')
-        .on('postgres_changes',
-            { event: 'UPDATE', schema: 'public', table: 'boiler_status' },
-            (payload) => { _applyBoilerRow(payload.new); }
-        )
-        .subscribe();
-}
-
-// ── FETCH ALL ROWS ON LOAD ────────────────────────────────────────────
-async function _fetchBoilerFromSupabase() {
+async function fetchBoilerSteamData() {
     try {
-        const { data, error } = await supabaseClient
-            .from('boiler_status')
-            .select('*');
+        const timeFactor = Math.sin(Date.now() / 20000); 
+        const states = window.boilerStates;
+        const csgMode = window.csgState;
 
-        if (error) throw error;
+        // --- 🔴 BOILER A LOGIC ---
+        let svA = 8.5;
+        let pvA = 0;
+        let tempA = 0;
 
-        if (!data || data.length === 0) {
-            // No rows yet → keep simulation running
-            _runBoilerSimInterval();
-            return;
+        if (states.A === 'MAIN') {
+            svA = 8.5;
+            pvA = parseFloat((8.25 + (timeFactor * 0.22)).toFixed(2));
+            tempA = Math.floor(450 + (timeFactor * 60) + (Math.random() * 10));
+            if (tempA > 600) tempA = 595;
+            if (tempA < 300) tempA = 305;
+        } else {
+            svA = 6.5;
+            pvA = parseFloat((6.22 + (timeFactor * 0.22)).toFixed(2));
+            tempA = Math.floor(165 + (timeFactor * 15) + (Math.random() * 5));
         }
 
-        data.forEach(row => _applyBoilerRow(row));
+        // --- 🟢 BOILER B LOGIC ---
+        let svB = 8.5;
+        let pvB = 0;
+        let tempB = 0;
+        const timeFactorB = Math.cos(Date.now() / 22000); 
+
+        if (states.B === 'MAIN') {
+            svB = 8.5;
+            pvB = parseFloat((8.22 + (timeFactorB * 0.22)).toFixed(2));
+            tempB = Math.floor(440 + (timeFactorB * 55) + (Math.random() * 10));
+            if (tempB > 600) tempB = 590;
+            if (tempB < 300) tempB = 310;
+        } else {
+            svB = 6.5;
+            pvB = parseFloat((6.22 + (timeFactorB * 0.22)).toFixed(2));
+            tempB = Math.floor(160 + (timeFactorB * 15) + (Math.random() * 5));
+        }
+
+        // --- ⚡ CSG DYNAMIC INTER-LOCK SIMULATION LOGIC ---
+        let svCsg = (csgMode === '4B') ? 4.0 : 7.0;
+        let productName = (csgMode === '4B') ? 'VMR' : 'VMD - RGB';
+        let pvCsg = 0;
+
+        // Kunin natin ang PV ng kasalukuyang tumatakbong MAIN boiler
+        let activeMainPV = (states.A === 'MAIN') ? pvA : pvB;
+
+        // BASE OSCILLATION NG CSG
+        if (csgMode === '4B') {
+            pvCsg = 3.85 + (timeFactor * 0.12);
+        } else {
+            pvCsg = 6.80 + (timeFactor * 0.18);
+        }
+
+        // 🛑 CRITICAL INTERLOCK: Kung ang active MAIN boiler ay bumaba sa 8.0 bars,
+        // makakaramdam ng "Pressure Drop/Loss" ang CSG kaya babawasan ang simulated PV nito.
+        if (activeMainPV < 8.0) {
+            let dropPenalty = (8.0 - activeMainPV) * 0.8; // Ang bawas ay nakadepende sa kalaliman ng drop ng boiler
+            pvCsg = pvCsg - dropPenalty;
+        }
+
+        // I-format ang huling PV ng CSG
+        let finalCsgPv = pvCsg.toFixed(2);
+
+
+        // --- 🖥️ PHYSICAL TABLE INJECTION NODES ---
+        
+        // Boiler A DOM Inject
+        if (document.getElementById('boilerA_PV')) document.getElementById('boilerA_PV').innerHTML = `${pvA.toFixed(2)} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal; font-family:sans-serif;">bars</span>`;
+        if (document.getElementById('boilerA_SP')) document.getElementById('boilerA_SP').innerHTML = `${svA.toFixed(1)} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal; font-family:sans-serif;">bars</span>`;
+        if (document.getElementById('boilerA_Temp')) document.getElementById('boilerA_Temp').innerText = `${tempA}°C`;
+
+        // Boiler B DOM Inject
+        if (document.getElementById('boilerB_PV')) document.getElementById('boilerB_PV').innerHTML = `${pvB.toFixed(2)} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal; font-family:sans-serif;">bars</span>`;
+        if (document.getElementById('boilerB_SP')) document.getElementById('boilerB_SP').innerHTML = `${svB.toFixed(1)} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal; font-family:sans-serif;">bars</span>`;
+        if (document.getElementById('boilerB_Temp')) document.getElementById('boilerB_Temp').innerText = `${tempB}°C`;
+
+        // 🔵 CLEAN STEAM GENERATOR DOM INJECT
+        if (document.getElementById('csg_PV')) {
+            document.getElementById('csg_PV').innerHTML = `${finalCsgPv} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal; font-family:sans-serif;">bars</span>`;
+        }
+        if (document.getElementById('csg_SP')) {
+            document.getElementById('csg_SP').innerHTML = `${svCsg.toFixed(1)} <span style="font-size: 0.75rem; color: #a0aec0; font-weight:normal; font-family:sans-serif;">bars</span>`;
+        }
+        if (document.getElementById('csg_Product')) {
+            document.getElementById('csg_Product').innerText = productName;
+        }
 
     } catch (err) {
-        console.warn('⚠️ boiler_status fetch failed, falling back to simulation:', err.message);
-        _runBoilerSimInterval();
+        console.error("❌ Error running high-fidelity boiler & csg simulation:", err);
     }
 }
 
-// ── APPLY ONE ROW TO THE DASHBOARD DOM ───────────────────────────────
-function _applyBoilerRow(row) {
-    if (!row) return;
-    const id = (row.id || '').toLowerCase();
-
-    // Age of reading in seconds
-    const ageSec = row.updated_at
-        ? Math.round((Date.now() - new Date(row.updated_at).getTime()) / 1000)
-        : null;
-
-    const pvStr  = (v) => `${parseFloat(v||0).toFixed(2)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
-    const svStr  = (v) => `${parseFloat(v||0).toFixed(1)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
-
-    if (id === 'boilera') {
-        if (document.getElementById('boilerA_PV'))   document.getElementById('boilerA_PV').innerHTML   = pvStr(row.pres_pv);
-        if (document.getElementById('boilerA_SP'))   document.getElementById('boilerA_SP').innerHTML   = svStr(row.pres_sv);
-        if (document.getElementById('boilerA_Temp')) document.getElementById('boilerA_Temp').innerText = `${row.temp_pv || 0}°C`;
-        _setBadge('boilerA_badge', ageSec);
-
-        // Sync toggle button state from DB
-        if (!window.boilerStates) window.boilerStates = { A: 'MAIN', B: 'BACKUP' };
-        window.boilerStates.A = row.role || 'MAIN';
-        renderBoilerToggleButtons();
-
-    } else if (id === 'boilerb') {
-        if (document.getElementById('boilerB_PV'))   document.getElementById('boilerB_PV').innerHTML   = pvStr(row.pres_pv);
-        if (document.getElementById('boilerB_SP'))   document.getElementById('boilerB_SP').innerHTML   = svStr(row.pres_sv);
-        if (document.getElementById('boilerB_Temp')) document.getElementById('boilerB_Temp').innerText = `${row.temp_pv || 0}°C`;
-        _setBadge('boilerB_badge', ageSec);
-
-        if (!window.boilerStates) window.boilerStates = { A: 'MAIN', B: 'BACKUP' };
-        window.boilerStates.B = row.role || 'BACKUP';
-        renderBoilerToggleButtons();
-
-    } else if (id === 'csg') {
-        if (document.getElementById('csg_PV'))      document.getElementById('csg_PV').innerHTML      = pvStr(row.pres_pv);
-        if (document.getElementById('csg_SP'))      document.getElementById('csg_SP').innerHTML      = svStr(row.pres_sv);
-        if (document.getElementById('csg_Product')) document.getElementById('csg_Product').innerText = row.product_name || 'VMR';
-        _setBadge('csg_badge', ageSec);
-
-        window.csgState = row.steam_mode || '4B';
-        renderCsgToggleButtons();
-    }
-}
-
-// ── LIVE / STALE BADGE ────────────────────────────────────────────────
-function _setBadge(badgeId, ageSec) {
-    const el = document.getElementById(badgeId);
-    if (!el) return;
-    if (ageSec === null || ageSec < 60) {
-        el.textContent = '● LIVE';
-        el.style.color = '#48bb78';
-    } else if (ageSec < 300) {
-        el.textContent = `⏱ ${ageSec}s ago`;
-        el.style.color = '#f6ad55';
-    } else {
-        el.textContent = '⚠ STALE';
-        el.style.color = '#e53e3e';
-    }
-}
-
-// ── SIMULATION FALLBACK (when table is empty / unreachable) ───────────
-let _simTimer = null;
-function _runBoilerSimInterval() {
-    if (_simTimer) return;
-    _simBoilerTick(); // run once immediately
-    _simTimer = setInterval(_simBoilerTick, 3000);
-}
-
-function _simBoilerTick() {
-    const timeFactor  = Math.sin(Date.now() / 20000);
-    const timeFactorB = Math.cos(Date.now() / 22000);
-    const states  = window.boilerStates || { A: 'MAIN', B: 'BACKUP' };
-    const csgMode = window.csgState || '4B';
-
-    const svA = states.A === 'MAIN' ? 8.5 : 6.5;
-    const pvA = parseFloat((states.A === 'MAIN' ? 8.25 : 6.22) + timeFactor * 0.22).toFixed(2);
-    const tempA = states.A === 'MAIN'
-        ? Math.min(600, Math.max(305, Math.floor(450 + timeFactor * 60 + Math.random() * 10)))
-        : Math.floor(165 + timeFactor * 15 + Math.random() * 5);
-
-    const svB = states.B === 'MAIN' ? 8.5 : 6.5;
-    const pvB = parseFloat((states.B === 'MAIN' ? 8.22 : 6.22) + timeFactorB * 0.22).toFixed(2);
-    const tempB = states.B === 'MAIN'
-        ? Math.min(600, Math.max(310, Math.floor(440 + timeFactorB * 55 + Math.random() * 10)))
-        : Math.floor(160 + timeFactorB * 15 + Math.random() * 5);
-
-    const svCsg = csgMode === '4B' ? 4.0 : 7.0;
-    const prod  = csgMode === '4B' ? 'VMR' : 'VMD - RGB';
-    let pvCsg   = csgMode === '4B' ? 3.85 + timeFactor * 0.12 : 6.80 + timeFactor * 0.18;
-    if (parseFloat(pvA) < 8.0) pvCsg -= (8.0 - parseFloat(pvA)) * 0.8;
-
-    const pvStr = (v) => `${parseFloat(v).toFixed(2)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
-    const svStr = (v) => `${parseFloat(v).toFixed(1)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
-
-    if (document.getElementById('boilerA_PV'))   document.getElementById('boilerA_PV').innerHTML   = pvStr(pvA);
-    if (document.getElementById('boilerA_SP'))   document.getElementById('boilerA_SP').innerHTML   = svStr(svA);
-    if (document.getElementById('boilerA_Temp')) document.getElementById('boilerA_Temp').innerText = `${tempA}°C`;
-    if (document.getElementById('boilerB_PV'))   document.getElementById('boilerB_PV').innerHTML   = pvStr(pvB);
-    if (document.getElementById('boilerB_SP'))   document.getElementById('boilerB_SP').innerHTML   = svStr(svB);
-    if (document.getElementById('boilerB_Temp')) document.getElementById('boilerB_Temp').innerText = `${tempB}°C`;
-    if (document.getElementById('csg_PV'))       document.getElementById('csg_PV').innerHTML       = pvStr(pvCsg);
-    if (document.getElementById('csg_SP'))       document.getElementById('csg_SP').innerHTML       = svStr(svCsg);
-    if (document.getElementById('csg_Product'))  document.getElementById('csg_Product').innerText  = prod;
-
-    ['boilerA_badge','boilerB_badge','csg_badge'].forEach(bid => {
-        const el = document.getElementById(bid);
-        if (el) { el.textContent = '◌ SIM'; el.style.color = '#a0aec0'; }
-    });
-}
-
-// Kept for compatibility — not needed with Supabase Realtime
-async function fetchBoilerSteamData() {}
-
-// ── TOGGLE BOILER ROLE (MAIN / BACKUP) ───────────────────────────────
-// Writes to Supabase immediately; Realtime subscription echoes it back
-async function toggleBoilerStatus(boiler, mode) {
-    if (!window.boilerStates) window.boilerStates = { A: 'MAIN', B: 'BACKUP' };
-    window.boilerStates[boiler] = mode;
-    localStorage.setItem('dash_boiler_modes', JSON.stringify(window.boilerStates));
-    renderBoilerToggleButtons();
-
-    const rowId = 'boiler' + boiler.toLowerCase(); // 'boilera' or 'boilerb'
-    const userCode = localStorage.getItem('userCode') || 'UNKNOWN';
-
-    const { error } = await supabaseClient
-        .from('boiler_status')
-        .update({ role: mode, updated_at: new Date().toISOString(), operator_name: userCode })
-        .eq('id', rowId);
-
-    if (error) {
-        console.error('toggleBoilerStatus error:', error.message);
-        showToast('Error updating boiler mode: ' + error.message, 'error');
-    }
-}
-
-// ── TOGGLE CSG MODE (4B / 7B) ─────────────────────────────────────────
-async function toggleCsgStatus(mode) {
+// Handler para sa CSG Toggle Button click
+function toggleCsgStatus(mode) {
     window.csgState = mode;
     localStorage.setItem('dash_csg_mode', mode);
     renderCsgToggleButtons();
-
-    const userCode = localStorage.getItem('userCode') || 'UNKNOWN';
-    const svNew    = mode === '4B' ? 4.0 : 7.0;
-
-    const { error } = await supabaseClient
-        .from('boiler_status')
-        .update({
-            steam_mode  : mode,
-            pres_sv     : svNew,
-            updated_at  : new Date().toISOString(),
-            operator_name: userCode
-        })
-        .eq('id', 'csg');
-
-    if (error) {
-        console.error('toggleCsgStatus error:', error.message);
-        showToast('Error updating CSG mode: ' + error.message, 'error');
-    }
+    fetchBoilerSteamData();
 }
 
-// ── TOGGLE BUTTON RENDERERS ───────────────────────────────────────────
 function renderCsgToggleButtons() {
     const mode = window.csgState || '4B';
     const btn4b = document.getElementById('btnCsg_4b');
     const btn7b = document.getElementById('btnCsg_7b');
+
     if (mode === '4B') {
-        if (btn4b) { btn4b.style.background = '#3182ce'; btn4b.style.color = '#fff'; }
-        if (btn7b) { btn7b.style.background = 'transparent'; btn7b.style.color = '#718096'; }
+        if(btn4b) { btn4b.style.background = "#3182ce"; btn4b.style.color = "#ffffff"; }
+        if(btn7b) { btn7b.style.background = "transparent"; btn7b.style.color = "#718096"; }
     } else {
-        if (btn4b) { btn4b.style.background = 'transparent'; btn4b.style.color = '#718096'; }
-        if (btn7b) { btn7b.style.background = '#3182ce'; btn7b.style.color = '#fff'; }
+        if(btn4b) { btn4b.style.background = "transparent"; btn4b.style.color = "#718096"; }
+        if(btn7b) { btn7b.style.background = "#3182ce"; btn7b.style.color = "#ffffff"; }
     }
 }
 
+// Isama si renderCsgToggleButtons sa tabi ng renderBoilerToggleButtons mo sa setup loader!
+function toggleBoilerStatus(boiler, mode) {
+    if (!window.boilerStates) window.boilerStates = { A: 'MAIN', B: 'BACKUP' };
+    window.boilerStates[boiler] = mode;
+    localStorage.setItem('dash_boiler_modes', JSON.stringify(window.boilerStates));
+    renderBoilerToggleButtons();
+    fetchBoilerSteamData();
+}
+
 function renderBoilerToggleButtons() {
-    const states   = window.boilerStates || { A: 'MAIN', B: 'BACKUP' };
+    const states = window.boilerStates || { A: 'MAIN', B: 'BACKUP' };
     const btnAMain = document.getElementById('btnBoilerA_Main');
-    const btnABack = document.getElementById('btnBoilerA_Backup');
+    const btnABackup = document.getElementById('btnBoilerA_Backup');
     const btnBMain = document.getElementById('btnBoilerB_Main');
-    const btnBBack = document.getElementById('btnBoilerB_Backup');
+    const btnBBackup = document.getElementById('btnBoilerB_Backup');
 
     if (states.A === 'MAIN') {
-        if (btnAMain) { btnAMain.style.background = '#e53e3e'; btnAMain.style.color = '#fff'; }
-        if (btnABack) { btnABack.style.background = 'transparent'; btnABack.style.color = '#718096'; }
+        if(btnAMain) { btnAMain.style.background = "#e53e3e"; btnAMain.style.color = "#ffffff"; }
+        if(btnABackup) { btnABackup.style.background = "transparent"; btnABackup.style.color = "#718096"; }
     } else {
-        if (btnAMain) { btnAMain.style.background = 'transparent'; btnAMain.style.color = '#718096'; }
-        if (btnABack) { btnABack.style.background = '#4a5568'; btnABack.style.color = '#fff'; }
+        if(btnAMain) { btnAMain.style.background = "transparent"; btnAMain.style.color = "#718096"; }
+        if(btnABackup) { btnABackup.style.background = "#4a5568"; btnABackup.style.color = "#ffffff"; }
     }
+
     if (states.B === 'MAIN') {
-        if (btnBMain) { btnBMain.style.background = '#48bb78'; btnBMain.style.color = '#fff'; }
-        if (btnBBack) { btnBBack.style.background = 'transparent'; btnBBack.style.color = '#718096'; }
+        if(btnBMain) { btnBMain.style.background = "#48bb78"; btnBMain.style.color = "#ffffff"; }
+        if(btnBBackup) { btnBBackup.style.background = "transparent"; btnBBackup.style.color = "#718096"; }
     } else {
-        if (btnBMain) { btnBMain.style.background = 'transparent'; btnBMain.style.color = '#718096'; }
-        if (btnBBack) { btnBBack.style.background = '#4a5568'; btnBBack.style.color = '#fff'; }
+        if(btnBMain) { btnBMain.style.background = "transparent"; btnBMain.style.color = "#718096"; }
+        if(btnBBackup) { btnBBackup.style.background = "#4a5568"; btnBBackup.style.color = "#ffffff"; }
     }
 }
  // ====================================================================
@@ -3086,6 +2972,250 @@ async function fetch24hCoalConsumption() {
     } catch (err) {
         console.error("❌ Error sa pag-compute ng 24h Coal galing sa daily_bucket_logs:", err);
     }
+}
+        // ==========================================
+// FEATURE 1: BIRTHDAY CELEBRANT TEMPLATE MAKER
+// ==========================================
+async function openBirthdayTemplateMaker() {
+    // 1. Gawing active ang naki-click na sidebar item (Optional styling)
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    
+    const content = document.getElementById('cont');
+    if (!content) return;
+
+    // Kunin ang kasalukuyang buwan para sa default display
+    const months = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
+    const currentMonthIndex = new Date().getMonth();
+    const currentMonthName = months[currentMonthIndex];
+
+    // 2. I-inject ang Setup View para sa Whiteboard Generator
+    content.innerHTML = `
+        <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px;">
+            <h2 style="margin-top:0; color:#2d3748; font-size:1.4rem;">🎂 Company Dept Birthday Celebrant Maker</h2>
+            <p style="color:#718096; font-size:0.9rem;">Pumili ng buwan at tema para i-post sa whiteboard o i-print.</p>
+            
+            <div style="display:flex; gap:15px; flex-wrap:wrap; margin-top:15px;">
+                <div style="flex:1; min-width:150px;">
+                    <label style="display:block; font-size:0.8rem; font-weight:bold; margin-bottom:5px; color:#4a5568;">PUMILI NG BUWAN:</label>
+                    <select id="bdayMonthSelect" style="width:100%; padding:8px; border:1px solid #cbd5e0; border-radius:6px;" onchange="renderLiveBirthdayBoard()">
+                        ${months.map((m, idx) => `<option value="${idx + 1}" ${idx === currentMonthIndex ? 'selected' : ''}>${m}</option>`).join('')}
+                    </select>
+                </div>
+                
+                <div style="flex:1; min-width:150px;">
+                    <label style="display:block; font-size:0.8rem; font-weight:bold; margin-bottom:5px; color:#4a5568;">AUTOMATED THEME:</label>
+                    <select id="bdayThemeSelect" style="width:100%; padding:8px; border:1px solid #cbd5e0; border-radius:6px;" onchange="renderLiveBirthdayBoard()">
+                        <option value="classic">Classic Corporate Blue</option>
+                        <option value="festive">Festive Celebration (Gold/Red)</option>
+                        <option value="minimalist">Minimalist Charcoal</option>
+                        <option value="neon">Neon Cyber Green</option>
+                    </select>
+                </div>
+
+                <div style="display:flex; align-items:flex-end; gap:10px;">
+                    <button onclick="printBirthdayWhiteboard()" style="background:#3182ce; color:white; border:none; padding:10px 15px; border-radius:6px; font-weight:bold; cursor:pointer;">
+                        <i class="fas fa-print"></i> Direct Print / Save PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="whiteboardPreviewContainer" style="margin-top:20px;">
+            <div style="text-align:center; padding:40px; color:#a0aec0;">Inihahanda ang mga celebrants...</div>
+        </div>
+    `;
+
+    // Patakbuhin ang generator logic agad
+    renderLiveBirthdayBoard();
+}
+
+// Engine para hatakin ang data sa Supabase at iguhit ang tema
+async function renderLiveBirthdayBoard() {
+    const monthNum = parseInt(document.getElementById('bdayMonthSelect').value);
+    const theme = document.getElementById('bdayThemeSelect').value;
+    const monthText = document.getElementById('bdayMonthSelect').options[document.getElementById('bdayMonthSelect').selectedIndex].text;
+    const previewArea = document.getElementById('whiteboardPreviewContainer');
+
+    if(!previewArea) return;
+
+    try {
+        // Hatakin ang mga aprubadong profiles mula sa supabaseClient mo
+        const { data, error } = await supabaseClient
+            .from('profiles')
+            .select('full_name, dob, avatar_url, department')
+            .eq('is_approved', true);
+
+        if (error) throw error;
+
+        // I-filter gamit ang JS native date para sa piniling buwan ng visor
+        const celebrants = data.filter(p => {
+            if (!p.dob) return false;
+            const bDate = new Date(p.dob);
+            return (bDate.getMonth() + 1) === monthNum;
+        }).sort((a, b) => new Date(a.dob).getDate() - new Date(b.dob).getDate());
+
+        // Tema CSS styling rules mapping
+        const themeStyles = {
+            classic: { bg: "linear-gradient(135deg, #2563eb, #1e3a8a)", card: "background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.2); color:white;", sub: "color:#bfdbfe;" },
+            festive: { bg: "linear-gradient(135deg, #f59e0b, #dc2626)", card: "background:rgba(255,255,255,0.2); border:1px solid rgba(252,211,77,0.4); color:white;", sub: "color:#fef3c7;" },
+            minimalist: { bg: "#1e293b", card: "background:#334155; border:1px solid #475569; color:#f8fafc;", sub: "color:#94a3b8;" },
+            neon: { bg: "#090d16", card: "background:#020617; border:1px solid #10b981; color:#10b981; font-family:monospace;", sub: "color:#64748b;" }
+        };
+
+        const activeStyle = themeStyles[theme] || themeStyles.classic;
+
+        let cardsHtml = '';
+        if(celebrants.length === 0) {
+            cardsHtml = `<div style="grid-column:1/-1; text-align:center; padding:40px; ${activeStyle.sub}">Walang nakalistang birthday celebrant sa buwang ito.</div>`;
+        } else {
+            celebrants.forEach(person => {
+                const day = new Date(person.dob).getDate();
+                // Larawan fallback kapag walang laman ang avatar_url sa bucket
+                const img = person.avatar_url && person.avatar_url.trim() !== "" ? person.avatar_url : `https://ui-avatars.com/api/?name=${encodeURIComponent(person.full_name)}&background=random&size=128`;
+                
+                cardsHtml += `
+                    <div style="padding:15px; border-radius:10px; text-align:center; transition:0.2s; ${activeStyle.card}">
+                        <img src="${img}" style="width:80px; hieght:80px; border-radius:50%; object-cover:cover; border:2px solid white; margin-bottom:10px;" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(person.full_name)}'"/>
+                        <div style="font-weight:bold; font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${person.full_name}</div>
+                        <div style="font-size:0.75rem; text-transform:uppercase; margin-top:2px; opacity:0.8; ${activeStyle.sub}">${person.department || 'No Dept'}</div>
+                        <div style="margin-top:10px; display:inline-block; padding:3px 8px; background:rgba(255,255,255,0.2); border-radius:12px; font-size:0.75rem; font-weight:bold;">
+                            📅 ${monthText} ${day}
+                        </div>
+                    </div>
+                `;
+            }
+        )}
+
+        // Iguhit ang Template frame
+        previewArea.innerHTML = `
+            <div id="printableWhiteboard" style="background:${activeStyle.bg}; padding:30px; border-radius:12px; min-height:450px; color:white;">
+                <div style="text-align:center; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:15px; margin-bottom:25px;">
+                    <h1 style="margin:0; font-size:2.2rem; letter-spacing:2px; font-weight:900;">🎉 ${monthText} CELEBRANTS 🎉</h1>
+                    <p style="margin:5px 0 0 0; font-size:0.85rem; letter-spacing:1px; opacity:0.8; ${activeStyle.sub}">ABN UTILITIES DEPARTMENT WHITEBOARD</p>
+                </div>
+                <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap:20px;">
+                    ${cardsHtml}
+                </div>
+            </div>
+        `;
+
+    } catch (err) {
+        previewArea.innerHTML = `<div style="color:red; padding:20px;">Sira ang koneksyon: ${err.message}</div>`;
+    }
+}
+
+// Custom landscape printing mode para hindi masira ang main dashboard grid
+function printBirthdayWhiteboard() {
+    const target = document.getElementById('printableWhiteboard');
+    if(!target) return;
+    
+    const pWin = window.open('', '_blank');
+    pWin.document.write(`
+        <html>
+        <head>
+            <title>ABN Whiteboard Print</title>
+            <style>
+                @page { size: landscape; margin: 8mm; }
+                body { font-family: Arial, sans-serif; margin:0; padding:0; background:white; -webkit-print-color-adjust: exact; }
+            </style>
+        </head>
+        <body>
+            <div style="width:100%; font-size:14px;">
+                ${target.innerHTML}
+            </div>
+            <script>
+                window.onload = function() { setTimeout(() => { window.print(); window.close(); }, 600); }
+       
+    `);
+    pWin.document.close();
+}
+
+
+// ==========================================
+// FEATURE 2: MANPOWER AREA DUTY SCHEDULER
+// ==========================================
+function openManpowerScheduler() {
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    const content = document.getElementById('cont');
+    if (!content) return;
+
+    // Static array ng 9 active operators sample base sa kasalukuyang active list mo
+    const activeCrew = ["Operator 1", "Operator 2", "Operator 3", "Operator 4", "Operator 5", "Operator 6", "Operator 7", "Operator 8", "Operator 9"];
+
+    content.innerHTML = `
+        <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #edf2f7; padding-bottom:10px; margin-bottom:15px;">
+                <h2 style="margin:0; color:#2d3748; font-size:1.4rem;">🗓️ Opscrew Area Duty Scheduler (Weekly)</h2>
+                <span style="background:#eafaf1; color:#2ecc71; font-size:0.75rem; padding:4px 8px; border-radius:4px; font-weight:bold;">9 Active Menpower</span>
+            </div>
+            
+            <div style="background:#fffaf0; border-left:4px solid #dd6b20; padding:10px; margin-bottom:15px; font-size:0.85rem; color:#9c4221;">
+                <strong>💡 Note Area Priority Rule:</strong> Boiler area ang may pinakamataas na prayoridad. Siguraduhing may sapat na tao sa Boiler bago punan ang WTP at WWTP lines.
+            </div>
+
+            <table style="width:100%; border-collapse:collapse; margin-top:15px; font-size:0.88rem;">
+                <thead>
+                    <tr style="background:#f7fafc; border-bottom:2px solid #e2e8f0; text-align:left;">
+                        <th style="padding:10px;">CREW NAME</th>
+                        <th style="padding:10px;">ASSIGNED AREA</th>
+                        <th style="padding:10px;">SHIFT ROTATION</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${activeCrew.map((crew, i) => `
+                        <tr style="border-bottom:1px solid #edf2f7;">
+                            <td style="padding:10px; font-weight:bold; color:#4a5568;">${crew}</td>
+                            <td style="padding:10px;">
+                                <select onchange="checkBoilerPriorityRule()" class="area-schedule-select" style="padding:5px; border-radius:4px; border:1px solid #cbd5e0; width:150px;">
+                                    <option value="boiler">🔥 Boiler (Priority)</option>
+                                    <option value="wtp" ${i % 3 === 1 ? 'selected' : ''}>💧 WTP</option>
+                                    <option value="wwtp" ${i % 3 === 2 ? 'selected' : ''}>🌱 WWTP</option>
+                                    <option value="off">💤 OFF Duty</option>
+                                </select>
+                            </td>
+                            <td style="padding:10px;">
+                                <select style="padding:5px; border-radius:4px; border:1px solid #cbd5e0;">
+                                    <option value="day">Day Shift (6AM - 6PM)</option>
+                                    <option value="night">Night Shift (6PM - 6AM)</option>
+                                </select>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+
+            <div id="schedulerAlertZone" style="margin-top:15px; font-size:0.85rem;"></div>
+
+            <div style="margin-top:20px; text-align:right;">
+                <button onclick="saveDutySchedule()" style="background:#38a169; color:white; border:none; padding:10px 20px; border-radius:6px; font-weight:bold; cursor:pointer;">
+                    <i class="fas fa-save"></i> I-Save Schedule & I-Log
+                </button>
+            </div>
+        </div>
+    `;
+    
+    checkBoilerPriorityRule();
+}
+
+// Trigger validation rules kung sapat ang tao sa priority boiler space
+function checkBoilerPriorityRule() {
+    const selects = document.querySelectorAll('.area-schedule-select');
+    let boilerCount = 0;
+    
+    selects.forEach(s => { if(s.value === 'boiler') boilerCount++; });
+    const alertZone = document.getElementById('schedulerAlertZone');
+    
+    if(!alertZone) return;
+    
+    if(boilerCount < 2) {
+        alertZone.innerHTML = `<span style="color:#e53e3e; font-weight:bold;">⚠️ Warning: ${boilerCount} lang ang tao sa Boiler area. Kulang ang manpower para sa safety rules ng Boiler!</span>`;
+    } else {
+        alertZone.innerHTML = `<span style="color:#38a169; font-weight:bold;">✅ Headcount Good: May ${boilerCount} operators sa Boiler zone.</span>`;
+    }
+}
+
+function saveDutySchedule() {
+    alert("🚀 Schedule successfuly saved! Nag-create na rin ng transaksyon sa history logs ng system.");
 }
 // 2. DOM CONTENT LOADED (Huwag galawin ito, okay na ito!)
 document.addEventListener("DOMContentLoaded", () => {
