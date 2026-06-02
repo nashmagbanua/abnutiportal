@@ -3379,23 +3379,25 @@ async function openManpowerScheduler() {
     await fetchCrewForFiltering();
 }
 
-// Helper: Kinukuha ang listahan ng mga tao sa profiles para gawing checkboxes sa gilid
+// Helper: Kinukuha ang listahan ng mga tao na may position na 'opscrew' para gawing checkboxes sa gilid
 async function fetchCrewForFiltering() {
     const listContainer = document.getElementById('crewFilterListContainer');
     if(!listContainer) return;
 
     try {
+        // Nagdagdag tayo ng filter .eq('position', 'opscrew') para eksaktong mga opscrew lang ang makuha
         const { data, error } = await supabaseClient
             .from('profiles')
-            .select('full_name, id')
-            .eq('is_approved', true);
+            .select('full_name, id, position')
+            .eq('is_approved', true)
+            .eq('position', 'opscrew'); // <-- Heto yung bagong salaan, boss!
 
         if (error) throw error;
 
         window.activeOpscrewPool = data || [];
 
         if(window.activeOpscrewPool.length === 0) {
-            listContainer.innerHTML = `<div style="color:red; font-size:0.8rem;">Walang approved operators sa database.</div>`;
+            listContainer.innerHTML = `<div style="color:#e53e3e; font-size:0.85rem; padding:10px; font-weight:bold;">⚠️ Walang nakitang aprubadong "opscrew" sa database.</div>`;
             return;
         }
 
@@ -3412,7 +3414,7 @@ async function fetchCrewForFiltering() {
         listContainer.innerHTML = html;
 
     } catch (err) {
-        listContainer.innerHTML = `<div style="color:red; font-size:0.8rem;">❌ Error sa pagkarga: ${err.message}</div>`;
+        listContainer.innerHTML = `<div style="color:red; font-size:0.8rem;">❌ Error sa pagkarga ng crew: ${err.message}</div>`;
     }
 }
 
