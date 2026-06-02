@@ -2977,27 +2977,22 @@ async function fetch24hCoalConsumption() {
 // FEATURE 1: BIRTHDAY CELEBRANT TEMPLATE MAKER
 // ==========================================
 async function openBirthdayTemplateMaker() {
-    // 1. Gawing active ang naki-click na sidebar item (Optional styling)
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-    
     const content = document.getElementById('cont');
     if (!content) return;
 
-    // Kunin ang kasalukuyang buwan para sa default display
     const months = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
     const currentMonthIndex = new Date().getMonth();
-    const currentMonthName = months[currentMonthIndex];
-    
-    // 2. I-inject ang Setup View para sa Whiteboard Generator
+
     content.innerHTML = `
         <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px;">
             <h2 style="margin-top:0; color:#2d3748; font-size:1.4rem;">🎂 Company Dept Birthday Celebrant Maker</h2>
-            <p style="color:#718096; font-size:0.9rem;">Pumili ng buwan at tema para i-post sa whiteboard o i-print.</p>
+            <p style="color:#718096; font-size:0.9rem;">Pumili ng buwan, tema, at motivational slogan para sa whiteboard.</p>
             
             <div style="display:flex; gap:15px; flex-wrap:wrap; margin-top:15px;">
                 <div style="flex:1; min-width:150px;">
                     <label style="display:block; font-size:0.8rem; font-weight:bold; margin-bottom:5px; color:#4a5568;">PUMILI NG BUWAN:</label>
-                    <select id="bdayMonthSelect" style="width:100%; padding:8px; border:1px solid #cbd5e0; border-radius:6px;" onchange="renderLiveBirthdayBoard()">
+                    <select id="bdayMonthSelect" style="width:100%; padding:8px; border:1px solid #cbd5e0; border-radius:6px; background:white; color:#1a202c;" onchange="renderLiveBirthdayBoard()">
                         ${months.map((m, idx) => `<option value="${idx + 1}" ${idx === currentMonthIndex ? 'selected' : ''}>${m}</option>`).join('')}
                     </select>
                 </div>
@@ -3005,11 +3000,22 @@ async function openBirthdayTemplateMaker() {
                 <div style="flex:1; min-width:150px;">
                     <label style="display:block; font-size:0.8rem; font-weight:bold; margin-bottom:5px; color:#4a5568;">AUTOMATED THEME:</label>
                     <select id="bdayThemeSelect" style="width:100%; padding:8px; border:1px solid #cbd5e0; border-radius:6px; background:white; color:#1a202c;" onchange="renderLiveBirthdayBoard()">
-    <option value="classic">💼 Classic Corporate Blue (Professional)</option>
-    <option value="festive">🎈 Festive Celebration (Balloons & Gifts)</option>
-    <option value="flowers">🌸 Beautiful Garden (Pink Flowers & Tulips)</option>
-    <option value="nature">🌊 Refreshing Nature (River & Birds Theme)</option>
-</select>
+                        <option value="classic">💼 Classic Corporate Blue</option>
+                        <option value="festive">🎈 Festive Celebration (Balloons)</option>
+                        <option value="flowers">🌸 Beautiful Garden (Flowers)</option>
+                        <option value="nature">🌊 Refreshing Nature (River & Birds)</option>
+                    </select>
+                </div>
+
+                <div style="flex:2; min-width:250px;">
+                    <label style="display:block; font-size:0.8rem; font-weight:bold; margin-bottom:5px; color:#4a5568;">MOTIVATIONAL SUBTITLE:</label>
+                    <select id="bdaySloganSelect" style="width:100%; padding:8px; border:1px solid #cbd5e0; border-radius:6px; background:white; color:#1a202c;" onchange="renderLiveBirthdayBoard()">
+                        <option value="💪 Sama-samang lakas, nagpapatakbo sa tagumpay ng buong planta!">💪 Sama-samang lakas, nagpapatakbo sa planta!</option>
+                        <option value="✨ Ipinagdiriwang ang mga tapat na lingkod na nagbibigay-buhay sa ating operasyon!">✨ Ipinagdiriwang ang mga tapat na lingkod ng operasyon!</option>
+                        <option value="🔥 Galing at Alab sa Trabaho, Ligtas na Serbisyo para sa Lahat.">🔥 Galing at Alab sa Trabaho, Ligtas na Serbisyo.</option>
+                        <option value="⚡ Katuwang sa Paglago: Enerhiyang Walang Pagod, Serbisyong Dumadaloy nang May Puso.">⚡ Enerhiyang Walang Pagod, Serbisyong May Puso.</option>
+                        <option value="🎯 Isang Pamilya, Isang Layunin: Kahusayan sa bawat Utilities Area!">🎯 Isang Pamilya, Kahusayan sa bawat Utilities!</option>
+                    </select>
                 </div>
 
                 <div style="display:flex; align-items:flex-end; gap:10px;">
@@ -3019,13 +3025,10 @@ async function openBirthdayTemplateMaker() {
                 </div>
             </div>
         </div>
-
         <div id="whiteboardPreviewContainer" style="margin-top:20px;">
             <div style="text-align:center; padding:40px; color:#a0aec0;">Inihahanda ang mga celebrants...</div>
         </div>
     `;
-
-    // Patakbuhin ang generator logic agad
     renderLiveBirthdayBoard();
 }
 
@@ -3034,6 +3037,7 @@ async function openBirthdayTemplateMaker() {
 // ==========================================
 async function renderLiveBirthdayBoard() {
     const monthNum = parseInt(document.getElementById('bdayMonthSelect').value);
+    const chosenSlogan = document.getElementById('bdaySloganSelect').value;
     const theme = document.getElementById('bdayThemeSelect').value;
     const monthText = document.getElementById('bdayMonthSelect').options[document.getElementById('bdayMonthSelect').selectedIndex].text;
     const previewArea = document.getElementById('whiteboardPreviewContainer');
@@ -3120,13 +3124,13 @@ async function renderLiveBirthdayBoard() {
                 ${activeStyle.decorations}
 
                 <div style="text-align: center; border-bottom: 2px dashed rgba(255,255,255,0.4); padding-bottom: 20px; margin-bottom: 35px; position: relative; z-index: 2;">
-                    <h1 style="margin: 0; font-size: 2.8rem; letter-spacing: 3px; font-weight: 950; text-shadow: 0 3px 6px rgba(0,0,0,0.25); text-transform: uppercase;">
-                        ✨ ${monthText} CELEBRANTS ✨
-                    </h1>
-                    <p style="margin: 6px 0 0 0; font-size: 0.95rem; letter-spacing: 1.5px; opacity: 0.9; font-weight: bold; ${activeStyle.sub}">
-                        ABN UTILITIES DEPARTMENT DIGITAL WHITEBOARD
-                    </p>
-                </div>
+    <h1 style="margin: 0; font-size: 2.8rem; letter-spacing: 3px; font-weight: 950; text-shadow: 0 3px 6px rgba(0,0,0,0.25); text-transform: uppercase;">
+        ✨ ${monthText} CELEBRANTS ✨
+    </h1>
+    <p style="margin: 6px 0 0 0; font-size: 0.95rem; letter-spacing: 1.5px; opacity: 0.9; font-weight: bold; ${activeStyle.sub}">
+        ${chosenSlogan}
+    </p>
+</div>
 
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 25px; position: relative; z-index: 2;">
                     ${cardsHtml}
