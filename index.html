@@ -3004,6 +3004,7 @@ async function openBirthdayTemplateMaker() {
                         <option value="festive">🎈 Festive Celebration (Balloons)</option>
                         <option value="flowers">🌸 Beautiful Garden (Flowers)</option>
                         <option value="nature">🌊 Refreshing Nature (River & Birds)</option>
+                        <option value="industrial">⚙️ Industrial Utilities & Maintenance</option>
                         <option value="custom">🖼️ [CUSTOM] Gagamit ng Inupload na Image</option>
                     </select>
                 </div>
@@ -3126,36 +3127,80 @@ async function renderLiveBirthdayBoard() {
             return (bDate.getMonth() + 1) === monthNum;
         }).sort((a, b) => new Date(a.dob).getDate() - new Date(b.dob).getDate());
 
-        // MGA DESIGN AT KULAY BASE SA TEMA (Dinamiko para laging nababasa ang text)
+      // MGA DESIGN AT KULAY BASE SA TEMA (May 4-8 Small at Big Icons para Unified)
         const posterThemes = {
             classic: { 
                 bg: "background: linear-gradient(135deg, #1e3a8a, #3b82f6);", 
                 card: "background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.4); color: white;", 
                 textStyle: "color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.4);",
                 dateBox: "background: rgba(0,0,0,0.2); color: #ffffff; border: 1px solid rgba(255,255,255,0.3);",
-                decorations: `<div style="position:absolute; top:20px; right:30px; font-size:5rem; opacity:0.15; color:white;"><i class="fas fa-building"></i></div>`
+                decorations: `
+                    <div style="position:absolute; top:-10px; left:-15px; font-size:6.5rem; opacity:0.12; color:white;"><i class="fas fa-building"></i></div>
+                    <div style="position:absolute; bottom:20px; right:20px; font-size:5.5rem; opacity:0.1; color:white;"><i class="fas fa-briefcase"></i></div>
+                    <div style="position:absolute; top:40px; right:15%; font-size:3rem; opacity:0.12; color:white;"><i class="fas fa-award"></i></div>
+                    <div style="position:absolute; bottom:35px; left:18%; font-size:2.5rem; opacity:0.08; color:white;"><i class="fas fa-chart-line"></i></div>
+                    <div style="position:absolute; top:45%; left:30px; font-size:2rem; opacity:0.1; color:white;"><i class="fas fa-user-friends"></i></div>
+                `
             },
             festive: { 
                 bg: "background: linear-gradient(135deg, #b91c1c, #f59e0b, #d97706);", 
                 card: "background: rgba(255,255,255,0.25); border: 2px solid #fef3c7; color: white; box-shadow: 0 8px 16px rgba(0,0,0,0.15);", 
                 textStyle: "color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.5);",
                 dateBox: "background: rgba(0,0,0,0.25); color: #fef3c7; border: 1px solid #fef3c7;",
-                decorations: `<div style="position:absolute; top:20px; left:30px; font-size:4rem; opacity:0.3;">🎈</div>
-                              <div style="position:absolute; top:25px; right:40px; font-size:4.5rem; opacity:0.25;">🎉</div>`
+                decorations: `
+                    <div style="position:absolute; top:15px; left:25px; font-size:5.5rem; opacity:0.25;">🎈</div>
+                    <div style="position:absolute; top:25px; right:40px; font-size:6rem; opacity:0.25;">🎉</div>
+                    <div style="position:absolute; bottom:20px; right:30px; font-size:4.5rem; opacity:0.2;">🎈</div>
+                    <div style="position:absolute; bottom:30px; left:40px; font-size:3.5rem; opacity:0.18;">🎁</div>
+                    <div style="position:absolute; top:40%; right:25px; font-size:2rem; opacity:0.22;">✨</div>
+                    <div style="position:absolute; top:35%; left:15%; font-size:2.2rem; opacity:0.15;">🎈</div>
+                    <div style="position:absolute; bottom:45%; left:45%; font-size:1.8rem; opacity:0.2;">🎉</div>
+                `
             },
             flowers: { 
                 bg: "background: linear-gradient(135deg, #ec4899, #fbcfe8, #f472b6);", 
                 card: "background: rgba(255, 255, 255, 0.75); border: 2px solid #f472b6; box-shadow: 0 6px 12px rgba(0,0,0,0.05);", 
-                textStyle: "color: #6d073b; text-shadow: none; font-weight: 950;", // Madilim na kulay para litaw sa pink/puti
+                textStyle: "color: #6d073b; text-shadow: none; font-weight: 950;", 
                 dateBox: "background: #be185d; color: #ffffff; border: none;",
-                decorations: `<div style="position:absolute; top:15px; left:25px; font-size:4.5rem; opacity:0.4;">🌸</div>`
+                decorations: `
+                    <div style="position:absolute; top:15px; left:20px; font-size:6.5rem; opacity:0.35;">🌸</div>
+                    <div style="position:absolute; top:25px; right:35px; font-size:5.5rem; opacity:0.3;">🌺</div>
+                    <div style="position:absolute; bottom:20px; left:30px; font-size:4.5rem; opacity:0.3;">🌷</div>
+                    <div style="position:absolute; bottom:25px; right:45px; font-size:5rem; opacity:0.25;">🌸</div>
+                    <div style="position:absolute; top:35%; right:18%; font-size:2.5rem; opacity:0.28;">🌹</div>
+                    <div style="position:absolute; bottom:40%; left:12%; font-size:2.2rem; opacity:0.3;">🌻</div>
+                    <div style="position:absolute; top:45%; left:48%; font-size:1.8rem; opacity:0.25;">🦋</div>
+                `
             },
             nature: { 
                 bg: "background: linear-gradient(135deg, #065f46, #10b981, #34d399);", 
                 card: "background: rgba(255, 255, 255, 0.85); border: 2px solid #047857; box-shadow: 0 6px 12px rgba(0,0,0,0.1);", 
-                textStyle: "color: #064e3b; text-shadow: none; font-weight: 950;", // Madilim na berde para sa puting card
+                textStyle: "color: #064e3b; text-shadow: none; font-weight: 950;", 
                 dateBox: "background: #047857; color: #ffffff; border: none;",
-                decorations: `<div style="position:absolute; top:15px; left:25px; font-size:4rem; opacity:0.35;">🐦</div>`
+                decorations: `
+                    <div style="position:absolute; top:15px; left:25px; font-size:5.5rem; opacity:0.3;">🐦</div>
+                    <div style="position:absolute; top:25px; right:45px; font-size:6rem; opacity:0.22;">🌊</div>
+                    <div style="position:absolute; bottom:20px; left:35px; font-size:5rem; opacity:0.25;">🍃</div>
+                    <div style="position:absolute; bottom:30px; right:30px; font-size:4.5rem; opacity:0.28;">🪵</div>
+                    <div style="position:absolute; top:35%; right:15%; font-size:2.5rem; opacity:0.2;">🐦</div>
+                    <div style="position:absolute; bottom:45%; left:20%; font-size:2.2rem; opacity:0.25;">🌱</div>
+                    <div style="position:absolute; top:42%; left:45%; font-size:1.8rem; opacity:0.18;">🦅</div>
+                `
+            },
+            industrial: {
+                bg: "background: linear-gradient(135deg, #2d3748, #4a5568, #1a202c);", 
+                card: "background: rgba(255, 255, 255, 0.15); border: 2px solid #718096; box-shadow: 0 8px 16px rgba(0,0,0,0.3); color: white;",
+                textStyle: "color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.8);",
+                dateBox: "background: #d69e2e; color: #1a202c; border: 1px solid #f6e05e; font-weight: 950;", 
+                decorations: `
+                    <div style="position:absolute; top:-10px; left:-20px; font-size:6.5rem; opacity:0.12; color:#cbd5e0; transform: rotate(15deg);"><i class="fas fa-cog"></i></div>
+                    <div style="position:absolute; top:25px; right:40px; font-size:4.5rem; opacity:0.15; color:#f6e05e;"><i class="fas fa-tachometer-alt"></i></div>
+                    <div style="position:absolute; top:35px; left:22%; font-size:2.5rem; opacity:0.15; color:#cbd5e0; transform: rotate(-45deg);"><i class="fas fa-tools"></i></div>
+                    <div style="position:absolute; bottom:30px; left:35px; font-size:4.5rem; opacity:0.12; color:#63b3ed;"><i class="fas fa-faucet"></i></div>
+                    <div style="position:absolute; bottom:25px; right:45px; font-size:4rem; opacity:0.15; color:#cbd5e0;"><i class="fas fa-hammer"></i></div>
+                    <div style="position:absolute; top:110px; right:20%; font-size:3.2rem; opacity:0.12; color:#cbd5e0; transform: rotate(45deg);"><i class="fas fa-cog"></i></div>
+                    <div style="position:absolute; bottom:140px; left:15px; font-size:2rem; opacity:0.15; color:#e2e8f0;"><i class="fas fa-cubes"></i></div>
+                `
             },
             custom: {
                 bg: window.currentCustomBgBase64 ? `background-image: url('${window.currentCustomBgBase64}'); background-size: cover; background-position: center; background-repeat: no-repeat;` : `background: #4a5568;`,
