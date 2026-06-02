@@ -3126,38 +3126,42 @@ async function renderLiveBirthdayBoard() {
             return (bDate.getMonth() + 1) === monthNum;
         }).sort((a, b) => new Date(a.dob).getDate() - new Date(b.dob).getDate());
 
-        // LISTAHAN NG MGA THEMES AT KANYA-KANYANG CSS PROPERTIES
+        // MGA DESIGN AT KULAY BASE SA TEMA (Dinamiko para laging nababasa ang text)
         const posterThemes = {
             classic: { 
                 bg: "background: linear-gradient(135deg, #1e3a8a, #3b82f6);", 
                 card: "background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.4); color: white;", 
-                sub: "color: #dbeafe;",
+                textStyle: "color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.4);",
+                dateBox: "background: rgba(0,0,0,0.2); color: #ffffff; border: 1px solid rgba(255,255,255,0.3);",
                 decorations: `<div style="position:absolute; top:20px; right:30px; font-size:5rem; opacity:0.15; color:white;"><i class="fas fa-building"></i></div>`
             },
             festive: { 
                 bg: "background: linear-gradient(135deg, #b91c1c, #f59e0b, #d97706);", 
                 card: "background: rgba(255,255,255,0.25); border: 2px solid #fef3c7; color: white; box-shadow: 0 8px 16px rgba(0,0,0,0.15);", 
-                sub: "color: #fef3c7; font-weight: bold;",
+                textStyle: "color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.5);",
+                dateBox: "background: rgba(0,0,0,0.25); color: #fef3c7; border: 1px solid #fef3c7;",
                 decorations: `<div style="position:absolute; top:20px; left:30px; font-size:4rem; opacity:0.3;">🎈</div>
                               <div style="position:absolute; top:25px; right:40px; font-size:4.5rem; opacity:0.25;">🎉</div>`
             },
             flowers: { 
                 bg: "background: linear-gradient(135deg, #ec4899, #fbcfe8, #f472b6);", 
-                card: "background: rgba(255, 255, 255, 0.65); border: 2px solid #f472b6; color: #831843;", 
-                sub: "color: #be185d;",
+                card: "background: rgba(255, 255, 255, 0.75); border: 2px solid #f472b6; box-shadow: 0 6px 12px rgba(0,0,0,0.05);", 
+                textStyle: "color: #6d073b; text-shadow: none; font-weight: 950;", // Madilim na kulay para litaw sa pink/puti
+                dateBox: "background: #be185d; color: #ffffff; border: none;",
                 decorations: `<div style="position:absolute; top:15px; left:25px; font-size:4.5rem; opacity:0.4;">🌸</div>`
             },
             nature: { 
                 bg: "background: linear-gradient(135deg, #065f46, #10b981, #34d399);", 
-                card: "background: rgba(255, 255, 255, 0.8); border: 2px solid #047857; color: #064e3b;", 
-                sub: "color: #047857; font-weight: 600;",
+                card: "background: rgba(255, 255, 255, 0.85); border: 2px solid #047857; box-shadow: 0 6px 12px rgba(0,0,0,0.1);", 
+                textStyle: "color: #064e3b; text-shadow: none; font-weight: 950;", // Madilim na berde para sa puting card
+                dateBox: "background: #047857; color: #ffffff; border: none;",
                 decorations: `<div style="position:absolute; top:15px; left:25px; font-size:4rem; opacity:0.35;">🐦</div>`
             },
-            // BAGONG LOGIC RULES PARA SA INUPLOAD NA IMAGE BACKDROP
             custom: {
                 bg: window.currentCustomBgBase64 ? `background-image: url('${window.currentCustomBgBase64}'); background-size: cover; background-position: center; background-repeat: no-repeat;` : `background: #4a5568;`,
-                card: "background: rgba(0, 0, 0, 0.6); border: 2px solid rgba(255,255,255,0.3); color: white; backdrop-filter: blur(4px);",
-                sub: "color: #cbd5e0;",
+                card: "background: rgba(0, 0, 0, 0.65); border: 2px solid rgba(255,255,255,0.4); color: white; backdrop-filter: blur(4px);",
+                textStyle: "color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.6);",
+                dateBox: "background: rgba(255,255,255,0.2); color: #ffffff; border: 1px solid rgba(255,255,255,0.4);",
                 decorations: !window.currentCustomBgBase64 ? `<div style="position:absolute; top:45%; width:100%; text-align:center; color:#cbd5e0; font-size:0.9rem;">⚠️ Walang file na napili. Mangyaring mag-upload ng image file sa itaas.</div>` : ''
             }
         };
@@ -3166,42 +3170,47 @@ async function renderLiveBirthdayBoard() {
         let cardsHtml = '';
 
         if(celebrants.length === 0) {
-            cardsHtml = `<div style="grid-column:1/-1; text-align:center; padding:60px; font-size:1.2rem; font-weight:bold; ${activeStyle.sub}">Walang nakalistang birthday celebrant sa buwang ito.</div>`;
+            cardsHtml = `<div style="text-align:center; padding:60px; font-size:1.3rem; font-weight:bold; width:100%; color: inherit;">Walang nakalistang birthday celebrant sa buwang ito.</div>`;
         } else {
             celebrants.forEach(person => {
                 const day = new Date(person.dob).getDate();
                 const img = person.avatar_url && person.avatar_url.trim() !== "" ? person.avatar_url : `https://ui-avatars.com/api/?name=${encodeURIComponent(person.full_name)}&background=random&size=150`;
                 
                 cardsHtml += `
-                    <div style="padding: 20px; border-radius: 16px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; ${activeStyle.card}">
-                        <div style="width: 100px; height: 100px; border-radius: 50%; overflow: hidden; border: 3px solid white; margin: 0 auto 12px auto; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(0,0,0,0.15);">
+                    <div style="width: 210px; padding: 25px 20px; border-radius: 16px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; transition: 0.2s; ${activeStyle.card}">
+                        
+                        <div style="width: 110px; height: 110px; border-radius: 50%; overflow: hidden; border: 4px solid white; margin: 0 auto 15px auto; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 12px rgba(0,0,0,0.2);">
                             <img src="${img}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(person.full_name)}'"/>
                         </div>
-                        <div style="font-weight: 900; font-size: 1.1rem; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">${person.full_name}</div>
-                        <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; margin-bottom: 12px; text-shadow: 0 1px 2px rgba(0,0,0,0.5); ${activeStyle.sub}">${person.department || 'UTILITIES'}</div>
-                        <div style="margin-top: auto; display: inline-block; padding: 5px 15px; background: rgba(0,0,0,0.3); border-radius: 20px; font-size: 0.85rem; font-weight: 900; letter-spacing: 0.5px; border: 1px solid rgba(255,255,255,0.25);">
-                            📅 ${monthText} ${day}
+                        
+                        <div style="font-weight: 900; font-size: 1.25rem; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 12px; ${activeStyle.textStyle}">
+                            ${person.full_name}
+                        </div>
+                        
+                        <div style="margin-top: auto; display: inline-block; padding: 6px 18px; border-radius: 20px; font-size: 0.95rem; font-weight: 950; letter-spacing: 0.5px; text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.1); ${activeStyle.dateBox}">
+                            ${monthText} ${day}
                         </div>
                     </div>
                 `;
             });
         }
 
+        // HEADER TEXT STYLE AT ANG ATING BAGONG FLEX-CENTER GRIDS
         previewArea.innerHTML = `
-            <div id="printableWhiteboard" style="${activeStyle.bg} padding: 40px; border-radius: 16px; min-height: 520px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.15); box-sizing: border-box; color: white;">
+            <div id="printableWhiteboard" style="${activeStyle.bg} padding: 40px; border-radius: 16px; min-height: 520px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.15); box-sizing: border-box; color: white; display: flex; flex-direction: column;">
                 
                 ${activeStyle.decorations}
 
-                <div style="text-align: center; border-bottom: 2px dashed rgba(255,255,255,0.4); padding-bottom: 20px; margin-bottom: 35px; position: relative; z-index: 2;">
-                    <h1 style="margin: 0; font-size: 2.8rem; letter-spacing: 3px; font-weight: 950; text-shadow: 0 3px 6px rgba(0,0,0,0.6); text-transform: uppercase;">
+                <div style="text-align: center; border-bottom: 2px dashed rgba(255,255,255,0.4); padding-bottom: 25px; margin-bottom: 35px; position: relative; z-index: 2;">
+                    <h1 style="margin: 0; font-size: 3rem; letter-spacing: 3px; font-weight: 950; text-transform: uppercase; color: #ffffff; text-shadow: 0 4px 8px rgba(0,0,0,0.4);">
                         ✨ ${monthText} CELEBRANTS ✨
                     </h1>
-                    <p style="margin: 8px 0 0 0; font-size: 1.05rem; letter-spacing: 1px; opacity: 0.95; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.6); ${activeStyle.sub}">
+                    <p style="margin: 10px 0 0 0; font-size: 1.15rem; letter-spacing: 1px; opacity: 0.95; font-weight: bold; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.4);">
                         ${chosenSlogan}
                     </p>
                 </div>
 
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 25px; position: relative; z-index: 2;">
+                <div style="display: flex; flex-javascript; justify-content: center; align-items: center; gap: 30px; flex-wrap: wrap; margin: auto 0; position: relative; z-index: 2; width: 100%;">
                     ${cardsHtml}
                 </div>
             </div>
