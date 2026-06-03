@@ -472,8 +472,17 @@ function updateSidebarActive(index) {
         }
     });
 }
-    async function openGPMCalculator() {
+   async function openGPMCalculator() {
     updateSidebarActive(2); // GPM Calculator
+
+    // 1. Kuhanin ang petsa ngayon para sa default filter value
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
+
+    // 2. Ibalot ang HTML sa loob ng backticks (Template Literals) at i-assign sa variable
+    let html = `
+        <div class="page-header">
+            <h1 class="text-2xl font-bold">GPM Calculator</h1>
             <p class="sub-text" style="margin:0;">System logs for Flow Rate, Pump Status, and Frequencies.</p>
         </div>
 
@@ -518,6 +527,13 @@ function updateSidebarActive(index) {
         </div>
     `;
 
+    // 3. I-render ang HTML sa loob ng main content element mo
+    const cont = document.getElementById('cont');
+    if (cont) {
+        cont.innerHTML = html;
+    }
+
+    // 4. Tawagin ang fetcher para sa data
     fetchGPMLogs();
 }
 async function fetchGPMLogs() {
@@ -569,6 +585,13 @@ async function fetchGPMLogs() {
 
         let rows = "";
         data.forEach(log => {
+            // 🟢 ETO ANG BAGONG PROTEKSYON (ANTI-RE-RENDER):
+            // Kung kasalukuyang binubura ang row na ito at may pending state pa, HUWAG itong muling iguhit ng masterSync timer!
+            const existingRow = document.getElementById(`gpm-row-${log.id}`);
+            if (existingRow && existingRow.getAttribute('data-deleted') === 'true') {
+                return; // Laktawan ang data na ito, huwag isama sa renders
+            }
+
             const time = new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const gpmVal = parseFloat(log.gpm || 0).toFixed(2);
 
@@ -581,7 +604,7 @@ async function fetchGPMLogs() {
                 : `<span style="color:#a0aec0;">○ OFF</span>`;
 
             rows += `
-                <tr>
+                <tr id="gpm-row-${log.id}">
                     <td><b>${time}</b></td>
                     <td class="text-blue">${gpmVal}</td>
                     <td><small>${log.cws_status || ''}</small></td>
@@ -618,50 +641,66 @@ async function fetchGPMLogs() {
 }
 function openPowerMonitor() {
     updateSidebarActive(3); // Power Consumption
-        <p class="sub-text" style="margin:0;">Live utility tracking and historical logs.</p>
-    </div>
 
-    <div class="filter-bar" style="display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 15px; border-radius: 10px; background: var(--bg-card); border: 1px solid var(--border-color); margin-bottom: 20px;">
-        
-        <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 0.9rem; color: var(--text-sub); font-weight: 600;">Filter Date:</span>
-                <input type="date" id="dateFilter" value="${today}" onchange="fetchPowerData(this.value)" 
-                       style="padding: 6px 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-card); color: var(--text-main); font-family: inherit;">
+    // 1. Kuhanin ang petsa ngayon para sa default filter value
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
+
+    // 2. Ibalot ang HTML sa variable gamit ang backticks (Template Literals)
+    let html = `
+        <div class="page-header">
+            <h1 class="text-2xl font-bold">Power Power Monitor</h1>
+            <p class="sub-text" style="margin:0;">Live utility tracking and historical logs.</p>
+        </div>
+
+        <div class="filter-bar" style="display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 15px; border-radius: 10px; background: var(--bg-card); border: 1px solid var(--border-color); margin-bottom: 20px;">
+            
+            <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 0.9rem; color: var(--text-sub); font-weight: 600;">Filter Date:</span>
+                    <input type="date" id="dateFilter" value="${today}" onchange="fetchPowerData(this.value)" 
+                           style="padding: 6px 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-card); color: var(--text-main); font-family: inherit;">
+                </div>
+                <span id="opBadge" class="info-badge">Operator: ---</span>
+                <span id="grandTotalDisplay" style="font-weight: bold; font-size: 0.95rem;">Total: 0.00 kWh</span>
             </div>
-            <span id="opBadge" class="info-badge">Operator: ---</span>
-            <span id="grandTotalDisplay" style="font-weight: bold; font-size: 0.95rem;">Total: 0.00 kWh</span>
+
+            <div style="display: flex; gap: 8px;">
+                <button onclick="exportPowerToExcel()" class="btn-export" style="padding: 8px 12px; font-size: 0.8rem; background: #2f855a; color: white; border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                    <i class="fas fa-file-excel"></i> Export Excel
+                </button>
+                <button onclick="const d = document.getElementById('dateFilter').value; window.open('logsheet.html?date=' + d, '_blank')" 
+                        class="btn-print" 
+                        style="padding: 8px 12px; font-size: 0.8rem; background: #2b6cb0; color: white; border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                    <i class="fas fa-print"></i> Print Logsheet
+                </button>
+            </div>
         </div>
 
-        <div style="display: flex; gap: 8px;">
-            <button onclick="exportPowerToExcel()" class="btn-export" style="padding: 8px 12px; font-size: 0.8rem; background: #2f855a; color: white; border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
-                <i class="fas fa-file-excel"></i> Export Excel
-            </button>
-           <button onclick="const d = document.querySelector('input[type=date]').value; window.open('logsheet.html?date=' + d, '_blank')" 
-        class="btn-print" 
-        style="padding: 8px 12px; font-size: 0.8rem; background: #2b6cb0; color: white; border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
-    <i class="fas fa-print"></i> Print Logsheet
-</button>
+        <div class="data-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Equipment Name</th>
+                        <th>Previous (kWh)</th>
+                        <th>Current (kWh)</th>
+                        <th>Usage (kWh)</th>
+                    </tr>
+                </thead>
+                <tbody id="powerBody">
+                    <tr><td colspan="4" style="text-align:center; padding: 20px;">Loading data...</td></tr>
+                </tbody>
+            </table>
         </div>
-    </div>
-
-    <div class="data-card">
-        <table>
-            <thead>
-                <tr>
-                    <th>Equipment Name</th>
-                    <th>Previous (kWh)</th>
-                    <th>Current (kWh)</th>
-                    <th>Usage (kWh)</th>
-                </tr>
-            </thead>
-            <tbody id="powerBody">
-                <tr><td colspan="4">Loading data...</td></tr>
-            </tbody>
-        </table>
-    </div>
-`;
+    `;
     
+    // 3. I-inject ang HTML sa 'cont' main container ng index mo
+    const cont = document.getElementById('cont');
+    if (cont) {
+        cont.innerHTML = html;
+    }
+
+    // 4. Patakbuhin ang data fetcher para magkalaman ang table
     fetchPowerData(today);
 }
         function exportPowerToExcel() {
@@ -717,15 +756,19 @@ function fetchPowerData(selectedDate) {
         grandTotalDisplay.innerText = "Total: " + totalSum.toFixed(2) + " kWh";
     });
 }
-       async function openChemicals() {
+ async function openChemicals() {
     updateSidebarActive(4); // Chemicals
+
+    // 1. Ibalot ang HTML layout sa variable gamit ang backticks
+    let html = `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <div>
                 <h1 style="font-size: 1.4rem; margin: 0; font-weight: 800; color: #2d3748;">Chemicals Inventory Control</h1>
                 <p class="sub-text" style="font-size: 0.85rem; margin: 3px 0 0 0; color: #718096;">Real-time stock levels and monitoring across all plant areas.</p>
             </div>
             <div>
-                <button onclick="openChemicals()" style="padding: 6px 12px; background: #319795; color: white; border: none; border-radius: 8px; font-size: 0.75rem; font-weight: bold; cursor: pointer;">
+                <!-- PINALITAN: Sa halip na openChemicals(), fetchChemicalsData() na lang ang tinatawag para walang infinite loop -->
+                <button onclick="fetchChemicalsData()" style="padding: 6px 12px; background: #319795; color: white; border: none; border-radius: 8px; font-size: 0.75rem; font-weight: bold; cursor: pointer;">
                     <i class="fas fa-sync-alt"></i> Refresh Stock
                 </button>
             </div>
@@ -766,7 +809,23 @@ function fetchPowerData(selectedDate) {
         </div>
     `;
 
-    // 2. Patakbuhin ang Engine para kuhanin ang totoong imbentaryo sa Supabase
+    // 2. I-inject ang skeleton framework sa screen container
+    const cont = document.getElementById('cont');
+    if (cont) {
+        cont.innerHTML = html;
+    }
+
+    // 3. Patakbuhin ang nakahiwalay na fetcher function
+    await fetchChemicalsData();
+}
+
+// BUKOD NA FUNCTION: Para tuwing mag-re-refresh, hindi na kumukurap ang buong screen layout mo
+async function fetchChemicalsData() {
+    // Ipakita muna ang loading status sa table body habang naghihintay
+    if (document.getElementById('pageChemTableBody')) {
+        document.getElementById('pageChemTableBody').innerHTML = `<tr><td colspan="3" style="text-align: center; padding: 20px; color: #a0aec0; font-style: italic;">Fetching fresh logs from Supabase...</td></tr>`;
+    }
+
     try {
         const { data: inventory, error } = await supabaseClient
             .from('chemical_inventory')
@@ -786,7 +845,6 @@ function fetchPowerData(selectedDate) {
                 const bal = parseFloat(item.quantity || 0);
                 const unit = item.unit;
 
-                // Suriin ang configuration levels ng alarm (tulad ng ginawa natin sa card)
                 let isCritical = false;
                 const lowerName = name.toLowerCase();
                 if ((lowerName.includes('hydro') || lowerName.includes('caustic') || lowerName.includes('chlorine')) && bal <= 10) isCritical = true;
@@ -795,7 +853,6 @@ function fetchPowerData(selectedDate) {
 
                 if (isCritical) criticalCount++;
 
-                // Set styles at text para sa status badge
                 const statusText = isCritical ? "CRITICAL LOW" : "GOOD STOCK";
                 const badgeBg = isCritical ? "#fed7d7" : "#c6f6d5";
                 const badgeColor = isCritical ? "#9b2c2c" : "#22543d";
@@ -816,7 +873,6 @@ function fetchPowerData(selectedDate) {
             });
         }
 
-        // 3. I-inject ang totoong bilang at listahan sa screen
         if (document.getElementById('pageChemTableBody')) document.getElementById('pageChemTableBody').innerHTML = tableHtml;
         if (document.getElementById('pageChemTotalItems')) document.getElementById('pageChemTotalItems').innerText = inventory ? inventory.length : 0;
         
@@ -834,7 +890,7 @@ function fetchPowerData(selectedDate) {
         }
     }
 }
-       // --- COAL YARD MONITORING LOGIC ---
+        // --- COAL YARD MONITORING LOGIC ---
 async function openCoalDelivery() {
     updateSidebarActive(5); // Coal Delivery
     const cont = document.getElementById('cont');
@@ -2298,24 +2354,39 @@ window.onload = function() {
         document.getElementById('profileBtn').style.backgroundImage = `url('${profilePath}')`;
     }
 
-    // 4. Supabase Realtime — INSERT + DELETE
-    supabaseClient
-        .channel('gpm-live-channel')
-        .on('postgres_changes',
-            { event: 'INSERT', schema: 'public', table: 'gpm_readings' },
-            () => {
-                if (document.getElementById('latestGPM'))    fetchLatestGPM();
-                if (document.getElementById('updateStatus')) checkTodayStatus();
-                if (document.getElementById('gpmTableBody')) fetchGPMLogs();
+   // 🔴 PINAGANDANG SUPABASE REALTIME — PROTEKTADO SA MULTONG ROW
+supabaseClient
+    .channel('gpm-live-channel')
+    .on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'gpm_readings' },
+        () => {
+            console.log("📥 May bagong GPM input! Syncing data...");
+            if (document.getElementById('latestGPM'))    fetchLatestGPM();
+            if (document.getElementById('updateStatus')) checkTodayStatus();
+            if (document.getElementById('gpmTableBody')) fetchGPMLogs();
+        }
+    )
+    .on('postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'gpm_readings' },
+        (payload) => {
+            console.log("🗑 Realtime Delete Triggered para sa ID:", payload.old?.id);
+            
+            // 🟢 INTEGRATION: Kung may natanggap na ID na totoong nabura sa DB, pwersahan nating patayin ang HTML element
+            if (payload.old && payload.old.id) {
+                const targetRow = document.getElementById(`gpm-row-${payload.old.id}`);
+                if (targetRow) {
+                    targetRow.remove();
+                    console.log(`💀 Patay ang multo! Tinanggal sa screen ang row ID: ${payload.old.id}`);
+                }
             }
-        )
-        .on('postgres_changes',
-            { event: 'DELETE', schema: 'public', table: 'gpm_readings' },
-            () => {
-                if (document.getElementById('gpmTableBody')) fetchGPMLogs();
-            }
-        )
-        .subscribe();
+            
+            // At ligtas na nating mai-refresh ang listahan para sa counters/badges
+            if (document.getElementById('gpmTableBody')) fetchGPMLogs();
+        }
+    )
+    .subscribe((status) => {
+        console.log("📡 GPM Realtime Status:", status);
+    });
 
     // 5. Idle Timer (30 minutes)
     let idleTime = 0;
@@ -2596,7 +2667,7 @@ async function doDelete(id, btn) {
                 setTimeout(() => toast.remove(), 300);
             }, duration);
         }
-        // ====================================================================
+// ====================================================================
 // NEW FIX: Function para sa pagbura ng GPM Log nang walang Auth dependency
 // ====================================================================
 function deleteGPMLog(logId) {
@@ -2631,22 +2702,33 @@ function deleteGPMLog(logId) {
 async function confirmDeleteGPMLog(logId) {
     const btn = document.getElementById('confirmDelBtn');
     if (btn) { btn.disabled = true; btn.textContent = 'Deleting...'; }
+    
     try {
+        // 1. Ipadala ang delete request sa Supabase (Selyado na ito ng RLS SQL)
         const { error } = await supabaseClient
             .from('gpm_readings')
             .delete()
             .eq('id', logId);
+            
         if (error) throw error;
+        
+        // 2. Alisin ang delete confirmation modal popup
         document.getElementById('delGpmOverlay')?.remove();
         showToast('GPM log deleted successfully.', 'success');
-        await fetchGPMLogs(); // ✅ Direct refresh — row disappears instantly
+        
+        // 3. Tanggalin agad ang row sa screen para instant vanish
+        const matchingRows = document.querySelectorAll(`[id="gpm-row-${logId}"]`);
+        matchingRows.forEach(row => row.remove());
+        
+        // 4. Mag-refresh ng logs para updated ang mga badges/counters
+        await fetchGPMLogs();
+        
     } catch (err) {
         document.getElementById('delGpmOverlay')?.remove();
         showToast('Error deleting log: ' + err.message, 'error');
         console.error('GPM delete error:', err);
     }
 }
-
         // ─── MOBILE SIDEBAR (UNIFIED with backdrop) ──────────────
         function toggleSidebarMobile() {
             const sidebar   = document.getElementById('sidebar');
@@ -2880,16 +2962,34 @@ let _simTimer = null;
 async function startBoilerLiveListener() {
     if (_boilerListenerActive) return;
     _boilerListenerActive = true;
+    
+    // Kunin muna ang paunang data sa pag-load ng page
     await _fetchBoilerFromSupabase();
+    
     supabaseClient
         .channel('boiler-status-live')
         .on('postgres_changes',
-            { event: 'UPDATE', schema: 'public', table: 'boiler_status' },
-            (payload) => { _applyBoilerRow(payload.new); }
+            { 
+                event: '*', // 🟢 BINAGO: Ginawang '*' para salo pati INSERT, UPDATE, at UPSERT ng logger app!
+                schema: 'public', 
+                table: 'boiler_status' 
+            },
+            (payload) => { 
+                console.log("🔥 Boiler Realtime Event Natanggap:", payload.eventType, payload.new);
+                
+                // Siguraduhing may dalang data ang payload bago i-apply sa screen
+                if (payload.new && Object.keys(payload.new).length > 0) {
+                    _applyBoilerRow(payload.new); 
+                } else if (payload.old) {
+                    // Kung sakaling may nag-delete (fallback re-fetch)
+                    _fetchBoilerFromSupabase();
+                }
+            }
         )
-        .subscribe();
+        .subscribe((status) => {
+            console.log("📡 Boiler Realtime Channel Status:", status);
+        });
 }
-
 async function _fetchBoilerFromSupabase() {
     try {
         const { data, error } = await supabaseClient.from('boiler_status').select('*');
@@ -2910,40 +3010,71 @@ function _applyBoilerRow(row) {
     const pvStr  = v => `${parseFloat(v||0).toFixed(2)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
     const svStr  = v => `${parseFloat(v||0).toFixed(1)} <span style="font-size:.75rem;color:#a0aec0;font-weight:normal;font-family:sans-serif;">bars</span>`;
 
-    if (id === 'boilera') {
+    // 1. Boiler A Check
+    if (id === 'boiler_a' || id === 'boilera') {
         if (document.getElementById('boilerA_PV'))   document.getElementById('boilerA_PV').innerHTML   = pvStr(row.pres_pv);
         if (document.getElementById('boilerA_SP'))   document.getElementById('boilerA_SP').innerHTML   = svStr(row.pres_sv);
         if (document.getElementById('boilerA_Temp')) document.getElementById('boilerA_Temp').innerText = `${row.temp_pv||0}°C`;
         _setBadge('boilerA_badge', ageSec);
         if (!window.boilerStates) window.boilerStates = { A:'MAIN', B:'BACKUP' };
         window.boilerStates.A = row.role || 'MAIN';
-        renderBoilerToggleButtons();
-    } else if (id === 'boilerb') {
+        if (typeof renderBoilerToggleButtons === "function") {
+            renderBoilerToggleButtons();
+        }
+    } 
+    // 2. Boiler B Check
+    else if (id === 'boiler_b' || id === 'boilerb') {
         if (document.getElementById('boilerB_PV'))   document.getElementById('boilerB_PV').innerHTML   = pvStr(row.pres_pv);
         if (document.getElementById('boilerB_SP'))   document.getElementById('boilerB_SP').innerHTML   = svStr(row.pres_sv);
         if (document.getElementById('boilerB_Temp')) document.getElementById('boilerB_Temp').innerText = `${row.temp_pv||0}°C`;
         _setBadge('boilerB_badge', ageSec);
         if (!window.boilerStates) window.boilerStates = { A:'MAIN', B:'BACKUP' };
         window.boilerStates.B = row.role || 'BACKUP';
-        renderBoilerToggleButtons();
-    } else if (id === 'csg') {
-        if (document.getElementById('csg_PV'))      document.getElementById('csg_PV').innerHTML      = pvStr(row.pres_pv);
-        if (document.getElementById('csg_SP'))      document.getElementById('csg_SP').innerHTML      = svStr(row.pres_sv);
-        if (document.getElementById('csg_Product')) document.getElementById('csg_Product').innerText = row.product_name || 'VMR';
+        if (typeof renderBoilerToggleButtons === "function") {
+            renderBoilerToggleButtons();
+        }
+    } 
+    // 3. CSG / Clean Steam Generator Check (May dagdag para sa Pascual Standby)
+    else if (id === 'csg') {
+        const currentRole = (row.role || '').toUpperCase();
+        const isPascual = (currentRole === 'PASCUAL');
+
+        // KUNG PASCUAL: Pwersahang 0.00 bars ang display at "STANDBY" ang produkto
+        const finalPV = isPascual ? 0 : row.pres_pv;
+        const finalSV = isPascual ? 0 : row.pres_sv;
+        const displayProduct = isPascual ? '⚠️ STANDBY' : (row.product_name || 'VMR');
+
+        // Isalpak ang mga halaga sa HTML Elements ng Dashboard Card
+        if (document.getElementById('csg_PV'))      document.getElementById('csg_PV').innerHTML      = pvStr(finalPV);
+        if (document.getElementById('csg_SP'))      document.getElementById('csg_SP').innerHTML      = svStr(finalSV);
+        if (document.getElementById('csg_Product')) document.getElementById('csg_Product').innerText = displayProduct;
+
+        // STATE CONTROL FOR DASHBOARD
+        window.csgState = isPascual ? 'STANDBY' : (row.steam_mode || '4B');
+        
+        // I-update ang Live/Stale badge ng CSG
         _setBadge('csg_badge', ageSec);
-        window.csgState = row.steam_mode || '4B';
-        renderCsgToggleButtons();
+        
+        // Kung may toggle buttons ka sa Dashboard screen para sa CSG, i-render ang states nito
+        if (typeof renderCsgToggleButtons === "function") {
+            renderCsgToggleButtons();
+        }
     }
 }
-
-function _setBadge(id, ageSec) {
+        function _setBadge(id, ageSec) {
     const el = document.getElementById(id);
     if (!el) return;
-    if (ageSec === null || ageSec < 60) { el.textContent = '● LIVE'; el.style.color = '#48bb78'; }
-    else if (ageSec < 300)              { el.textContent = `⏱ ${ageSec}s ago`; el.style.color = '#f6ad55'; }
-    else                                { el.textContent = '⚠ STALE'; el.style.color = '#e53e3e'; }
+    if (ageSec === null || ageSec < 60) { 
+        el.textContent = '● LIVE'; 
+        el.style.color = '#48bb78'; 
+    } else if (ageSec < 300) { 
+        el.textContent = `⏱ ${ageSec}s ago`; 
+        el.style.color = '#f6ad55'; 
+    } else { 
+        el.textContent = '⚠ STALE'; 
+        el.style.color = '#e53e3e'; 
+    }
 }
-
 // Simulation fallback — runs only when boiler_status table has no data
 function _startSimFallback() {
     if (_simTimer) return;
@@ -3019,14 +3150,16 @@ async function toggleBoilerStatus(boiler, mode) {
     window.boilerStates[boiler] = mode;
     localStorage.setItem('dash_boiler_modes', JSON.stringify(window.boilerStates));
     renderBoilerToggleButtons();
-    const rowId    = 'boiler' + boiler.toLowerCase();
+    
+    // BINAGO: Idinagdag ang underscore sa string ('boiler_a' o 'boiler_b')
+    const rowId    = 'boiler_' + boiler.toLowerCase(); 
+    
     const userCode = localStorage.getItem('userCode') || 'UNKNOWN';
     const { error } = await supabaseClient.from('boiler_status')
         .update({ role: mode, updated_at: new Date().toISOString(), operator_name: userCode })
         .eq('id', rowId);
     if (error) showToast('Error updating boiler mode: ' + error.message, 'error');
 }
-
 function renderBoilerToggleButtons() {
     const states   = window.boilerStates || { A:'MAIN', B:'BACKUP' };
     const btnAMain = document.getElementById('btnBoilerA_Main');
