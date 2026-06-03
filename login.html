@@ -1368,9 +1368,10 @@ nav.scrolled {
     const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
     
     function setSession(id, name, role, avatar) {
-        localStorage.setItem('userCode', id);
-        localStorage.setItem('userName', name);
-        localStorage.setItem('userRole', role);
+        // Kept for backward compatibility — handleLogin sets these directly
+        localStorage.setItem('userCode',   id);
+        localStorage.setItem('userName',   name);
+        localStorage.setItem('userRole',   role);
         localStorage.setItem('userAvatar', avatar);
     }
 
@@ -1489,7 +1490,7 @@ async function handleLogin() {
     localStorage.setItem('userRole',   role);
     localStorage.setItem('userCode',   id);
     localStorage.setItem('userAvatar', data.avatar_url || 'avatar1.svg');
-    localStorage.setItem('currentUser', JSON.stringify(data));
+    // Note: NOT storing full profile object — it contains plaintext password
 
     showToast(`Welcome back, ${data.full_name}! 👋`, 'success', 2000);
 
@@ -1534,8 +1535,8 @@ function closeAssessment() {
 }
 
 async function checkAssessmentAccess() {
-    const idInput = document.getElementById('verifyID').value;
-    if(!idInput) return alert("Pakisulat ang iyong Company ID.");
+    const idInput = document.getElementById('verifyID').value.trim();
+    if (!idInput) return showToast('Please enter your Company ID.', 'warning');
 
     const { data, error } = await supabaseClient
         .from('profiles')
@@ -1544,7 +1545,7 @@ async function checkAssessmentAccess() {
         .single();
 
     if (error || !data) {
-        return alert("ID not found. Siguraduhing tama ang iyong ID.");
+        return showToast('ID not found. Please check your Company ID.', 'error');
     }
 
     document.getElementById('verifyStep').style.display = 'none';
@@ -1552,8 +1553,8 @@ async function checkAssessmentAccess() {
     dash.style.display = 'block';
     document.getElementById('userNameDisplay').innerText = data.full_name;
 
-    updateProgress(75); 
-    injectScores();
+    updateProgress(75);
+    await injectScores(idInput);
 }
 
 function updateProgress(val) {
@@ -1561,22 +1562,58 @@ function updateProgress(val) {
     document.getElementById('progressPercent').innerText = val + '%';
 }
 
-function injectScores() {
+async function injectScores(companyId) {
     const logArea = document.getElementById('scoreLogs');
-    logArea.innerHTML = `
-        <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border);">
-            <span style="font-size:0.9rem;">Boiler Exam</span>
-            <span style="color:var(--primary); font-weight:bold;">95/100</span>
-        </div>
-         <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border);">
-            <span style="font-size:0.9rem;">Wwtp Exam</span>
-            <span style="color:var(--primary); font-weight:bold;">95/100</span>
-        </div>
-        <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border);">
-            <span style="font-size:0.9rem;">WTP Exam</span>
-            <span style="color:var(--primary); font-weight:bold;">88/100</span>
-        </div>
-    `;
+    logArea.innerHTML = `<div style="text-align:center;padding:20px;color:#a0aec0;font-size:0.85rem;">
+        <i class="fas fa-spinner fa-spin"></i> Loading scores...
+    </div>`;
+
+    try {
+        const { data, error } = await supabaseClient
+            .from('quiz_attempts')
+            .select('quiz_id, percentage_score, is_passed, created_at, quizzes(title)')
+            .eq('respondent_code', companyId)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            logArea.innerHTML = `<div style="text-align:center;padding:20px;color:#a0aec0;font-size:0.85rem;">
+                <i class="fas fa-inbox"></i><br>No exam records yet.
+            </div>`;
+            updateProgress(20);
+            return;
+        }
+
+        // Show last attempt per quiz
+        const seen = new Set();
+        const unique = data.filter(a => {
+            if (seen.has(a.quiz_id)) return false;
+            seen.add(a.quiz_id);
+            return true;
+        });
+
+        const passedCount = unique.filter(a => a.is_passed).length;
+        const pct = Math.round((passedCount / unique.length) * 100);
+        updateProgress(pct);
+
+        logArea.innerHTML = unique.map(a => `
+            <div style="display:flex;justify-content:space-between;align-items:center;
+                        padding:10px 0;border-bottom:1px solid var(--border);">
+                <span style="font-size:0.85rem;">${a.quizzes?.title || 'Unnamed Quiz'}</span>
+                <span style="font-weight:700;color:${a.is_passed ? 'var(--primary)' : '#f56565'};">
+                    ${a.percentage_score?.toFixed(0) ?? '--'}%
+                    ${a.is_passed
+                        ? '<i class="fas fa-check-circle" style="margin-left:4px;"></i>'
+                        : '<i class="fas fa-times-circle" style="margin-left:4px;"></i>'}
+                </span>
+            </div>`).join('');
+
+    } catch (err) {
+        logArea.innerHTML = `<div style="text-align:center;padding:16px;color:#f56565;font-size:0.82rem;">
+            Error loading scores: ${err.message}
+        </div>`;
+    }
 }
 
 // --- NAV LINKS CLICK LOGIC (Huwag galawin, okay na ito) ---
