@@ -2851,14 +2851,21 @@ function renderChemList() {
 // ====================================================================
 
 // I-initialize ang memory para sa Boiler at CSG states
+// Wrapped in try/catch — JSON.parse() throws if localStorage has corrupt data
 if (!window.boilerStates) {
-    window.boilerStates = JSON.parse(localStorage.getItem('dash_boiler_modes')) || {
-        A: 'MAIN',
-        B: 'BACKUP'
-    };
+    try {
+        const saved = localStorage.getItem('dash_boiler_modes');
+        window.boilerStates = (saved && saved !== 'undefined')
+            ? JSON.parse(saved)
+            : { A: 'MAIN', B: 'BACKUP' };
+    } catch (e) {
+        window.boilerStates = { A: 'MAIN', B: 'BACKUP' };
+        localStorage.removeItem('dash_boiler_modes'); // Clear corrupt data
+    }
 }
 if (!window.csgState) {
-    window.csgState = localStorage.getItem('dash_csg_mode') || '4B';
+    const savedCsg = localStorage.getItem('dash_csg_mode');
+    window.csgState = (savedCsg && savedCsg !== 'undefined') ? savedCsg : '4B';
 }
 
 // ====================================================================
