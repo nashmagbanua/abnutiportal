@@ -1927,7 +1927,7 @@ function loadDashboard() {
     }, 150);
 }
 
-        async function fetchDashboardDutySchedule() {
+       async function fetchDashboardDutySchedule() {
     const rosterContainer = document.getElementById('dashboard-duty-roster');
     if (!rosterContainer) return;
 
@@ -1936,8 +1936,8 @@ function loadDashboard() {
     const currentMonthText = `${months[new Date().getMonth()]} ${new Date().getFullYear()}`;
 
     rosterContainer.innerHTML = `
-        <div style="background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; text-align: center; color: #a0aec0;">
-            <i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i> Loading active plant duty roster...
+        <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; text-align: center; color: #718096; font-family: system-ui, -apple-system, sans-serif;">
+            <i class="fas fa-spinner fa-spin" style="margin-right: 8px; color: #3182ce;"></i> Loading active plant duty roster...
         </div>
     `;
 
@@ -1953,8 +1953,8 @@ function loadDashboard() {
         // KUNG WALANG SCHEDULE NA NAGAWA PA
         if (!data || data.length === 0) {
             rosterContainer.innerHTML = `
-                <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; text-align: center;">
-                    <p style="margin: 0; color: #718096; font-size: 0.85rem; font-weight: bold;">
+                <div style="background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; text-align: center; font-family: system-ui, -apple-system, sans-serif;">
+                    <p style="margin: 0; color: #4a5568; font-size: 0.9rem; font-weight: 600;">
                         ⚠️ Walang opisyal na active schedule para sa buwan ng ${currentMonthText}.
                     </p>
                 </div>
@@ -1969,56 +1969,80 @@ function loadDashboard() {
         });
 
         // Helper para sa fallback names kung bakante ang slot
-        const getOp = (shift, area, slot) => roster[`${shift}_${area}_${slot}`] || `<span style="color:#a0aec0; font-weight:normal;">Vacant</span>`;
+        const getOp = (shift, area, slot) => roster[`${shift}_${area}_${slot}`] || `<span style="color:#a0aec0; font-weight:normal; font-style: italic;">Vacant</span>`;
+
+        // Helper para sa boiler names parsing (pinaghihiwalay nang maayos para mag-wrap sa mobile)
+        const formatBoilerOps = (shift) => {
+            const ops = [getOp(shift, 'boiler', 1), getOp(shift, 'boiler', 2), getOp(shift, 'boiler', 3)];
+            return ops.map(op => `<span style="white-space: nowrap;">${op}</span>`).join(' <span style="color: #cbd5e0; margin: 0 4px;">|</span> ');
+        };
 
         // I-render ang magandang Dashboard view panel
         rosterContainer.innerHTML = `
-            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #edf2f7; padding-bottom: 10px; margin-bottom: 15px;">
-                    <h3 style="margin: 0; font-size: 0.95rem; color: #2d3748; font-weight: 900;"><i class="fas fa-clipboard-list" style="color: #3182ce; margin-right: 6px;"></i> OFFICIAL PLANT DUTY ROSTER (${currentMonthText})</h3>
-                    <span style="background: #e6fffa; color: #234e52; font-size: 0.7rem; font-weight: bold; padding: 3px 8px; border-radius: 20px; border: 1px solid #b2f5ea;">LIVE STATIONING</span>
+            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; font-family: system-ui, -apple-system, sans-serif;">
+                
+                <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; border-bottom: 1px solid #edf2f7; padding-bottom: 12px; margin-bottom: 20px;">
+                    <h3 style="margin: 0; font-size: 1rem; color: #1a202c; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-clipboard-list" style="color: #3182ce;"></i> 
+                        OFFICIAL OPSCREW AREA DUTY (${currentMonthText})
+                    </h3>
+                    <span style="background: #e6fffa; color: #234e52; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 9999px; border: 1px solid #b2f5ea; letter-spacing: 0.05em;">LIVE STATIONING</span>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 20px;">
                     
-                    <!-- ☀️ DAY SHIFT BLOCK -->
-                    <div style="background: #fffaf0; border: 1px solid #feebc8; border-radius: 8px; padding: 12px;">
-                        <div style="color: #dd6b20; font-weight: 900; font-size: 0.8rem; margin-bottom: 10px; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
-                            <span>☀️ DAY SHIFT OPERATORS</span>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.82rem;">
-                            <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #feebc8; padding-bottom:4px;">
-                                <strong style="color:#718096;">🔥 Boiler:</strong>
-                                <span style="font-weight:bold; color:#2d3748;">${getOp('day','boiler',1)} | ${getOp('day','boiler',2)} | ${getOp('day','boiler',3)}</span>
+                    <div style="background: #fffaf0; border: 1px solid #feebc8; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <div style="color: #dd6b20; font-weight: 800; font-size: 0.85rem; margin-bottom: 14px; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
+                                <span style="font-size: 1.1rem;">☀️</span> <span>Day Shift OPSCREW</span>
                             </div>
-                            <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #feebc8; padding-bottom:4px;">
-                                <strong style="color:#718096;">💧 WTP:</strong>
-                                <span style="font-weight:bold; color:#2d3748;">${getOp('day','wtp',1)}</span>
-                            </div>
-                            <div style="display:flex; justify-content:space-between;">
-                                <strong style="color:#718096;">☣️ WWTP:</strong>
-                                <span style="font-weight:bold; color:#2d3748;">${getOp('day','wwtp',1)}</span>
+                            <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.875rem;">
+                                
+                                <div style="display: flex; flex-direction: column; border-bottom: 1px dashed #feebc8; padding-bottom: 8px;">
+                                    <strong style="color: #4a5568; margin-bottom: 4px;"><i class="fas fa-fire" style="color: #e53e3e; margin-right: 4px;"></i> Boiler:</strong>
+                                    <div style="color: #2d3748; font-weight: 600; line-height: 1.5; padding-left: 4px;">
+                                        ${formatBoilerOps('day')}
+                                    </div>
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #feebc8; padding-bottom: 8px; flex-wrap: wrap; gap: 4px;">
+                                    <strong style="color: #4a5568;"><i class="fas fa-tint" style="color: #3182ce; margin-right: 4px;"></i> WTP:</strong>
+                                    <span style="font-weight: 600; color: #2d3748;">${getOp('day','wtp',1)}</span>
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 4px; flex-wrap: wrap; gap: 4px;">
+                                    <strong style="color: #4a5568;"><i class="fas fa-biohazard" style="color: #ecc94b; margin-right: 4px;"></i> WWTP:</strong>
+                                    <span style="font-weight: 600; color: #2d3748;">${getOp('day','wwtp',1)}</span>
+                                </div>
+
                             </div>
                         </div>
                     </div>
 
-                    <!-- 🌙 NIGHT SHIFT BLOCK -->
-                    <div style="background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
-                        <div style="color: #4a5568; font-weight: 900; font-size: 0.8rem; margin-bottom: 10px; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
-                            <span>🌙 NIGHT SHIFT OPERATORS</span>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.82rem;">
-                            <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #e2e8f0; padding-bottom:4px;">
-                                <strong style="color:#718096;">🔥 Boiler:</strong>
-                                <span style="font-weight:bold; color:#2d3748;">${getOp('night','boiler',1)} | ${getOp('night','boiler',2)} | ${getOp('night','boiler',3)}</span>
+                    <div style="background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <div style="color: #4a5568; font-weight: 800; font-size: 0.85rem; margin-bottom: 14px; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
+                                <span style="font-size: 1.1rem;">🌙</span> <span>Night Shift OPSCREW</span>
                             </div>
-                            <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #e2e8f0; padding-bottom:4px;">
-                                <strong style="color:#718096;">💧 WTP:</strong>
-                                <span style="font-weight:bold; color:#2d3748;">${getOp('night','wtp',1)}</span>
-                            </div>
-                            <div style="display:flex; justify-content:space-between;">
-                                <strong style="color:#718096;">☣️ WWTP:</strong>
-                                <span style="font-weight:bold; color:#2d3748;">${getOp('night','wwtp',1)}</span>
+                            <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.875rem;">
+                                
+                                <div style="display: flex; flex-direction: column; border-bottom: 1px dashed #e2e8f0; padding-bottom: 8px;">
+                                    <strong style="color: #4a5568; margin-bottom: 4px;"><i class="fas fa-fire" style="color: #e53e3e; margin-right: 4px;"></i> Boiler:</strong>
+                                    <div style="color: #2d3748; font-weight: 600; line-height: 1.5; padding-left: 4px;">
+                                        ${formatBoilerOps('night')}
+                                    </div>
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #e2e8f0; padding-bottom: 8px; flex-wrap: wrap; gap: 4px;">
+                                    <strong style="color: #4a5568;"><i class="fas fa-tint" style="color: #3182ce; margin-right: 4px;"></i> WTP:</strong>
+                                    <span style="font-weight: 600; color: #2d3748;">${getOp('night','wtp',1)}</span>
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 4px; flex-wrap: wrap; gap: 4px;">
+                                    <strong style="color: #4a5568;"><i class="fas fa-biohazard" style="color: #ecc94b; margin-right: 4px;"></i> WWTP:</strong>
+                                    <span style="font-weight: 600; color: #2d3748;">${getOp('night','wwtp',1)}</span>
+                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -2029,8 +2053,8 @@ function loadDashboard() {
     } catch (err) {
         console.error(err);
         rosterContainer.innerHTML = `
-            <div style="color: red; background: white; padding: 15px; border-radius: 12px; font-size: 0.8rem;">
-                ❌ Error parsing dashboard roster: ${err.message}
+            <div style="color: #e53e3e; background: #fff5f5; padding: 16px; border-radius: 12px; font-size: 0.875rem; border: 1px solid #fed7d7; font-family: system-ui, -apple-system, sans-serif;">
+                <i class="fas fa-exclamation-circle" style="margin-right: 6px;"></i> Error parsing dashboard roster: ${err.message}
             </div>
         `;
     }
@@ -3634,7 +3658,7 @@ async function openManpowerScheduler() {
             <!-- LEFT PANEL: CREW STATUS FILTER -->
             <div id="schedulerLeftPanel" style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                 <h4 style="margin:0 0 5px 0; color:#2d3748; font-size:1rem; font-weight:900;">👥 CREW STATUS FILTER</h4>
-                <p style="color:#718096; font-size:0.75rem; margin-bottom:15px;">I-uncheck ang pangalan kung ang operator ay Suspended, Absent, o On-Leave para hindi maisama sa rota.</p>
+                <p style="color:#718096; font-size:0.75rem; margin-bottom:15px;">I-uncheck ang pangalan kung ang operator ay Suspended, Absent, o On-Leave para hindi maisama sa Schedule.</p>
                 
                 <div id="crewFilterListContainer" style="display:flex; flex-direction:column; gap:10px;">
                     <div style="text-align:center; color:#a0aec0; font-size:0.85rem; padding:10px;">Loading crew...</div>
@@ -3734,24 +3758,25 @@ async function checkAndLoadExistingSchedule() {
         if (data && data.length > 0) {
             console.log(`📌 May nahanap na opisyal na schedule para sa ${monthText}`);
             
-            // 1. Gawing disabled o paalala lang ang Auto Rotate button sa gilid para iwas aksidente
+            // 1. Gawing disabled o paalala lang ang Auto Rotate button sa kaliwang panel
             if (buttonZone) {
                 buttonZone.innerHTML = `
                     <div style="background:#edf2f7; color:#4a5568; padding:10px; border-radius:6px; font-size:0.75rem; font-weight:bold; text-align:center; border:1px dashed #cbd5e0;">
-                        🔒 Naka-lock ang Auto-Rotate dahil may opisyal na schedule na ito. Pindutin ang "Revise" para baguhin.
+                        🔒 Naka-lock ang Auto-Rotate dahil may opisyal na schedule na ito. Pindutin ang "Revise Schedule" para baguhin.
                     </div>
                 `;
             }
 
-            // 2. I-render ang data sa "Official View Mode" (Naka-disable ang dropdowns)
-            renderScheduleGrid(data, true); // True ibig sabihin: LOCKED MODE
+            // 2. I-render ang data sa "Official View Mode" (isLocked = true)
+            // Siguraduhing malinis at kumpleto ang pagkakapasa ng array data
+            renderScheduleGrid(data, true); 
             
         } 
         // KASO B: BLANKO AT WALA PANG SCHEDULE NA NAGAGAWA TALAGA!
         else {
             console.log(`💡 Blanko ang buwan ng ${monthText}. Handa para sa bagong schedule.`);
             
-            // ibalik ang orihinal na gumaganang Auto Rotate button sa kaliwa
+            // Ibalik ang orihinal na gumaganang Auto Rotate button sa kaliwa
             if (buttonZone) {
                 buttonZone.innerHTML = `
                     <button onclick="generateSmartSchedule()" style="width:100%; background: linear-gradient(135deg, #d69e2e, #b7791f); color:white; border:none; padding:12px; border-radius:6px; font-weight:950; cursor:pointer; box-shadow:0 4px 10px rgba(183,121,31,0.25); font-size:0.9rem;">
@@ -3774,7 +3799,7 @@ async function checkAndLoadExistingSchedule() {
         gridContainer.innerHTML = `<div style="color:red; padding:20px;">❌ Error sa pag-check ng schedule: ${err.message}</div>`;
     }
 }
-        function renderScheduleGrid(scheduleData, isLocked) {
+       function renderScheduleGrid(scheduleData, isLocked) {
     const gridContainer = document.getElementById('schedulerGridContainer');
     if (!gridContainer) return;
 
@@ -3794,16 +3819,14 @@ async function checkAndLoadExistingSchedule() {
         const currentSavedValue = slotsMap[`${shift}_${area}_${slotNum}`] || "⚠️ VACANT (Need Hire)";
         
         if (isLocked) {
-            // Kung Locked Mode: Malinis na badge lang ang ipapakita, hindi dropdown!
             return `
-                <div style="background: white; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 6px; font-weight: bold; color: #2d3748; display:flex; align-items:center; gap:8px; font-size:0.85rem;">
-                    <i class="fas fa-user-check" style="color:#3182ce;"></i> ${currentSavedValue}
+                <div style="background: white; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 6px; font-weight: 600; color: #2d3748; display:flex; align-items:center; gap:8px; font-size:0.88rem; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                    <i class="fas fa-user-check" style="color:#4a5568;"></i> ${currentSavedValue}
                 </div>
             `;
         } else {
-            // Kung Revise Mode: Dropdown menu para pwedeng palitan ni sir ang pangalan
             return `
-                <select class="sched-select-node" data-shift="${shift}" data-area="${area}" data-slot="${slotNum}" style="width:100%; padding:8px; border:1px solid #cbd5e0; border-radius:6px; margin-bottom:6px; background:white; font-size:0.85rem; font-weight:bold;">
+                <select class="sched-select-node" data-shift="${shift}" data-area="${area}" data-slot="${slotNum}" style="width:100%; padding:8px; border:1px solid #cbd5e0; border-radius:6px; margin-bottom:6px; background:white; font-size:0.88rem; font-weight:600; color: #2d3748;">
                     ${dropdownOptionsHtml}
                 </select>
             `;
@@ -3811,70 +3834,72 @@ async function checkAndLoadExistingSchedule() {
     }
 
     gridContainer.innerHTML = `
-        <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
-            <div style="border-bottom: 2px dashed #cbd5e0; padding-bottom:12px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; font-family: system-ui, -apple-system, sans-serif;">
+            <div style="border-bottom: 2px dashed #cbd5e0; padding-bottom:12px; margin-bottom:20px; display:flex; flex-wrap: wrap; gap: 12px; justify-content:space-between; align-items:center;">
                 <div>
-                    <h3 style="margin:0; color:#1a202c; font-size:1.2rem;">${isLocked ? '📋 Official Saved Schedule' : '✏️ Revise Schedule Mode'} — ${monthText}</h3>
+                    <h3 style="margin:0; color:#1a202c; font-size:1.2rem; font-weight: 800;">${isLocked ? '📋 Official OPSCREW Schedule' : '✏️ Revise Schedule Mode'} — ${monthText}</h3>
                     <small style="color:#718096;">Status: <strong>${isLocked ? '🟢 Published & Active' : '🟠 Editing Draft'}</strong></small>
                 </div>
                 <div>
                     ${isLocked ? 
-                        `<button onclick="enableReviseMode(${JSON.stringify(scheduleData).replace(/"/g, '&quot;')})" style="background:#3182ce; color:white; border:none; padding:8px 16px; border-radius:6px; font-weight:bold; cursor:pointer;"><i class="fas fa-edit"></i> Revise Schedule</button>` :
+                        `<button onclick="enableReviseMode(${JSON.stringify(scheduleData).replace(/"/g, '&quot;')})" style="background:#3182ce; color:white; border:none; padding:8px 16px; border-radius:6px; font-weight:bold; cursor:pointer; font-size: 0.85rem;"><i class="fas fa-edit"></i> Revise Schedule</button>` :
                         `<span style="background:#feebc8; color:#c05621; padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:bold;">Suriin ang mga babaguhin</span>`
                     }
                 </div>
             </div>
 
-            <!-- Main Split View Grid -->
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom:25px;">
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:20px; margin-bottom:25px;">
                 
-                <!-- DAY SHIFT -->
-                <div style="background:#f7fafc; border:1px solid #e2e8f0; border-radius:10px; padding:15px;">
-                    <div style="background:#ed8936; color:white; padding:8px 12px; font-weight:950; border-radius:6px; font-size:0.9rem; margin-bottom:15px;">☀️ DAY SHIFT</div>
-                    <div style="margin-bottom:12px;">
-                        <label style="display:block; font-size:0.75rem; font-weight:900; color:#4a5568; margin-bottom:4px;">🔥 BOILER AREA</label>
+                <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:15px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                    <div style="background:#ed8936; color:white; padding:10px 12px; font-weight:900; border-radius:6px; font-size:0.9rem; margin-bottom:15px; text-align:center; text-transform: uppercase; letter-spacing: 0.05em;">☀️ DAY SHIFT</div>
+                    
+                    <div style="margin-bottom:16px; background: #fff5f5; border: 1px solid #fed7d7; border-radius: 8px; padding: 10px;">
+                        <label style="display:block; font-size:0.8rem; font-weight:900; color:#c53030; margin-bottom:8px; text-align:center; letter-spacing: 0.05em;">🔥 BOILER AREA</label>
                         ${renderSlotField('day', 'boiler', 1)}
                         ${renderSlotField('day', 'boiler', 2)}
                         ${renderSlotField('day', 'boiler', 3)}
                     </div>
-                    <div style="margin-bottom:12px;">
-                        <label style="display:block; font-size:0.75rem; font-weight:900; color:#4a5568; margin-bottom:4px;">💧 WTP AREA</label>
+                    
+                    <div style="margin-bottom:16px; background: #ebf8ff; border: 1px solid #bee3f8; border-radius: 8px; padding: 10px;">
+                        <label style="display:block; font-size:0.8rem; font-weight:900; color:#2b6cb0; margin-bottom:8px; text-align:center; letter-spacing: 0.05em;">💧 WTP AREA</label>
                         ${renderSlotField('day', 'wtp', 1)}
                     </div>
-                    <div>
-                        <label style="display:block; font-size:0.75rem; font-weight:900; color:#4a5568; margin-bottom:4px;">☣️ WWTP AREA</label>
+                    
+                    <div style="background: #fefcbf; border: 1px solid #fef08a; border-radius: 8px; padding: 10px;">
+                        <label style="display:block; font-size:0.8rem; font-weight:900; color:#744210; margin-bottom:8px; text-align:center; letter-spacing: 0.05em;">☣️ WWTP AREA</label>
                         ${renderSlotField('day', 'wwtp', 1)}
                     </div>
                 </div>
 
-                <!-- NIGHT SHIFT -->
-                <div style="background:#f7fafc; border:1px solid #e2e8f0; border-radius:10px; padding:15px;">
-                    <div style="background:#4a5568; color:white; padding:8px 12px; font-weight:950; border-radius:6px; font-size:0.9rem; margin-bottom:15px;">🌙 NIGHT SHIFT</div>
-                    <div style="margin-bottom:12px;">
-                        <label style="display:block; font-size:0.75rem; font-weight:900; color:#4a5568; margin-bottom:4px;">🔥 BOILER AREA</label>
+                <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:15px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                    <div style="background:#4a5568; color:white; padding:10px 12px; font-weight:900; border-radius:6px; font-size:0.9rem; margin-bottom:15px; text-align:center; text-transform: uppercase; letter-spacing: 0.05em;">🌙 NIGHT SHIFT</div>
+                    
+                    <div style="margin-bottom:16px; background: #fff5f5; border: 1px solid #fed7d7; border-radius: 8px; padding: 10px;">
+                        <label style="display:block; font-size:0.8rem; font-weight:900; color:#c53030; margin-bottom:8px; text-align:center; letter-spacing: 0.05em;">🔥 BOILER AREA</label>
                         ${renderSlotField('night', 'boiler', 1)}
                         ${renderSlotField('night', 'boiler', 2)}
                         ${renderSlotField('night', 'boiler', 3)}
                     </div>
-                    <div style="margin-bottom:12px;">
-                        <label style="display:block; font-size:0.75rem; font-weight:900; color:#4a5568; margin-bottom:4px;">💧 WTP AREA</label>
+                    
+                    <div style="margin-bottom:16px; background: #ebf8ff; border: 1px solid #bee3f8; border-radius: 8px; padding: 10px;">
+                        <label style="display:block; font-size:0.8rem; font-weight:900; color:#2b6cb0; margin-bottom:8px; text-align:center; letter-spacing: 0.05em;">💧 WTP AREA</label>
                         ${renderSlotField('night', 'wtp', 1)}
                     </div>
-                    <div>
-                        <label style="display:block; font-size:0.75rem; font-weight:900; color:#4a5568; margin-bottom:4px;">☣️ WWTP AREA</label>
+                    
+                    <div style="background: #fefcbf; border: 1px solid #fef08a; border-radius: 8px; padding: 10px;">
+                        <label style="display:block; font-size:0.8rem; font-weight:900; color:#744210; margin-bottom:8px; text-align:center; letter-spacing: 0.05em;">☣️ WWTP AREA</label>
                         ${renderSlotField('night', 'wwtp', 1)}
                     </div>
                 </div>
 
             </div>
 
-            <!-- Bottom Control Action Panel -->
             ${!isLocked ? `
-                <div style="display:flex; justify-content:space-between; align-items:center; background:#edf2f7; padding:12px 20px; border-radius:8px;">
-                    <span style="font-size:0.78rem; color:#4a5568; font-weight:bold;"><i class="fas fa-info-circle"></i> Mode: Revising. Ang pag-save ay mag-uupdate sa kasalukuyang records sa Supabase gamit ang upsert logic.</span>
-                    <div style="display:flex; gap:10px;">
-                        <button onclick="checkAndLoadExistingSchedule()" style="background:#718096; color:white; border:none; padding:10px 15px; border-radius:6px; font-weight:bold; cursor:pointer;">Cancel</button>
-                        <button onclick="saveApprovedSchedule()" style="background:#2f855a; color:white; border:none; padding:10px 22px; border-radius:6px; font-weight:950; cursor:pointer; font-size:0.88rem; box-shadow:0 4px 10px rgba(47,133,90,0.2);">
+                <div style="display:flex; flex-wrap:wrap; gap:12px; justify-content:space-between; align-items:center; background:#edf2f7; padding:12px 20px; border-radius:8px;">
+                    <span style="font-size:0.78rem; color:#4a5568; font-weight:bold;"><i class="fas fa-info-circle"></i> Mode: Revising. Ang pag-save ay mag-uupdate sa kasalukuyang records sa database.</span>
+                    <div style="display:flex; gap:10px; width: 100%; justify-content: flex-end; mobile-layout">
+                        <button onclick="checkAndLoadExistingSchedule()" style="background:#718096; color:white; border:none; padding:10px 15px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:0.85rem;">Cancel</button>
+                        <button onclick="saveApprovedSchedule()" style="background:#2f855a; color:white; border:none; padding:10px 22px; border-radius:6px; font-weight:950; cursor:pointer; font-size:0.85rem; box-shadow:0 4px 10px rgba(47,133,90,0.2);">
                             <i class="fas fa-save"></i> Save Revise Rota
                         </button>
                     </div>
@@ -3883,7 +3908,7 @@ async function checkAndLoadExistingSchedule() {
         </div>
     `;
 
-    // Kung nakabukas ang Revise Mode, kailangan nating i-set ang selected value ng mga dropdowns sa nakasave talaga sa database
+    // Pagbabalik ng selected values para sa dropdowns sa revise mode
     if (!isLocked) {
         document.querySelectorAll('.sched-select-node').forEach((selectNode) => {
             const shift = selectNode.getAttribute('data-shift');
@@ -4092,13 +4117,11 @@ async function generateSmartSchedule() {
         selectNode.value = slots[`${shift}_${area}`][slotIdx];
     });
 }
-        async function saveApprovedSchedule() {
+       async function saveApprovedSchedule() {
     const monthSelect = document.getElementById('schedMonthSelect');
     if (!monthSelect) return;
     
-    const monthText = monthSelect.options[monthSelect.selectedIndex].text; // Halimbawa: "JULY 2026"
-    
-    // 1. Kunin lahat ng dropdowns sa screen para basahin ang mga nakatokang pangalan
+    const monthText = monthSelect.options[monthSelect.selectedIndex].text;
     const selectNodes = document.querySelectorAll('.sched-select-node');
     if (selectNodes.length === 0) {
         showToast('No schedule found. Generate a rota first.', 'warning');
@@ -4106,7 +4129,6 @@ async function generateSmartSchedule() {
     }
 
     let recordsToSave = [];
-
     selectNodes.forEach(node => {
         const shift = node.getAttribute('data-shift');
         const area = node.getAttribute('data-area');
@@ -4124,8 +4146,6 @@ async function generateSmartSchedule() {
     });
 
     try {
-        // Pakitandaan boss: .upsert() ang gamit natin. Kung i-revise man ito ni sir pagkalipas ng ilang araw,
-        // kusa nitong o-overwrite-an ang lumang data basta tumugma sa buwan, shift, area, at slot!
         const { data, error } = await supabaseClient
             .from('duty_schedules')
             .upsert(recordsToSave, { onConflict: 'schedule_month,shift,area,slot_number' });
@@ -4133,6 +4153,27 @@ async function generateSmartSchedule() {
         if (error) throw error;
 
         showToast(`Schedule for ${monthText} saved successfully! ✅ The team can now view it live.`, 'success', 5000);
+        
+        // ==========================================
+        // 🔥 FIX DIRECTLY HERE: I-render ulit ang Grid bilang LOCKED (true)
+        // mapproprocess nito ang array papuntang malinis na badges
+        // ==========================================
+        const slotsForGrid = recordsToSave.map(r => ({
+            shift: r.shift,
+            area: r.area,
+            slot_number: r.slot_number,
+            operator_name: r.operator_name
+        }));
+        
+        renderScheduleGrid(slotsForGrid, true);
+
+        // Ibalik din ang default layout ng Action Button Zone sa kaliwa kung meron man
+        const buttonZone = document.getElementById('schedulerActionButtonZone');
+        if (buttonZone) {
+            buttonZone.innerHTML = `
+                <button onclick="enableReviseMode(${JSON.stringify(slotsForGrid).replace(/"/g, '&quot;')})" style="background:#3182ce; color:white; border:none; padding:8px 16px; border-radius:6px; font-weight:bold; cursor:pointer;"><i class="fas fa-edit"></i> Revise Schedule</button>
+            `;
+        }
         
     } catch (err) {
         console.error("❌ Error sa pag-save ng schedule:", err);
