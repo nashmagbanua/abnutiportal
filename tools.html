@@ -252,18 +252,79 @@
     }
 
     // ── PROFILE ───────────────────────────────────────────────
-    function loadProfile() {
-        const name   = localStorage.getItem('userName');
-        const role   = localStorage.getItem('userRole');
-        const avatar = localStorage.getItem('userAvatar');
+    async function loadProfile() {
+        // 1. Instant UI Load: Kunin muna ang nasa localStorage para mabilis ang loading sa screen
+        const localName   = localStorage.getItem('userName');
+        const localRole   = localStorage.getItem('userRole');
+        const localAvatar = localStorage.getItem('userAvatar');
 
-        document.getElementById('displayName').innerText =
-            name || 'Unknown User';
-        document.getElementById('displayRole').innerText =
-            role ? role.toUpperCase() : 'OPERATOR';
+        document.getElementById('displayName').innerText = localName || 'Loading...';
+        document.getElementById('displayRole').innerText = localRole ? localRole.toUpperCase() : 'OPERATOR';
+        
+        if (localAvatar) {
+            document.getElementById('displayAvatar').src = localAvatar;
+        }
 
-        if (avatar) {
-            document.getElementById('displayAvatar').src = 'assets/' + avatar;
+        try {
+            // 2. Kunin ang logged-in user session mula sa Supabase Auth
+            const { data: { session }, error: authError } = await supabaseClient.auth.getSession();
+            
+            if (authError || !session) {
+                console.log("Walang active session o offline.");
+                return; 
+            }
+
+            const user = session.user;
+
+            // 3. Hugutin ang live profile details gamit ang user.id
+            const { data: profile, error: dbError } = await supabaseClient
+                .from('profiles')
+                .select('full_name, role, avatar_url')
+                .eq('id', user.id)
+                .single();
+
+            if (dbError) throw dbError;
+
+            if (profile) {
+                // I-update ang UI mula sa live database data
+                document.getElementById('displayName').innerText = profile.full_name || 'Unknown User';
+                document.getElementById('displayRole').innerText = profile.role ? profile.role.toUpperCase() : 'OPERATOR';
+
+                // I-save sa localStorage para sa mabilisang load sa susunod
+                localStorage.setItem('userName', profile.full_name);
+                localStorage.setItem('userRole', profile.role);
+
+                // 4. Prosesuhin ang avatar_url gamit ang 'avatars' folder path
+                if (profile.avatar_url) {
+                    let finalAvatarUrl = profile.avatar_url;
+
+                    // KUNG FILE NAME LANG ANG NAKASAVE (Hindi nagsisimula sa http o data:)
+                    if (!profile.avatar_url.startsWith('http') && !profile.avatar_url.startsWith('data:')) {
+                        
+                        // INFO: Palitan mo yung 'YOUR_BUCKET_NAME' kung ano ang nakalagay na pangalan 
+                        // ng iyong main bucket sa Supabase Storage dashboard (halimbawa: 'uploads' o 'main').
+                        const bucketName = 'uploads'; 
+                        
+                        // Dito natin pinagsasama ang folder name ('avatars/') at ang pangalan ng file
+                        const filePath = `avatars/${profile.avatar_url}`;
+
+                        const { data } = supabaseClient.storage
+                            .from(bucketName) 
+                            .getPublicUrl(filePath);
+                        
+                        finalAvatarUrl = data.publicUrl;
+                    }
+
+                    // I-apply na sa src ng img element sa HTML
+                    document.getElementById('displayAvatar').src = finalAvatarUrl;
+                    
+                    // I-save ang final link sa localStorage bilang cache
+                    localStorage.setItem('userAvatar', finalAvatarUrl);
+                }
+            }
+
+        } catch (err) {
+            console.error('Error loading profile from Supabase:', err.message);
         }
     }
 
