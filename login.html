@@ -1170,11 +1170,11 @@ function injectScores() {
         </div>
     `;
 }
-   // 1. Dito mo ilalagay ang mga FILENAME ng mga Supervisor at Dept Head na i-uupload mo sa uploads/avatars/
+ // 1. Dito mo ilalagay ang mga FILENAME ng mga Supervisor at Dept Head na i-uupload mo sa uploads/avatars/
 const managementAvatars = {
-    "Sir Karl": "sir.jpg",        // Gumagana na ito dahil tugma sa Supabase bucket mo!
+    "Sir Karl": "sir.jpg",        // Gumagana na ito!
     "Andrew Ortega": "andrew.jpg",
-    "Archy Calisay": "archy.jpg", // Nilagyan ko na rin ng extension para kapag nag-upload ka handa na
+    "Archy Calisay": "archy.jpg", 
     "Aldrin Apuang": "aldrin.jpg",
     "Jembie Reyes": "jembie.jpg"
 };
@@ -1182,7 +1182,6 @@ const managementAvatars = {
 async function initOrgChartAvatars() {
     try {
         // --- PROSESO 1: PARA SA MGA SUPERVISORS AT DEPT HEAD ---
-        // Gagamitin natin ang 'managementAvatars' object na nasa itaas ng function
         for (const [name, filename] of Object.entries(managementAvatars)) {
             const imgElement = document.getElementById(`avatar-${name.replace(/\s+/g, '-')}`);
             if (imgElement) {
@@ -1195,7 +1194,22 @@ async function initOrgChartAvatars() {
             }
         }
 
-       // --- PROSESO 2: PARA SA MGA OPERATORS & OPSCREW (PINAHUSAY NA FILENAME MATCHING) ---
+        // --- PROSESO 2: PARA SA MGA OPERATORS & OPSCREW ---
+        // HETO ANG BAHAGING NAWALA SA KODIGO MO KANINA (MAHALAGA ITO):
+        const { data: dbProfiles, error } = await supabaseClient
+            .from('profiles')
+            .select('full_name, avatar_url');
+
+        if (error) throw error;
+
+        const profileMap = {};
+        dbProfiles.forEach(p => {
+            if (p.full_name) {
+                profileMap[p.full_name.trim().toLowerCase()] = p.avatar_url;
+            }
+        });
+
+        // Dito na magsisimula ang pag-render sa mga miyembro
         const memberNodes = document.querySelectorAll('.org-member-list li[data-name]');
         
         memberNodes.forEach(node => {
@@ -1214,24 +1228,15 @@ async function initOrgChartAvatars() {
                     finalSrc = data.publicUrl;
                 }
             } else {
-                // 2. KUNG WALA PANG ACCOUNT (Fallback gamit ang Unang Pangalan):
-                // Gumawa tayo ng dalawang subok para mas sigurado:
-                
-                // Kunin ang unang salita (e.g., "John")
+                // 2. KUNG WALA PANG ACCOUNT (Fallback gamit ang Unang Pangalan)
                 const firstWord = rawName.trim().split(' ')[0].toLowerCase(); 
-                
-                // Kunin ang unang dalawang salita na walang space (e.g., "johnlloyd" para sa "John Lloyd")
-                const cleanCombined = rawName.trim().split(' ').slice(0, 2).join('').toLowerCase();
-                
-                // Dito natin default sa unang salita. Siguraduhing lowercase ang filename sa bucket!
                 const fallbackFilename = `${firstWord}.jpg`; 
                 
                 const { data } = supabaseClient.storage.from('uploads').getPublicUrl(`avatars/${fallbackFilename}`);
                 finalSrc = data.publicUrl;
             }
 
-            // I-inject ang image element gamit ang mas matatag na onerror fallback
-            // Kung hindi mahanap ang .jpg, susubukan naman nitong hanapin ang .png bago mag-UI Avatars
+            // I-inject ang image element gamit ang double-fallback (.jpg -> .png -> UI Avatars)
             node.innerHTML = `
                 <img src="${finalSrc}" class="member-avatar" 
                      onerror="
@@ -1257,7 +1262,6 @@ async function initOrgChartAvatars() {
 window.addEventListener('DOMContentLoaded', () => {
     initOrgChartAvatars(); 
 });
-
 // --- NAV LINKS CLICK LOGIC (Huwag galawin, okay na ito) ---
 document.querySelectorAll('.nav-links a').forEach(link => {
     link.addEventListener('click', () => {
