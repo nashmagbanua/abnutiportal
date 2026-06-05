@@ -1194,8 +1194,7 @@ async function initOrgChartAvatars() {
             }
         }
 
-        // --- PROSESO 2: PARA SA MGA OPERATORS & OPSCREW ---
-        // HETO ANG BAHAGING NAWALA SA KODIGO MO KANINA (MAHALAGA ITO):
+// --- PROSESO 2: PARA SA MGA OPERATORS & OPSCREW (DEBUGGING VERSION) ---
         const { data: dbProfiles, error } = await supabaseClient
             .from('profiles')
             .select('full_name, avatar_url');
@@ -1205,11 +1204,11 @@ async function initOrgChartAvatars() {
         const profileMap = {};
         dbProfiles.forEach(p => {
             if (p.full_name) {
+                // Ginagawang lowercase at tinatanggal ang extra spaces sa unahan at dulo
                 profileMap[p.full_name.trim().toLowerCase()] = p.avatar_url;
             }
         });
 
-        // Dito na magsisimula ang pag-render sa mga miyembro
         const memberNodes = document.querySelectorAll('.org-member-list li[data-name]');
         
         memberNodes.forEach(node => {
@@ -1219,6 +1218,10 @@ async function initOrgChartAvatars() {
             
             let finalSrc = '';
 
+            console.log(`=== DEBUGGING FOR: ${rawName} ===`);
+            console.log(`Search Key (HTML): "${searchKey}"`);
+            console.log(`Found in Database Profiles?:`, dbAvatarFile ? `Yes (${dbAvatarFile})` : "No");
+
             // 1. Kung may account at may custom avatar_url sa profiles table
             if (dbAvatarFile && dbAvatarFile.trim() !== '') {
                 if (dbAvatarFile.startsWith('http')) {
@@ -1227,6 +1230,7 @@ async function initOrgChartAvatars() {
                     const { data } = supabaseClient.storage.from('uploads').getPublicUrl(`avatars/${dbAvatarFile}`);
                     finalSrc = data.publicUrl;
                 }
+                console.log(`Using DB URL: ${finalSrc}`);
             } else {
                 // 2. KUNG WALA PANG ACCOUNT (Fallback gamit ang Unang Pangalan)
                 const firstWord = rawName.trim().split(' ')[0].toLowerCase(); 
@@ -1234,25 +1238,28 @@ async function initOrgChartAvatars() {
                 
                 const { data } = supabaseClient.storage.from('uploads').getPublicUrl(`avatars/${fallbackFilename}`);
                 finalSrc = data.publicUrl;
+                console.log(`No DB account. Falling back to Storage: avatars/${fallbackFilename}`);
             }
 
             // I-inject ang image element gamit ang double-fallback (.jpg -> .png -> UI Avatars)
             node.innerHTML = `
                 <img src="${finalSrc}" class="member-avatar" 
+                     data-rawname="${rawName}"
                      onerror="
                         if (!this.getAttribute('data-tried-png')) {
                             this.setAttribute('data-tried-png', 'true');
                             const firstName = '${rawName.trim().split(' ')[0].toLowerCase()}';
+                            console.log('Failed to load .jpg for ' + this.getAttribute('data-rawname') + '. Trying .png next...');
                             this.src = supabaseClient.storage.from('uploads').getPublicUrl('avatars/' + firstName + '.png').data.publicUrl;
                         } else {
                             this.onerror = null;
+                            console.log('Failed both .jpg and .png for ' + this.getAttribute('data-rawname') + '. Defaulting to UI-Avatars.');
                             this.src = 'https://ui-avatars.com/api/?name=${encodeURIComponent(rawName)}&background=48bb78&color=fff';
                         }
                      "> 
                 <span>${rawName}</span>
             `;
         });
-
     } catch (err) {
         console.error("Error loading org chart avatars:", err.message);
     }
