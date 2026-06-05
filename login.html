@@ -1170,27 +1170,19 @@ function injectScores() {
         </div>
     `;
 }
-    // 1. Dito mo ilalagay ang mga FILENAME ng mga Supervisor at Dept Head na i-uupload mo sa uploads/avatars/
+   // 1. Dito mo ilalagay ang mga FILENAME ng mga Supervisor at Dept Head na i-uupload mo sa uploads/avatars/
 const managementAvatars = {
-    "Sir Karl": "sir.jpg", 
+    "Sir Karl": "sir.jpg",        // Gumagana na ito dahil tugma sa Supabase bucket mo!
     "Andrew Ortega": "andrew_pfp.jpg",
-    "Archy Calisay": "", // Iwanang blanko kung wala pa, automatic UI-Avatars ang sasalo
-    "Aldrin Apuang": "",
-    "Jembie Reyes": ""
+    "Archy Calisay": "archy.jpg", // Nilagyan ko na rin ng extension para kapag nag-upload ka handa na
+    "Aldrin Apuang": "aldrin.jpg",
+    "Jembie Reyes": "jembie.jpg"
 };
 
 async function initOrgChartAvatars() {
     try {
-        // --- PROSESO 1: PARA SA MGA SUPERVISORS AT DEPT HEAD (FIRST NAME BASE) ---
-        // Ginawa nating lowercase at kinuha lang ang unang salita para sa filename match
-        const managementAvatars = {
-            "Sir Karl": "sir.png",         // sir.png ang hahanapin sa storage
-            "Andrew Ortega": "andrew.jpg", // andrew.jpg ang hahanapin sa storage
-            "Archy Calisay": "archy.jpg",
-            "Aldrin Apuang": "aldrin.jpg",
-            "Jembie Reyes": "jembie.jpg"
-        };
-
+        // --- PROSESO 1: PARA SA MGA SUPERVISORS AT DEPT HEAD ---
+        // Gagamitin natin ang 'managementAvatars' object na nasa itaas ng function
         for (const [name, filename] of Object.entries(managementAvatars)) {
             const imgElement = document.getElementById(`avatar-${name.replace(/\s+/g, '-')}`);
             if (imgElement) {
@@ -1236,17 +1228,14 @@ async function initOrgChartAvatars() {
                 }
             } else {
                 // 2. KUNG WALA PA SILANG ACCOUNT: Kukunin natin ang FIRST NAME nila para i-check sa Supabase Storage
-                // Halimbawa: "Aurelio Galelio Jhonas Magbanua" -> "aurelio.jpg" (or .png)
                 const firstName = rawName.trim().split(' ')[0].toLowerCase();
-                
-                // Piliin kung anong extension ang default mo sa bucket (.png o .jpg)
                 const fallbackFilename = `${firstName}.jpg`; 
                 
                 const { data } = supabaseClient.storage.from('uploads').getPublicUrl(`avatars/${fallbackFilename}`);
                 finalSrc = data.publicUrl;
             }
 
-            // I-inject ang image element. May onerror handler para bumalik sa UI-Avatars kapag walang uploaded file sa storage.
+            // I-inject ang image element. May onerror handler para bumalik sa UI-Avatars kapag walang uploaded file.
             node.innerHTML = `
                 <img src="${finalSrc}" class="member-avatar" 
                      onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(rawName)}&background=48bb78&color=fff'"> 
@@ -1261,7 +1250,6 @@ async function initOrgChartAvatars() {
 
 // Tawagin ang function para mag-load ang mga pictures pagkabukas ng page
 window.addEventListener('DOMContentLoaded', () => {
-    // Siguraduhing tawagin ito kasabay ng iba mo pang functions
     initOrgChartAvatars(); 
 });
 
