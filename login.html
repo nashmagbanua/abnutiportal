@@ -1181,30 +1181,35 @@ const managementAvatars = {
 
 async function initOrgChartAvatars() {
     try {
-        // --- PROSESO 1: PARA SA MGA SUPERVISORS AT DEPT HEAD (HARDCODED FILENAMES) ---
+        // --- PROSESO 1: PARA SA MGA SUPERVISORS AT DEPT HEAD (FIRST NAME BASE) ---
+        // Ginawa nating lowercase at kinuha lang ang unang salita para sa filename match
+        const managementAvatars = {
+            "Sir Karl": "sir.png",         // sir.png ang hahanapin sa storage
+            "Andrew Ortega": "andrew.jpg", // andrew.jpg ang hahanapin sa storage
+            "Archy Calisay": "archy.jpg",
+            "Aldrin Apuang": "aldrin.jpg",
+            "Jembie Reyes": "jembie.jpg"
+        };
+
         for (const [name, filename] of Object.entries(managementAvatars)) {
             const imgElement = document.getElementById(`avatar-${name.replace(/\s+/g, '-')}`);
             if (imgElement) {
                 if (filename && filename.trim() !== '') {
-                    // Kunin ang public URL mula sa Supabase Storage
                     const { data } = supabaseClient.storage.from('uploads').getPublicUrl(`avatars/${filename}`);
                     imgElement.src = data.publicUrl;
                 } else {
-                    // Fallback sa UI-Avatars kapag walang filename
                     imgElement.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2d3748&color=fff`;
                 }
             }
         }
 
-        // --- PROSESO 2: PARA SA MGA OPERATORS & OPSCREW (MULA SA SUPABASE PROFILES) ---
-        // Kukunin natin ang lahat ng aprubadong operators para itugma sa pangalan
+        // --- PROSESO 2: PARA SA MGA OPERATORS & OPSCREW (AUTOMATIC FIRST NAME FILENAME) ---
         const { data: dbProfiles, error } = await supabaseClient
             .from('profiles')
             .select('full_name, avatar_url');
 
         if (error) throw error;
 
-        // Gagawa tayo ng mabilisang map ng pangalan -> avatar link
         const profileMap = {};
         dbProfiles.forEach(p => {
             if (p.full_name) {
@@ -1212,7 +1217,6 @@ async function initOrgChartAvatars() {
             }
         });
 
-        // Hanapin lahat ng `<li>` na may `data-name` attribute sa screen
         const memberNodes = document.querySelectorAll('.org-member-list li[data-name]');
         
         memberNodes.forEach(node => {
@@ -1222,7 +1226,7 @@ async function initOrgChartAvatars() {
             
             let finalSrc = '';
 
-            // Tiyakin kung may nakitang profile pic sa database at hindi ito blanko
+            // 1. Kung may account sila at may custom avatar_url sa profiles table, iyon ang gagamitin
             if (dbAvatarFile && dbAvatarFile.trim() !== '') {
                 if (dbAvatarFile.startsWith('http')) {
                     finalSrc = dbAvatarFile;
@@ -1231,12 +1235,23 @@ async function initOrgChartAvatars() {
                     finalSrc = data.publicUrl;
                 }
             } else {
-                // Fallback kapag walang account o walang pic: Gagamit ng UI-Avatars gamit ang pangalan nila
-                finalSrc = `https://ui-avatars.com/api/?name=${encodeURIComponent(rawName)}&background=48bb78&color=fff`;
+                // 2. KUNG WALA PA SILANG ACCOUNT: Kukunin natin ang FIRST NAME nila para i-check sa Supabase Storage
+                // Halimbawa: "Aurelio Galelio Jhonas Magbanua" -> "aurelio.jpg" (or .png)
+                const firstName = rawName.trim().split(' ')[0].toLowerCase();
+                
+                // Piliin kung anong extension ang default mo sa bucket (.png o .jpg)
+                const fallbackFilename = `${firstName}.jpg`; 
+                
+                const { data } = supabaseClient.storage.from('uploads').getPublicUrl(`avatars/${fallbackFilename}`);
+                finalSrc = data.publicUrl;
             }
 
-            // I-inject ang maliit na bilog na image element sa loob ng <li> bago ang text ng pangalan
-            node.innerHTML = `<img src="${finalSrc}" class="member-avatar" onerror="this.src='https://ui-avatars.com/api/?name=User&background=48bb78&color=fff'"> <span>${rawName}</span>`;
+            // I-inject ang image element. May onerror handler para bumalik sa UI-Avatars kapag walang uploaded file sa storage.
+            node.innerHTML = `
+                <img src="${finalSrc}" class="member-avatar" 
+                     onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(rawName)}&background=48bb78&color=fff'"> 
+                <span>${rawName}</span>
+            `;
         });
 
     } catch (err) {
