@@ -1195,20 +1195,7 @@ async function initOrgChartAvatars() {
             }
         }
 
-        // --- PROSESO 2: PARA SA MGA OPERATORS & OPSCREW (AUTOMATIC FIRST NAME FILENAME) ---
-        const { data: dbProfiles, error } = await supabaseClient
-            .from('profiles')
-            .select('full_name, avatar_url');
-
-        if (error) throw error;
-
-        const profileMap = {};
-        dbProfiles.forEach(p => {
-            if (p.full_name) {
-                profileMap[p.full_name.trim().toLowerCase()] = p.avatar_url;
-            }
-        });
-
+       // --- PROSESO 2: PARA SA MGA OPERATORS & OPSCREW (PINAHUSAY NA FILENAME MATCHING) ---
         const memberNodes = document.querySelectorAll('.org-member-list li[data-name]');
         
         memberNodes.forEach(node => {
@@ -1218,7 +1205,7 @@ async function initOrgChartAvatars() {
             
             let finalSrc = '';
 
-            // 1. Kung may account sila at may custom avatar_url sa profiles table, iyon ang gagamitin
+            // 1. Kung may account at may custom avatar_url sa profiles table
             if (dbAvatarFile && dbAvatarFile.trim() !== '') {
                 if (dbAvatarFile.startsWith('http')) {
                     finalSrc = dbAvatarFile;
@@ -1227,18 +1214,36 @@ async function initOrgChartAvatars() {
                     finalSrc = data.publicUrl;
                 }
             } else {
-                // 2. KUNG WALA PA SILANG ACCOUNT: Kukunin natin ang FIRST NAME nila para i-check sa Supabase Storage
-                const firstName = rawName.trim().split(' ')[0].toLowerCase();
-                const fallbackFilename = `${firstName}.jpg`; 
+                // 2. KUNG WALA PANG ACCOUNT (Fallback gamit ang Unang Pangalan):
+                // Gumawa tayo ng dalawang subok para mas sigurado:
+                
+                // Kunin ang unang salita (e.g., "John")
+                const firstWord = rawName.trim().split(' ')[0].toLowerCase(); 
+                
+                // Kunin ang unang dalawang salita na walang space (e.g., "johnlloyd" para sa "John Lloyd")
+                const cleanCombined = rawName.trim().split(' ').slice(0, 2).join('').toLowerCase();
+                
+                // Dito natin default sa unang salita. Siguraduhing lowercase ang filename sa bucket!
+                const fallbackFilename = `${firstWord}.jpg`; 
                 
                 const { data } = supabaseClient.storage.from('uploads').getPublicUrl(`avatars/${fallbackFilename}`);
                 finalSrc = data.publicUrl;
             }
 
-            // I-inject ang image element. May onerror handler para bumalik sa UI-Avatars kapag walang uploaded file.
+            // I-inject ang image element gamit ang mas matatag na onerror fallback
+            // Kung hindi mahanap ang .jpg, susubukan naman nitong hanapin ang .png bago mag-UI Avatars
             node.innerHTML = `
                 <img src="${finalSrc}" class="member-avatar" 
-                     onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(rawName)}&background=48bb78&color=fff'"> 
+                     onerror="
+                        if (!this.getAttribute('data-tried-png')) {
+                            this.setAttribute('data-tried-png', 'true');
+                            const firstName = '${rawName.trim().split(' ')[0].toLowerCase()}';
+                            this.src = supabaseClient.storage.from('uploads').getPublicUrl('avatars/' + firstName + '.png').data.publicUrl;
+                        } else {
+                            this.onerror = null;
+                            this.src = 'https://ui-avatars.com/api/?name=${encodeURIComponent(rawName)}&background=48bb78&color=fff';
+                        }
+                     "> 
                 <span>${rawName}</span>
             `;
         });
