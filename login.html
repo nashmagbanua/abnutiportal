@@ -417,22 +417,28 @@ nav.scrolled {
 .org-main-section::before { content: ''; position: absolute; top: 0; left: 16.66%; right: 16.66%; height: 2px; background: var(--primary); box-shadow: 0 0 8px var(--primary); }
 
 .org-main-layout { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; width: 100%; position: relative; }
-.org-team-column { background: rgba(255, 255, 255, 0.01); border: 1px solid rgba(255, 255, 255, 0.04); border-radius: 16px; padding: 20px 15px; position: relative; }
+.org-team-column { background: rgba(255, 255, 255, 0.01); border: 1px solid rgba(255, 255, 255, 0.04); border-radius: 16px; padding: 22px 18px; position: relative; } /* Dinagdagan ng konting padding ang column */
 .org-team-column::before { content: ''; position: absolute; top: -20px; left: 50%; width: 2px; height: 20px; background: var(--primary); }
 .org-team-column::after { content: ''; position: absolute; bottom: -25px; left: 50%; width: 2px; height: 25px; background: var(--primary); }
 
-.org-team-title { font-size: 0.8rem; color: var(--primary); font-weight: 800; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; border-bottom: 1px solid rgba(72, 187, 120, 0.2); padding-bottom: 6px; }
+/* PINALAKI: Pamagat tulad ng WTP Mantech, Boiler Mantech, atbp. */
+.org-team-title { font-size: 0.95rem; color: var(--primary); font-weight: 800; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 14px; border-bottom: 1px solid rgba(72, 187, 120, 0.2); padding-bottom: 8px; }
 
-.org-member-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
-.org-member-list li { font-size: 0.88rem; color: #cbd5e0; background: rgba(255,255,255,0.02); padding: 8px 12px; border-radius: 8px; border-bottom: 2px solid rgba(255,255,255,0.05); text-align: center; transition: 0.2s; width: 100%; }
+/* BINAGO: Nilakihan ang pagitan (gap) ng mga pangalan */
+.org-member-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+
+/* PINALAKI: Font at space sa loob ng kahon ng mga Mantech at Opscrew Members */
+.org-member-list li { font-size: 1.05rem; color: #cbd5e0; background: rgba(255,255,255,0.02); padding: 11px 14px; border-radius: 8px; border-bottom: 2px solid rgba(255,255,255,0.05); text-align: center; transition: 0.2s; width: 100%; font-weight: 500; }
 .org-member-list li:hover { background: rgba(72, 187, 120, 0.05); border-bottom-color: var(--primary); color: #fff; }
 .org-member-list li.vacant { color: #556175; font-style: italic; border-bottom-color: #4a5568; background: transparent; }
 
-.org-opscrew-container { grid-column: span 3; background: rgba(72, 187, 120, 0.02); border: 1px solid rgba(72, 187, 120, 0.2); border-radius: 20px; padding: 25px; margin-top: 25px; position: relative; box-shadow: inset 0 0 20px rgba(72,187,120,0.05); }
+/* BINAGO: Dinagdagan ng padding ang Opscrew container para mas maluwag tingnan */
+.org-opscrew-container { grid-column: span 3; background: rgba(72, 187, 120, 0.02); border: 1px solid rgba(72, 187, 120, 0.2); border-radius: 20px; padding: 30px; margin-top: 25px; position: relative; box-shadow: inset 0 0 20px rgba(72,187,120,0.05); }
 .org-opscrew-container::before { content: ''; position: absolute; top: -27px; left: 16.66%; right: 16.66%; height: 2px; background: var(--primary); box-shadow: 0 0 8px var(--primary); z-index: 1; }
 .org-opscrew-container::after { content: ''; position: absolute; top: -25px; left: 50%; transform: translateX(-50%); width: 2px; height: 25px; background: var(--primary); box-shadow: 0 0 6px var(--primary); z-index: 1; }
 
-.org-ops-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; justify-items: center; align-items: center; }
+/* BINAGO: Nilakihan ang gap sa pagitan ng Crew Alpha, Crew Bravo, etc. */
+.org-ops-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; justify-items: center; align-items: center; }
 
 @media (max-width: 960px) and (min-width: 821px) {
     .org-supervisors-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
