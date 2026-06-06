@@ -83,7 +83,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 1200px; /* Ensures readable spacing in desktop/large viewports */
+            min-width: 1300px;
         }
 
         th, td {
@@ -192,7 +192,7 @@
                     <tr>
                         <th rowspan="2" style="width: 40px;">No.</th>
                         <th rowspan="2" style="width: 150px;">Process Name / Operation Description</th>
-                        <th rowspan="2" style="width: 130px;">Machine, Device, Jig, Tools</th>
+                        <th rowspan="2" style="width: 140px;">Machine, Device, Jig, Tools</th>
                         <th colspan="3">Characteristics</th>
                         <th colspan="5">Methods</th>
                         <th rowspan="2" style="width: 150px;">Responsibility</th>
@@ -201,12 +201,12 @@
                     <tr>
                         <th style="width: 50px;">No.</th>
                         <th style="width: 120px;">Product</th>
-                        <th style="width: 150px;">Process</th>
+                        <th style="width: 140px;">Process</th>
                         <th style="width: 140px;">Product / Process Spec. Tolerance</th>
-                        <th style="width: 120px;">Evaluation / Measurement Technique</th>
+                        <th style="width: 130px;">Evaluation / Measurement Technique</th>
                         <th style="width: 80px;">Sample Size</th>
                         <th style="width: 90px;">Sample Freq.</th>
-                        <th style="width: 150px;">Control Method</th>
+                        <th style="width: 160px;">Control Method</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -223,8 +223,9 @@
                         <td class="center-cell">Every 1 hour</td>
                         <td>WWTP Monitoring Logsheet (ABN1-NUD-L4-006 Rev 00 WWTP Logsheet)</td>
                         <td>WWTP Operator / Helper</td>
-                        <td>If not within specs, open sump pit pump and transfer wastes to influent pit until reach the desired level of sump pit.</td>
+                        <td>if not within specs, open sump pit pump and transfer wastes to influent pit until reach the desired level of sump pit.</td>
                     </tr>
+
                     <tr>
                         <td class="center-cell">2</td>
                         <td>Raw Waste Water Extraction</td>
@@ -238,8 +239,9 @@
                         <td class="center-cell">Daily</td>
                         <td>-</td>
                         <td>WWTP Operator / Helper</td>
-                        <td>If any one of the pumps cant be utilized, troubleshoot latter, and use standby if needed.</td>
+                        <td>If any one of the pumps cant be utilized, troubleshoot latter, and use standby if needed</td>
                     </tr>
+
                     <tr>
                         <td class="center-cell" rowspan="2">3</td>
                         <td rowspan="2">Influent Raw Waste Water Storage</td>
@@ -265,12 +267,13 @@
                         <td>WWTP Operator / Helper</td>
                         <td>If not within specs turn on or off the sump pit feed pump.</td>
                     </tr>
+
                     <tr>
                         <td class="center-cell">4</td>
                         <td>Fine Screening</td>
                         <td>Metal Screen Box</td>
                         <td class="center-cell">U46</td>
-                        <td>Suspended solids free waste water</td>
+                        <td>suspended solids free waste water</td>
                         <td>-</td>
                         <td class="spec-cell">-</td>
                         <td>Visual Inspection</td>
@@ -280,6 +283,7 @@
                         <td>WWTP Operator / Helper</td>
                         <td>Clean or change the metal screen once becomes damaged.</td>
                     </tr>
+
                     <tr>
                         <td class="center-cell" rowspan="3">5</td>
                         <td rowspan="3">Diffused Air Floatation</td>
@@ -293,7 +297,7 @@
                         <td class="center-cell">Daily</td>
                         <td>-</td>
                         <td>WWTP Operator / Helper</td>
-                        <td>If any one of the pumps cant be utilized, troubleshoot latter, and use standby if needed.</td>
+                        <td>If any one of the pumps cant be utilized, troubleshoot latter, and use standby if needed</td>
                     </tr>
                     <tr>
                         <td>DAF Sump Pit</td>
@@ -304,7 +308,210 @@
                         <td class="center-cell">Daily</td>
                         <td>WWTP Monitoring Logsheet (ABN1-NUD-L4-006 Rev 00 WWTP Logsheet)</td>
                         <td>WWTP Operator / Helper</td>
-                        <td>If not within specs turn on or off the sump pit feed pump.</td>
+                        <td>If not within specs turn on or off the influent feed pump.</td>
+                    </tr>
+                    <tr>
+                        <td>Automatic Scraper</td>
+                        <td>Automatic scraper in service</td>
+                        <td class="spec-cell">Automatic scraper should be able to service</td>
+                        <td>Visual Inspection</td>
+                        <td class="center-cell">One reading</td>
+                        <td class="center-cell">Daily</td>
+                        <td>-</td>
+                        <td>WWTP Operator / Helper</td>
+                        <td>Change the oil every 5000 hrs of operation</td>
+                    </tr>
+
+                    <tr>
+                        <td class="center-cell">6</td>
+                        <td>Neutralization</td>
+                        <td>Flocculator</td>
+                        <td class="center-cell">U48</td>
+                        <td>Flocs</td>
+                        <td>Chemical dosing pumps in service</td>
+                        <td class="spec-cell">All pumps should be able to service</td>
+                        <td>Visual Inspection</td>
+                        <td class="center-cell">One reading</td>
+                        <td class="center-cell">Daily</td>
+                        <td>-</td>
+                        <td>WWTP Operator / Helper</td>
+                        <td>If any one of the pumps cant be utilized, troubleshoot latter, and use standby if needed</td>
+                    </tr>
+
+                    <tr>
+                        <td class="center-cell" rowspan="3">7</td>
+                        <td rowspan="3">Equalization</td>
+                        <td rowspan="3">Equalization Tank (325 cu. meters)</td>
+                        <td class="center-cell" rowspan="3">U49</td>
+                        <td rowspan="3">Partially Treated Waste Water</td>
+                        <td>pH</td>
+                        <td class="spec-cell">6-9</td>
+                        <td>pH meter</td>
+                        <td class="center-cell">One test</td>
+                        <td class="center-cell">Every 1 hour once start transferring wastes</td>
+                        <td>WWTP Monitoring Logsheet (ABN1-NUD-L4-006 Rev 00 WWTP Logsheet)</td>
+                        <td>WWTP QA/QC</td>
+                        <td>If not within specs, QA to inform WWTP Operator, WWTP Operator to stop feeding to MUR and adjust dosing of Acid & Caustic.</td>
+                    </tr>
+                    <tr>
+                        <td>Temperature</td>
+                        <td class="spec-cell">≤40 °C</td>
+                        <td>Thermometer</td>
+                        <td class="center-cell">One test</td>
+                        <td class="center-cell">Every 1 hour once start transferring wastes</td>
+                        <td>WWTP Monitoring Logsheet (ABN1-NUD-L4-006 Rev 00 WWTP Logsheet)</td>
+                        <td>WWTP QA/QC</td>
+                        <td>If not within specs, QA to inform WWTP Operator, WWTP Operator to stop feeding to MUR and dillute the waste using water from WTP Backwash.</td>
+                    </tr>
+                    <tr>
+                        <td>EQ Waste water volume</td>
+                        <td class="spec-cell">≤325 cu. meters</td>
+                        <td>Control Monitor</td>
+                        <td class="center-cell">One reading</td>
+                        <td class="center-cell">Daily</td>
+                        <td>WWTP Monitoring Logsheet (ABN1-NUD-L4-006 Rev 00 WWTP Logsheet)</td>
+                        <td>WWTP Operator</td>
+                        <td>If not within specs turn on or off the transfer pit feed pump.</td>
+                    </tr>
+
+                    <tr>
+                        <td class="center-cell" rowspan="4">8</td>
+                        <td rowspan="4">Anaerobic Treatment</td>
+                        <td rowspan="4">Upflow Methane Reactor, MUR Feed Pump, MUR recycle Pump</td>
+                        <td class="center-cell" rowspan="4">U50</td>
+                        <td rowspan="4">Biogas, Dead Anaerobic Sludge & Treated Waste Water</td>
+                        <td>pH</td>
+                        <td class="spec-cell">6-9</td>
+                        <td>pH meter</td>
+                        <td class="center-cell">One test</td>
+                        <td class="center-cell">Every 1 hour once start transferring wastes</td>
+                        <td>WWTP Monitoring Logsheet (ABN1-NUD-L4-006 Rev 00 WWTP Logsheet)</td>
+                        <td>WWTP QA/QC</td>
+                        <td>If not within specs, QA to inform WWTP Operator, WWTP Operator to stop feeding to MUR and adjust dosing of Acid & Caustic.</td>
+                    </tr>
+                    <tr>
+                        <td>Temperature</td>
+                        <td class="spec-cell">≤40 °C</td>
+                        <td>Thermometer</td>
+                        <td class="center-cell">One test</td>
+                        <td class="center-cell">Every 1 hour once start transferring wastes</td>
+                        <td>WWTP Monitoring Logsheet (ABN1-NUD-L4-006 Rev 00 WWTP Logsheet)</td>
+                        <td>WWTP QA/QC</td>
+                        <td>If not within specs, QA to inform WWTP Operator, WWTP Operator to stop feeding to MUR and dillute the waste using water from WTP Backwash.</td>
+                    </tr>
+                    <tr>
+                        <td>MUR feed pump on service</td>
+                        <td class="spec-cell">All pumps should be able to service</td>
+                        <td>Visual Inspection</td>
+                        <td class="center-cell">One reading</td>
+                        <td class="center-cell">Daily</td>
+                        <td>-</td>
+                        <td>WWTP Operator / Helper</td>
+                        <td>If any one of the pumps cant be utilized, troubleshoot latter, and use standby if needed</td>
+                    </tr>
+                    <tr>
+                        <td>MUR recycle pump on service</td>
+                        <td class="spec-cell">All pumps should be able to service</td>
+                        <td>Visual Inspection</td>
+                        <td class="center-cell">One reading</td>
+                        <td class="center-cell">Daily</td>
+                        <td>-</td>
+                        <td>WWTP Operator / Helper</td>
+                        <td>If any one of the pumps cant be utilized, troubleshoot latter, and use standby if needed</td>
+                    </tr>
+
+                    <tr>
+                        <td class="center-cell" rowspan="3">9</td>
+                        <td rowspan="3">Aerobic Treatment</td>
+                        <td rowspan="3">Aeration Blowers</td>
+                        <td class="center-cell" rowspan="3">U51</td>
+                        <td rowspan="3">Treated Waste Water & Excess Aerobic Sludge</td>
+                        <td>aerators in service</td>
+                        <td class="spec-cell">all aerators should be able to service</td>
+                        <td>Visual Inspection</td>
+                        <td class="center-cell">One reading</td>
+                        <td class="center-cell">Daily</td>
+                        <td>-</td>
+                        <td>WWTP Operator / Helper</td>
+                        <td>If any one of the blowers cant be utilized, troubleshoot latter, and use standby if needed. Report to the Supervisor/ Maintenance Section once unusual sound is noticed and Electrical Department once tripped.</td>
+                    </tr>
+                    <tr>
+                        <td>pH</td>
+                        <td class="spec-cell">6-9</td>
+                        <td>pH meter</td>
+                        <td class="center-cell">One test</td>
+                        <td class="center-cell">Every 1 hour once start transferring wastes</td>
+                        <td>WWTP Monitoring Logsheet (ABN1-NUD-L4-006 Rev 00 WWTP Logsheet)</td>
+                        <td>WWTP QA/QC</td>
+                        <td>If not within specs, QA to inform WWTP Operator, WWTP Operator to stop feeding to MUR and adjust dosing of Acid & Caustic.</td>
+                    </tr>
+                    <tr>
+                        <td>Temperature</td>
+                        <td class="spec-cell">≤40 °C</td>
+                        <td>Thermometer</td>
+                        <td class="center-cell">One test</td>
+                        <td class="center-cell">Every 1 hour once start transferring wastes</td>
+                        <td>WWTP Monitoring Logsheet (ABN1-NUD-L4-006 Rev 00 WWTP Logsheet)</td>
+                        <td>WWTP QA/QC</td>
+                        <td>If not within specs, QA to inform WWTP Operator, WWTP Operator to stop feeding to MUR and dillute the waste using water from WTP Backwash.</td>
+                    </tr>
+
+                    <tr>
+                        <td class="center-cell" rowspan="2">10</td>
+                        <td rowspan="2">Effluent Clarification</td>
+                        <td rowspan="2">Clarifier</td>
+                        <td class="center-cell" rowspan="2">U52</td>
+                        <td rowspan="2">Clear Treated Waste Water</td>
+                        <td>pH</td>
+                        <td class="spec-cell">6-9</td>
+                        <td>pH meter</td>
+                        <td class="center-cell">One test</td>
+                        <td class="center-cell">Every 1 hour once start transferring wastes</td>
+                        <td>WWTP Monitoring Logsheet (ABN1-NUD-L4-006 Rev 00 WWTP Logsheet)</td>
+                        <td>WWTP QA/QC</td>
+                        <td>If not within specs, QA to inform WWTP Operator, WWTP Operator to stop feeding to MUR and adjust dosing of Acid & Caustic.</td>
+                    </tr>
+                    <tr>
+                        <td>Temperature</td>
+                        <td class="spec-cell">≤40 °C</td>
+                        <td>Thermometer</td>
+                        <td class="center-cell">One test</td>
+                        <td class="center-cell">Every 1 hour once start transferring wastes</td>
+                        <td>WWTP Monitoring Logsheet (ABN1-NUD-L4-006 Rev 00 WWTP Logsheet)</td>
+                        <td>WWTP QA/QC</td>
+                        <td>If not within specs, QA to inform WWTP Operator, WWTP Operator to stop feeding to MUR and dillute the waste using water from WTP Backwash.</td>
+                    </tr>
+
+                    <tr>
+                        <td class="center-cell">11</td>
+                        <td>Excess Sludge Storage</td>
+                        <td>Excess Sludge Storage Tank</td>
+                        <td class="center-cell">U53</td>
+                        <td>-</td>
+                        <td>Sludge Volume</td>
+                        <td class="spec-cell">≤38.7 cu. meters</td>
+                        <td>Lab process</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">Daily</td>
+                        <td>WWTP Laboratory Test Report</td>
+                        <td>QA/QC</td>
+                        <td>If not within specs ,discharge the excess sludge at the drying bed until reached the desired volume.</td>
+                    </tr>
+
+                    <tr>
+                        <td class="center-cell">12</td>
+                        <td>Effluent Discharge</td>
+                        <td>Chlorine Dosing Pump</td>
+                        <td class="center-cell">U54</td>
+                        <td>Clear Treated Waste Water</td>
+                        <td>Chlorine dosing pump on service</td>
+                        <td class="spec-cell">All pumps should be able to service</td>
+                        <td>Visual Inspection</td>
+                        <td class="center-cell">One reading</td>
+                        <td class="center-cell">Daily</td>
+                        <td>-</td>
+                        <td>WWTP Operator / Helper</td>
+                        <td>If any one of the pumps cant be utilized, troubleshoot latter, and use standby if needed</td>
                     </tr>
                 </tbody>
             </table>
