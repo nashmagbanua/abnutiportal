@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Font Awesome para sa mga Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/abnlogo.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="assets/abnlogo.ico">
@@ -24,20 +25,22 @@
             overflow: hidden;
         }
 
-        /* Sidebar Container */
+        /* ==========================================================================
+           DESKTOP SIDEBAR STYLES
+           ========================================================================== */
         .sidebar {
             width: 280px;
             background-color: #1e293b;
             color: #fff;
             display: flex;
             flex-direction: column;
-            transition: all 0.3s ease;
-            z-index: 100; /* Tiniyak na nasa ibabaw ng iframe */
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
             flex-shrink: 0;
         }
 
         .sidebar-header {
-            padding: 15px 20px;
+            padding: 20px;
             background-color: #0f172a;
             font-size: 1.2rem;
             font-weight: bold;
@@ -55,26 +58,31 @@
         }
 
         .menu-item {
-            padding: 12px 20px;
+            padding: 14px 20px;
             cursor: pointer;
             display: flex;
             align-items: center;
-            transition: background 0.2s;
+            transition: all 0.2s;
             font-size: 0.95rem;
             border-left: 4px solid transparent;
+            color: #cbd5e1;
         }
 
         .menu-item:hover {
             background-color: #334155;
+            color: #fff;
         }
 
         .menu-item.active {
             background-color: #0284c7;
             border-left: 4px solid #38bdf8;
+            color: #fff;
             font-weight: bold;
         }
 
-        /* Main Content Area */
+        /* ==========================================================================
+           MAIN CONTENT & IFRAME
+           ========================================================================== */
         .main-content {
             flex-grow: 1;
             display: flex;
@@ -83,34 +91,6 @@
             position: relative;
         }
 
-        /* Mobile Header Navbar */
-        .mobile-header {
-            display: none;
-            background-color: #1e293b;
-            color: white;
-            padding: 12px 15px;
-            align-items: center;
-            z-index: 90;
-        }
-
-        .mobile-title {
-            font-size: 1.1rem;
-            font-weight: bold;
-        }
-
-        /* Inayos ang styling ng Hamburger para magkatugma */
-        .hamburger-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-            margin-right: 12px;
-            display: flex;
-            align-items: center;
-        }
-
-        /* Iframe Container */
         .iframe-container {
             flex-grow: 1;
             width: 100%;
@@ -125,23 +105,76 @@
             border: none;
         }
 
-        /* Mobile Responsiveness */
-        @media (max-width: 768px) {
-            body {
-                flex-direction: column;
-            }
+        /* ==========================================================================
+           SENIOR LEVEL: FLOATING BUTTONS (Mobile View Only UI)
+           ========================================================================== */
+        .floating-hamburger {
+            display: none; /* Tago sa desktop */
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            width: 45px;
+            height: 45px;
+            background-color: rgba(30, 41, 59, 0.9);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            font-size: 1.3rem;
+            cursor: pointer;
+            z-index: 90;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease, background-color 0.2s;
+        }
 
-            .mobile-header {
-                display: flex;
+        .floating-hamburger:active {
+            transform: scale(0.9);
+            background-color: #0f172a;
+        }
+
+        /* Dim background overlay para sa premium transition block */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(3px);
+            -webkit-backdrop-filter: blur(3px);
+            z-index: 95;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+
+        /* ==========================================================================
+           MOBILE RESPONSIVENESS (MEDIA QUERIES)
+           ========================================================================== */
+        @media (max-width: 768px) {
+            .floating-hamburger {
+                display: flex; /* Lalabas lang sa Mobile */
             }
 
             .sidebar {
-                position: absolute;
-                left: -280px;
-                top: 0; /* Simula sa pinakataas para takpan nang buo ang kaliwang bahagi */
+                position: fixed;
+                left: -290px; /* Nakatago sa labas ng screen */
+                top: 0;
                 height: 100vh;
-                width: 280px;
-                box-shadow: 5px 0 15px rgba(0, 0, 0, 0.5);
+                width: 285px;
+                z-index: 100;
+                box-shadow: 8px 0 25px rgba(0, 0, 0, 0.4);
+                border-top-right-radius: 16px;
+                border-bottom-right-radius: 16px;
+                overflow: hidden;
             }
 
             .sidebar.open {
@@ -149,27 +182,24 @@
             }
 
             .main-content {
-                height: calc(100vh - 50px); /* 50px ang bawas para sa mobile header */
+                height: 100vh; /* Full screen, sagad ang tables */
             }
         }
     </style>
 </head>
 <body>
 
-    <div class="mobile-header">
-        <button class="hamburger-btn" onclick="toggleSidebar()">☰</button>
-        
-        <div style="display: flex; align-items: center; gap: 8px;">
-            <img src="assets/abnlogo.svg" alt="ABN Logo" style="width: 24px; height: 24px; object-fit: contain;">
-            <div class="mobile-title" id="mobile-page-title">WWTP</div>
-        </div>
-        
-        <a href="login.html" style="color: #ef4444; font-size: 1.2rem; margin-left: auto; display: flex; align-items: center;">
-            <i class="fas fa-sign-out-alt"></i>
-        </a>
-    </div>
+    <!-- 1. FLOATING HAMBURGER BUTTON (Lumulutang sa ibabaw ng Iframe sa Mobile) -->
+    <button class="floating-hamburger" onclick="toggleSidebar()" aria-label="Open Menu">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- 2. DARK OVERLAY BACKDROP (Pang-blur ng tables kapag binuksan ang menu) -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
     
+    <!-- 3. PREMIUM SIDEBAR PANEL -->
     <div class="sidebar" id="sidebar">
+        <!-- Sidebar Header (May Logo at Desktop Logout) -->
         <div class="sidebar-header">
             <div style="display: flex; align-items: center; gap: 10px;">
                 <img src="assets/abnlogo.svg" alt="ABN Logo" style="width: 28px; height: 28px; object-fit: contain;">
@@ -180,57 +210,52 @@
             </a>
         </div>
         
+        <!-- Menu Items Navigation -->
         <ul class="menu-list">
-            <li class="menu-item active" onclick="loadPage('controlplan/WWTP_PCP.html', 'WWTP', this)">WWTP PCP</li>
-            <li class="menu-item" onclick="loadPage('controlplan/TowerWaterPCP.html', 'Tower Water', this)">Tower Water PCP</li>
-            <li class="menu-item" onclick="loadPage('controlplan/TankFarmGlycolCPPCPp2.html', 'Tank Farm Glycol', this)">Tank Farm Glycol CP PCP p2</li>
-            <li class="menu-item" onclick="loadPage('controlplan/SteamGenerationCFPCPp1 .html', 'Steam Gen Coal-Fired', this)">Steam Gen CF PCP p1</li>
-            <li class="menu-item" onclick="loadPage('controlplan/R.O.WaterPCPp1.html', 'R.O. Water', this)">R.O. Water PCP</li>
-            <li class="menu-item" onclick="loadPage('controlplan/ProcessedWaterPCPp1.html', 'Processed Water', this)">Processed Water PCP</li>
-            <li class="menu-item" onclick="loadPage('controlplan/ProcessedChilledWaterPCPa.html', 'Chilled Water', this)">Processed Chilled Water PCPa</li>
-            <li class="menu-item" onclick="loadPage('controlplan/PlantWaterPCPa.html', 'Plant Water', this)">Plant Water PCPa</li>
-            <li class="menu-item" onclick="loadPage('controlplan/CompressedAirPCPp1.html', 'Compressed Air', this)">Compressed Air PCP</li>
-            <li class="menu-item" onclick="loadPage('controlplan/CleanSteamGeneration.html', 'Clean Steam', this)">Clean Steam Generation</li>
+            <li class="menu-item active" onclick="loadPage('controlplan/WWTP_PCP.html', this)">WWTP PCP</li>
+            <li class="menu-item" onclick="loadPage('controlplan/TowerWaterPCP.html', this)">Tower Water PCP</li>
+            <li class="menu-item" onclick="loadPage('controlplan/TankFarmGlycolCPPCPp2.html', this)">Tank Farm Glycol CP PCP p2</li>
+            <li class="menu-item" onclick="loadPage('controlplan/SteamGenerationCFPCPp1 .html', this)">Steam Gen CF PCP p1</li>
+            <li class="menu-item" onclick="loadPage('controlplan/R.O.WaterPCPp1.html', this)">R.O. Water PCP</li>
+            <li class="menu-item" onclick="loadPage('controlplan/ProcessedWaterPCPp1.html', this)">Processed Water PCP</li>
+            <li class="menu-item" onclick="loadPage('controlplan/ProcessedChilledWaterPCPa.html', this)">Processed Chilled Water PCPa</li>
+            <li class="menu-item" onclick="loadPage('controlplan/PlantWaterPCPa.html', this)">Plant Water PCPa</li>
+            <li class="menu-item" onclick="loadPage('controlplan/CompressedAirPCPp1.html', this)">Compressed Air PCP</li>
+            <li class="menu-item" onclick="loadPage('controlplan/CleanSteamGeneration.html', this)">Clean Steam Generation</li>
         </ul>
     </div>
 
+    <!-- 4. MAIN CONTENT (100% Edge-to-Edge Desktop & Mobile View) -->
     <div class="main-content">
         <div class="iframe-container">
             <iframe id="content-frame" src="controlplan/WWTP_PCP.html"></iframe>
         </div>
     </div>
 
+    <!-- 5. ADVANCED JAVASCRIPT LOGIC -->
     <script>
-        function loadPage(url, title, element) {
+        // Inalis na natin ang pag-pilit ng text titles sa navbar dahil tinanggal na ang entry-level header block!
+        function loadPage(url, element) {
             document.getElementById('content-frame').src = url;
-            document.getElementById('mobile-page-title').innerText = title;
 
             const menuItems = document.querySelectorAll('.menu-item');
             menuItems.forEach(item => item.classList.remove('active'));
             element.classList.add('active');
 
-            // Isasara ang sidebar kapag nakapili na ng area sa mobile
+            // Kusang isasara ang menu pagkapindot sa mobile
             if (window.innerWidth <= 768) {
-                document.getElementById('sidebar').classList.remove('open');
+                toggleSidebar();
             }
         }
 
+        // Isang maayos na function para kontrolin ang Sidebar at Overlay nang sabay
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('open');
-        }
-
-        // Isasara ang sidebar kapag pinindot ang labas nito habang bukas sa mobile
-        document.addEventListener('click', function(event) {
-            const sidebar = document.getElementById('sidebar');
-            const hamburger = document.querySelector('.hamburger-btn');
+            const overlay = document.getElementById('sidebar-overlay');
             
-            if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
-                if (!sidebar.contains(event.target) && !hamburger.contains(event.target)) {
-                    sidebar.classList.remove('open');
-                }
-            }
-        });
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
     </script>
 </body>
 </html>
