@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Utilities Control Plan</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: #f4f6f9;
+            color: #333;
+            overflow: hidden;
+        }
+
+        /* Sidebar para sa Desktop */
+        .sidebar {
+            width: 280px;
+            background-color: #1e293b;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background-color: #0f172a;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-bottom: 1px solid #334155;
+        }
+
+        .menu-list {
+            list-style: none;
+            padding: 15px 0;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .menu-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: background 0.2s;
+            font-size: 0.95rem;
+            border-left: 4px solid transparent;
+        }
+
+        .menu-item:hover {
+            background-color: #334155;
+        }
+
+        .menu-item.active {
+            background-color: #0284c7;
+            border-left: 4px solid #38bdf8;
+            font-weight: bold;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+        }
+
+        /* Mobile Header Navbar */
+        .mobile-header {
+            display: none;
+            background-color: #1e293b;
+            color: white;
+            padding: 15px;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mobile-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Iframe Container */
+        .iframe-container {
+            flex-grow: 1;
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #fff;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Mobile Responsiveness (Media Queries) */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .sidebar {
+                position: absolute;
+                left: -280px;
+                top: 55px; /* adjust base sa taas ng mobile header */
+                height: calc(100vh - 55px);
+                width: 280px;
+            }
+
+            .sidebar.open {
+                left: 0;
+            }
+
+            .main-content {
+                height: calc(100vh - 55px);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-header">
+        <span class="mobile-title" id="mobile-page-title">Utilities Control Plan</span>
+        <button class="hamburger-btn" onclick="toggleSidebar()">☰</button>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            Utilities Control Plan
+        </div>
+        <ul class="menu-list">
+            <li class="menu-item active" onclick="loadPage('WWTP PCP.html', 'WWTP PCP', this)">WWTP PCP</li>
+            <li class="menu-item" onclick="loadPage('Tower Water PCP.html', 'Tower Water PCP', this)">Tower Water PCP</li>
+            <li class="menu-item" onclick="loadPage('Tank Farm Glycol CP PCP p2.html', 'Tank Farm Glycol', this)">Tank Farm Glycol CP</li>
+            <li class="menu-item" onclick="loadPage('Steam Generation CF PCP p1 .html', 'Steam Generation', this)">Steam Generation CF</li>
+            <li class="menu-item" onclick="loadPage('R.O. Water PCP p1.html', 'R.O. Water', this)">R.O. Water PCP</li>
+            <li class="menu-item" onclick="loadPage('Processed Water PCP p1.html', 'Processed Water', this)">Processed Water PCP</li>
+            <li class="menu-item" onclick="loadPage('Processed Chilled Water PCPa.html', 'Chilled Water', this)">Processed Chilled Water</li>
+            <li class="menu-item" onclick="loadPage('Plant Water PCPa.html', 'Plant Water', this)">Plant Water PCP</li>
+            <li class="menu-item" onclick="loadPage('Compressed Air PCP p1.html', 'Compressed Air', this)">Compressed Air PCP</li>
+            <li class="menu-item" onclick="loadPage('Clean Steam Generation.html', 'Clean Steam', this)">Clean Steam Generation</li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="iframe-container">
+            <iframe id="content-frame" src="WWTP PCP.html"></iframe>
+        </div>
+    </div>
+
+    <script>
+        // Function para magpalit ng ipinapakitang HTML file sa iframe
+        function loadPage(url, title, element) {
+            // Palitan ang src ng iframe
+            document.getElementById('content-frame').src = url;
+            
+            // Palitan ang pamagat sa mobile view
+            document.getElementById('mobile-page-title').innerText = title;
+
+            // Alisin ang 'active' class sa lumang menu item at ilipat sa pinindot
+            const menuItems = document.querySelectorAll('.menu-item');
+            menuItems.forEach(item => item.classList.remove('active'));
+            element.classList.add('active');
+
+            // Kung nasa mobile view, isara ang sidebar pagkatapos pumili
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('open');
+            }
+        }
+
+        // Function para sa pagbukas/pagsara ng menu sa cellphone
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>
