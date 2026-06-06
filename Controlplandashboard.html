@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Font Awesome para sa mga Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/abnlogo.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="assets/abnlogo.ico">
@@ -106,33 +105,34 @@
         }
 
         /* ==========================================================================
-           SENIOR LEVEL: FLOATING BUTTONS (Mobile View Only UI)
+           SENIOR LEVEL: FLOATING BUTTON (Gawa nang Company Logo - BOTTOM RIGHT)
            ========================================================================== */
         .floating-hamburger {
-            display: none; /* Tago sa desktop */
+            display: none; 
             position: fixed;
-            top: 15px;
-            left: 15px;
-            width: 45px;
-            height: 45px;
-            background-color: rgba(30, 41, 59, 0.9);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            font-size: 1.3rem;
+            bottom: 20px;   /* 20px ang awang mula sa ibaba */
+            right: 20px;    /* 20px ang awang mula sa kanan */
+            width: 50px;
+            height: 50px;
+            background-color: transparent; 
+            border: none; 
             cursor: pointer;
             z-index: 90;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
             align-items: center;
             justify-content: center;
-            transition: transform 0.2s ease, background-color 0.2s;
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.35)); 
+            padding: 0;
+        }
+
+        .floating-hamburger img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
         .floating-hamburger:active {
-            transform: scale(0.9);
-            background-color: #0f172a;
+            transform: scale(0.9); 
         }
 
         /* Dim background overlay para sa premium transition block */
@@ -189,17 +189,13 @@
 </head>
 <body>
 
-    <!-- 1. FLOATING HAMBURGER BUTTON (Lumulutang sa ibabaw ng Iframe sa Mobile) -->
     <button class="floating-hamburger" onclick="toggleSidebar()" aria-label="Open Menu">
-        <i class="fas fa-bars"></i>
+        <img src="assets/abnlogo.svg" alt="ABN Logo">
     </button>
 
-    <!-- 2. DARK OVERLAY BACKDROP (Pang-blur ng tables kapag binuksan ang menu) -->
     <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
     
-    <!-- 3. PREMIUM SIDEBAR PANEL -->
     <div class="sidebar" id="sidebar">
-        <!-- Sidebar Header (May Logo at Desktop Logout) -->
         <div class="sidebar-header">
             <div style="display: flex; align-items: center; gap: 10px;">
                 <img src="assets/abnlogo.svg" alt="ABN Logo" style="width: 28px; height: 28px; object-fit: contain;">
@@ -210,7 +206,6 @@
             </a>
         </div>
         
-        <!-- Menu Items Navigation -->
         <ul class="menu-list">
             <li class="menu-item active" onclick="loadPage('controlplan/WWTP_PCP.html', this)">WWTP PCP</li>
             <li class="menu-item" onclick="loadPage('controlplan/TowerWaterPCP.html', this)">Tower Water PCP</li>
@@ -225,25 +220,20 @@
         </ul>
     </div>
 
-    <!-- 4. MAIN CONTENT (100% Edge-to-Edge Desktop & Mobile View) -->
     <div class="main-content">
         <div class="iframe-container">
             <iframe id="content-frame" src="controlplan/WWTP_PCP.html"></iframe>
         </div>
     </div>
 
-    <!-- 5. ADVANCED JAVASCRIPT LOGIC -->
     <script>
-    // Pangunahing function para sa pagpapalit ng pahina kapag pinindot ang nav items
     function loadPage(url, element) {
         document.getElementById('content-frame').src = url;
 
-        // Alisin ang active class sa lahat at ilipat sa kasalukuyang pinindot
         const menuItems = document.querySelectorAll('.menu-item');
         menuItems.forEach(item => item.classList.remove('active'));
         element.classList.add('active');
 
-        // Kusang isasara ang sidebar sa mobile view matapos pumili
         if (window.innerWidth <= 768 && document.getElementById('sidebar').classList.contains('open')) {
             toggleSidebar();
         }
@@ -257,16 +247,11 @@
         overlay.classList.toggle('show');
     }
 
-    // ==========================================================================
-    // SENIOR-LEVEL DYNAMIC ROUTING ENGINE (URL Parameter Reader)
-    // ==========================================================================
     window.addEventListener('DOMContentLoaded', () => {
-        // 1. Basahin ang parameter sa URL (halimbawa: ?area=boiler)
         const urlParams = new URLSearchParams(window.location.search);
         const areaParam = urlParams.get('area');
 
         if (areaParam) {
-            // 2. I-map natin kung anong Keyword ang katapat ng bawat ID at Iframe Link
             const routingMap = {
                 'boiler':    { id: 'menu-boiler',    file: 'controlplan/SteamGenerationCFPCPp1 .html' },
                 'wwtp':      { id: 'menu-wwtp',      file: 'controlplan/WWTP_PCP.html' },
@@ -280,15 +265,12 @@
                 'clean':     { id: 'menu-clean',     file: 'controlplan/CleanSteamGeneration.html' }
             };
 
-            // 3. Hanapin kung tugma ang parameter (gawing lowercase para walang error sa kapital na letra)
             const matchedRoute = routingMap[areaParam.toLowerCase()];
 
             if (matchedRoute) {
-                // Hanapin ang kaukulang text element sa iyong menu list
                 const allMenuItems = document.querySelectorAll('.menu-item');
                 let targetElement = null;
 
-                // Hahanapin natin ang element gamit ang link na katapat nito
                 allMenuItems.forEach(item => {
                     const onclickAttr = item.getAttribute('onclick') || '';
                     if (onclickAttr.includes(matchedRoute.file)) {
@@ -296,7 +278,6 @@
                     }
                 });
 
-                // Kung nahanap ang element, i-trigger ang loadPage function para lumipat agad
                 if (targetElement) {
                     loadPage(matchedRoute.file, targetElement);
                 }
