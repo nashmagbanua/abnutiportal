@@ -135,27 +135,33 @@
             transform: scale(0.9); 
         }
 
-        /* Eksaktong galaw ng pagtalon ng abnlogo */
-        @keyframes logoJump {
-            0%, 100% {
-                transform: translateY(0) scale(1);
-            }
-            30% {
-                transform: translateY(-18px) scale(0.9, 1.1); /* Tatalon pataas at hahaba nang konti */
-            }
-            50% {
-                transform: translateY(0) scale(1.1, 0.9); /* Pagbagsak, medyo maiipit sa sahig */
-            }
-            70% {
-                transform: translateY(-6px) scale(0.95, 1.05); /* Konting bounce pataas uli */
-            }
+        /* Combo Animation: Shake muna bago Tumalon */
+        @keyframes logoShakeAndJump {
+            /* 0% to 30%: Nanginginig o nagsu-shake sa pwesto (Preparation) */
+            0% { transform: translate(0, 0) rotate(0deg); }
+            5% { transform: translate(-2px, 0) rotate(-3deg); }
+            10% { transform: translate(2px, 0) rotate(3deg); }
+            15% { transform: translate(-2px, 0) rotate(-3deg); }
+            20% { transform: translate(2px, 0) rotate(3deg); }
+            25% { transform: translate(-1px, 0) rotate(-1deg); }
+            30% { transform: translate(0, 0) rotate(0deg); }
+
+            /* 35% to 50%: Biglang bwelo at tatalon pataas */
+            35% { transform: translateY(2px) scale(1.1, 0.9); } /* Konting upo para sa bwelo */
+            50% { transform: translateY(-22px) scale(0.9, 1.1); } /* Tatalon pataas (Mas mataas para kitang-kita) */
+            
+            /* 65% to 100%: Pagbagsak at konting bounce sa lapag */
+            65% { transform: translateY(0) scale(1.1, 0.85); } /* Babagsak at maiipit sa sahig */
+            75% { transform: translateY(-6px) scale(0.95, 1.05); } /* Konting talbog pataas uli */
+            15% { transform: translateY(0) scale(1, 1); } /* Balik sa normal */
+            100% { transform: translateY(0) scale(1, 1); }
         }
 
-        /* Class na ikakabit ng JavaScript kapag idle na ang screen */
+        /* Ang class na ikakabit ng JS */
         .floating-hamburger.jump {
-            animation: logoJump 0.8s ease-in-out;
+            /* Ginawang 1.2s ang tagal para swabe ang shake at jump combo */
+            animation: logoShakeAndJump 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
-
         /* Dim background overlay para sa premium transition block */
         .sidebar-overlay {
             display: none;
@@ -276,28 +282,28 @@
     // IDLE ANIMATION LOGIC FOR LOGO
     // ==========================================================================
     
-    function startIdleTimer() {
+   function startIdleTimer() {
         // Siguraduhing malinis ang dating timer at tanggalin ang class kung meron man
         clearTimeout(idleTimer);
         if (logoButton) logoButton.classList.remove('jump');
 
-        // Mag-abang ng 7 segundo bago patakbuhin ang animation
+        // Mag-abang ng 7 segundo (idleTimeoutDuration) bago patakbuhin ang combo animation
         idleTimer = setTimeout(() => {
             if (logoButton) {
                 logoButton.classList.add('jump');
 
-                // Tanggalin ang class pagkatapos ng animation (0.8s) para pwede siyang umulit uli mamaya
+                // Binago: Ginawang 1200ms (1.2s) para matapos muna ang buong shake at jump bago tanggalin ang class
                 setTimeout(() => {
                     logoButton.classList.remove('jump');
-                    // Pagkatapos tumalon, mag-start uli ng bagong idle timer para tumalon uli kung idle pa rin
+                    // Pagkatapos ng animation, magre-reset para umulit ang cycle kung nananatiling idle ang screen
                     startIdleTimer();
-                }, 800); 
+                }, 1200); 
             }
         }, idleTimeoutDuration);
     }
 
     function resetIdleTimer() {
-        // Kapag may ginawa ang user, magre-reset ang bilang ng segundo mula sa simula
+        // Kapag may ginawa ang user (touch, scroll, click), magre-reset ang countdown mula sa simula
         startIdleTimer();
     }
 
