@@ -148,14 +148,19 @@
 <body>
 
     <div class="mobile-header">
-        <span class="mobile-title" id="mobile-page-title">Utilities Control Plan</span>
-        <button class="hamburger-btn" onclick="toggleSidebar()">☰</button>
-    </div>
-
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            Utilities Control Plan
-        </div>
+    <button class="hamburger" onclick="toggleSidebar()">☰</button>
+    <div class="mobile-title" id="mobile-page-title">WWTP PCP</div>
+    <a href="login.html" style="color: #ef4444; font-size: 1.2rem; margin-left: auto; padding-right: 10px;">
+        <i class="fas fa-sign-out-alt"></i>
+    </a>
+</div>
+    
+    <div class="sidebar-header" style="display: flex; justify-content: space-between; align-items: center; padding: 20px;">
+    <span>ABN Utilities</span>
+    <a href="login.html" title="Logout" style="color: #ef4444; font-size: 1.2rem; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
+        <i class="fas fa-sign-out-alt"></i>
+    </a>
+</div>
         <ul class="menu-list">
     <li class="menu-item active" onclick="loadPage('controlplan/WWTP_PCP.html', 'WWTP', this)">WWTP PCP</li>
     <li class="menu-item" onclick="loadPage('controlplan/TowerWaterPCP.html', 'Tower Water', this)">Tower Water PCP</li>
