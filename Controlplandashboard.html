@@ -24,7 +24,7 @@
             overflow: hidden;
         }
 
-        /* Sidebar para sa Desktop */
+        /* Sidebar Container */
         .sidebar {
             width: 280px;
             background-color: #1e293b;
@@ -32,7 +32,8 @@
             display: flex;
             flex-direction: column;
             transition: all 0.3s ease;
-            z-index: 10;
+            z-index: 100; /* Tiniyak na nasa ibabaw ng iframe */
+            flex-shrink: 0;
         }
 
         .sidebar-header {
@@ -87,9 +88,9 @@
             display: none;
             background-color: #1e293b;
             color: white;
-            padding: 10px 15px;
-            justify-content: space-between;
+            padding: 12px 15px;
             align-items: center;
+            z-index: 90;
         }
 
         .mobile-title {
@@ -97,12 +98,16 @@
             font-weight: bold;
         }
 
-        .hamburger {
+        /* Inayos ang styling ng Hamburger para magkatugma */
+        .hamburger-btn {
             background: none;
             border: none;
             color: white;
             font-size: 1.5rem;
             cursor: pointer;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
         }
 
         /* Iframe Container */
@@ -120,7 +125,7 @@
             border: none;
         }
 
-        /* Mobile Responsiveness (Media Queries) */
+        /* Mobile Responsiveness */
         @media (max-width: 768px) {
             body {
                 flex-direction: column;
@@ -133,9 +138,10 @@
             .sidebar {
                 position: absolute;
                 left: -280px;
-                top: 55px; /* base sa taas ng mobile header */
-                height: calc(100vh - 55px);
+                top: 0; /* Simula sa pinakataas para takpan nang buo ang kaliwang bahagi */
+                height: 100vh;
                 width: 280px;
+                box-shadow: 5px 0 15px rgba(0, 0, 0, 0.5);
             }
 
             .sidebar.open {
@@ -143,7 +149,7 @@
             }
 
             .main-content {
-                height: calc(100vh - 55px);
+                height: calc(100vh - 50px); /* 50px ang bawas para sa mobile header */
             }
         }
     </style>
@@ -151,14 +157,14 @@
 <body>
 
     <div class="mobile-header">
-        <button class="hamburger" onclick="toggleSidebar()">☰</button>
+        <button class="hamburger-btn" onclick="toggleSidebar()">☰</button>
         
         <div style="display: flex; align-items: center; gap: 8px;">
-            <img src="assets/abnlogo.svg" alt="ABN Logo" style="width: 25px; height: 25px; object-fit: contain;">
+            <img src="assets/abnlogo.svg" alt="ABN Logo" style="width: 24px; height: 24px; object-fit: contain;">
             <div class="mobile-title" id="mobile-page-title">WWTP</div>
         </div>
         
-        <a href="login.html" style="color: #ef4444; font-size: 1.2rem; margin-left: auto; padding-right: 5px;">
+        <a href="login.html" style="color: #ef4444; font-size: 1.2rem; margin-left: auto; display: flex; align-items: center;">
             <i class="fas fa-sign-out-alt"></i>
         </a>
     </div>
@@ -166,7 +172,7 @@
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div style="display: flex; align-items: center; gap: 10px;">
-                <img src="assets/abnlogo.svg" alt="ABN Logo" style="width: 30px; height: 30px; object-fit: contain;">
+                <img src="assets/abnlogo.svg" alt="ABN Logo" style="width: 28px; height: 28px; object-fit: contain;">
                 <span>ABN Utilities</span>
             </div>
             <a href="login.html" title="Logout" style="color: #ef4444; font-size: 1.2rem; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
@@ -196,18 +202,14 @@
 
     <script>
         function loadPage(url, title, element) {
-            // Palitan ang src ng iframe para mag-load ang piniling file
             document.getElementById('content-frame').src = url;
-            
-            // Palitan ang pamagat sa mobile header view
             document.getElementById('mobile-page-title').innerText = title;
 
-            // Lipat ang 'active' class styling sa pinindot na menu link
             const menuItems = document.querySelectorAll('.menu-item');
             menuItems.forEach(item => item.classList.remove('active'));
             element.classList.add('active');
 
-            // Kusang isara ang menu kapag ginagamit sa cellphone matapos pumili
+            // Isasara ang sidebar kapag nakapili na ng area sa mobile
             if (window.innerWidth <= 768) {
                 document.getElementById('sidebar').classList.remove('open');
             }
@@ -217,6 +219,18 @@
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('open');
         }
+
+        // Isasara ang sidebar kapag pinindot ang labas nito habang bukas sa mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const hamburger = document.querySelector('.hamburger-btn');
+            
+            if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
+                if (!sidebar.contains(event.target) && !hamburger.contains(event.target)) {
+                    sidebar.classList.remove('open');
+                }
+            }
+        });
     </script>
 </body>
 </html>
