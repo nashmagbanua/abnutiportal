@@ -234,28 +234,75 @@
 
     <!-- 5. ADVANCED JAVASCRIPT LOGIC -->
     <script>
-        // Inalis na natin ang pag-pilit ng text titles sa navbar dahil tinanggal na ang entry-level header block!
-        function loadPage(url, element) {
-            document.getElementById('content-frame').src = url;
+    // Pangunahing function para sa pagpapalit ng pahina kapag pinindot ang nav items
+    function loadPage(url, element) {
+        document.getElementById('content-frame').src = url;
 
-            const menuItems = document.querySelectorAll('.menu-item');
-            menuItems.forEach(item => item.classList.remove('active'));
-            element.classList.add('active');
+        // Alisin ang active class sa lahat at ilipat sa kasalukuyang pinindot
+        const menuItems = document.querySelectorAll('.menu-item');
+        menuItems.forEach(item => item.classList.remove('active'));
+        element.classList.add('active');
 
-            // Kusang isasara ang menu pagkapindot sa mobile
-            if (window.innerWidth <= 768) {
-                toggleSidebar();
+        // Kusang isasara ang sidebar sa mobile view matapos pumili
+        if (window.innerWidth <= 768 && document.getElementById('sidebar').classList.contains('open')) {
+            toggleSidebar();
+        }
+    }
+
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('show');
+    }
+
+    // ==========================================================================
+    // SENIOR-LEVEL DYNAMIC ROUTING ENGINE (URL Parameter Reader)
+    // ==========================================================================
+    window.addEventListener('DOMContentLoaded', () => {
+        // 1. Basahin ang parameter sa URL (halimbawa: ?area=boiler)
+        const urlParams = new URLSearchParams(window.location.search);
+        const areaParam = urlParams.get('area');
+
+        if (areaParam) {
+            // 2. I-map natin kung anong Keyword ang katapat ng bawat ID at Iframe Link
+            const routingMap = {
+                'boiler':    { id: 'menu-boiler',    file: 'controlplan/SteamGenerationCFPCPp1 .html' },
+                'wwtp':      { id: 'menu-wwtp',      file: 'controlplan/WWTP_PCP.html' },
+                'tower':     { id: 'menu-tower',     file: 'controlplan/TowerWaterPCP.html' },
+                'tank':      { id: 'menu-tank',      file: 'controlplan/TankFarmGlycolCPPCPp2.html' },
+                'ro':        { id: 'menu-ro',        file: 'controlplan/R.O.WaterPCPp1.html' },
+                'processed': { id: 'menu-processed', file: 'controlplan/ProcessedWaterPCPp1.html' },
+                'chilled':   { id: 'menu-chilled',   file: 'controlplan/ProcessedChilledWaterPCPa.html' },
+                'plant':     { id: 'menu-plant',     file: 'controlplan/PlantWaterPCPa.html' },
+                'cda':       { id: 'menu-cda',       style: 'controlplan/CompressedAirPCPp1.html' },
+                'clean':     { id: 'menu-clean',     file: 'controlplan/CleanSteamGeneration.html' }
+            };
+
+            // 3. Hanapin kung tugma ang parameter (gawing lowercase para walang error sa kapital na letra)
+            const matchedRoute = routingMap[areaParam.toLowerCase()];
+
+            if (matchedRoute) {
+                // Hanapin ang kaukulang text element sa iyong menu list
+                const allMenuItems = document.querySelectorAll('.menu-item');
+                let targetElement = null;
+
+                // Hahanapin natin ang element gamit ang link na katapat nito
+                allMenuItems.forEach(item => {
+                    const onclickAttr = item.getAttribute('onclick') || '';
+                    if (onclickAttr.includes(matchedRoute.file)) {
+                        targetElement = item;
+                    }
+                });
+
+                // Kung nahanap ang element, i-trigger ang loadPage function para lumipat agad
+                if (targetElement) {
+                    loadPage(matchedRoute.file, targetElement);
+                }
             }
         }
-
-        // Isang maayos na function para kontrolin ang Sidebar at Overlay nang sabay
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebar-overlay');
-            
-            sidebar.classList.toggle('open');
-            overlay.classList.toggle('show');
-        }
-    </script>
+    });
+</script>
 </body>
 </html>
