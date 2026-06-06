@@ -191,7 +191,6 @@ nav.scrolled {
         gap: 8px;
     }
 
-    /* INAYOS: Nilinis ang salubong na transition properties para sa mobile click display toggle */
     .dropdown-content {
         position: static;
         opacity: 1 !important;
@@ -287,7 +286,6 @@ nav.scrolled {
     height: 100%;
 }
 
-/* INAYOS: Ginawang para sa tunay na desktop hover lang para hindi mag-loko sa mobile touch screen */
 @media (hover: hover) {
     .area-card:hover {
         transform: translateY(-15px);
@@ -322,9 +320,8 @@ nav.scrolled {
     display: flex; gap: 10px; width: 100%; margin-top: 15px;
     opacity: 0; transform: translateY(10px); transition: all 0.3s ease; pointer-events: none; 
 }
-/* Idagdag ito sa dulo ng mga button styles mo */
 .btn-cp { 
-    background: #4f46e5; /* Modern Indigo/Purple-Blue pasa button CONTROL PLAN */
+    background: #4f46e5; 
     color: white; 
     border: 1px solid #4f46e5; 
 }
@@ -417,27 +414,21 @@ nav.scrolled {
 .org-main-section::before { content: ''; position: absolute; top: 0; left: 16.66%; right: 16.66%; height: 2px; background: var(--primary); box-shadow: 0 0 8px var(--primary); }
 
 .org-main-layout { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; width: 100%; position: relative; }
-.org-team-column { background: rgba(255, 255, 255, 0.01); border: 1px solid rgba(255, 255, 255, 0.04); border-radius: 16px; padding: 22px 18px; position: relative; } /* Dinagdagan ng konting padding ang column */
+.org-team-column { background: rgba(255, 255, 255, 0.01); border: 1px solid rgba(255, 255, 255, 0.04); border-radius: 16px; padding: 22px 18px; position: relative; }
 .org-team-column::before { content: ''; position: absolute; top: -20px; left: 50%; width: 2px; height: 20px; background: var(--primary); }
 .org-team-column::after { content: ''; position: absolute; bottom: -25px; left: 50%; width: 2px; height: 25px; background: var(--primary); }
 
-/* PINALAKI: Pamagat tulad ng WTP Mantech, Boiler Mantech, atbp. */
 .org-team-title { font-size: 0.95rem; color: var(--primary); font-weight: 800; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 14px; border-bottom: 1px solid rgba(72, 187, 120, 0.2); padding-bottom: 8px; }
 
-/* BINAGO: Nilakihan ang pagitan (gap) ng mga pangalan */
 .org-member-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
-
-/* PINALAKI: Font at space sa loob ng kahon ng mga Mantech at Opscrew Members */
 .org-member-list li { font-size: 1.05rem; color: #cbd5e0; background: rgba(255,255,255,0.02); padding: 11px 14px; border-radius: 8px; border-bottom: 2px solid rgba(255,255,255,0.05); text-align: center; transition: 0.2s; width: 100%; font-weight: 500; }
 .org-member-list li:hover { background: rgba(72, 187, 120, 0.05); border-bottom-color: var(--primary); color: #fff; }
 .org-member-list li.vacant { color: #556175; font-style: italic; border-bottom-color: #4a5568; background: transparent; }
 
-/* BINAGO: Dinagdagan ng padding ang Opscrew container para mas maluwag tingnan */
 .org-opscrew-container { grid-column: span 3; background: rgba(72, 187, 120, 0.02); border: 1px solid rgba(72, 187, 120, 0.2); border-radius: 20px; padding: 30px; margin-top: 25px; position: relative; box-shadow: inset 0 0 20px rgba(72,187,120,0.05); }
 .org-opscrew-container::before { content: ''; position: absolute; top: -27px; left: 16.66%; right: 16.66%; height: 2px; background: var(--primary); box-shadow: 0 0 8px var(--primary); z-index: 1; }
 .org-opscrew-container::after { content: ''; position: absolute; top: -25px; left: 50%; transform: translateX(-50%); width: 2px; height: 25px; background: var(--primary); box-shadow: 0 0 6px var(--primary); z-index: 1; }
 
-/* BINAGO: Nilakihan ang gap sa pagitan ng Crew Alpha, Crew Bravo, etc. */
 .org-ops-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; justify-items: center; align-items: center; }
 
 @media (max-width: 960px) and (min-width: 821px) {
@@ -445,12 +436,11 @@ nav.scrolled {
     .org-supervisors-container::before, .org-supervisors-grid .org-card::before, .org-supervisors-container::after { display: none; }
 }
 
-//* ─── MOBILE TREE FLOW INTERFACE (MAX 820px) ─── */
+/* ─── MOBILE TREE FLOW INTERFACE (MAX 820px) ─── */
 @media (max-width: 820px) {
     .org-wrapper { align-items: stretch; padding-left: 20px; }
     .org-wrapper::before { content: ''; position: absolute; top: 0; bottom: 0; left: 15px; width: 2px; background: linear-gradient(to bottom, var(--primary), rgba(72, 187, 120, 0.2)); box-shadow: 0 0 6px var(--primary); z-index: 1; }
 
-    /* INAYOS: Isahang pag-hide ng desktop pseudo lines nang walang sapaw sa ibaba */
     .org-level-dept::after, .org-supervisors-container::before, .org-supervisors-container::after,
     .org-main-section::before, .org-team-column::before, .org-team-column::after, .org-opscrew-container::before { display: none !important; }
 
@@ -459,25 +449,22 @@ nav.scrolled {
 
     .org-supervisors-container { padding-top: 0; }
     
-    /* BINAGO: Ginawang center ang text alignment ng grid ng mga supervisor */
     .org-supervisors-grid { grid-template-columns: 1fr; gap: 15px; margin-bottom: 25px; padding-left: 35px; padding-bottom: 0; text-align: center; width: 100%; }
     
-    /* BINAGO: Sinet ang card at ang laman nito (avatar/text) para mag-center lahat nang pantay */
     .org-supervisors-grid .org-card { display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-align: center !important; position: relative; }
     .org-supervisors-grid .org-card .member-info { display: flex; flex-direction: column; align-items: center; text-align: center; }
-    /* Linya na kumokonekta sa card mula sa kaliwa */
     .org-supervisors-grid .org-card::before { content: ''; position: absolute; left: -26px; top: 50%; width: 26px; height: 2px; background: var(--primary) !important; }
 
     .org-main-section { padding-top: 0; }
     .org-main-layout { grid-template-columns: 1fr; gap: 25px; padding-left: 35px; }
     
-    /* BINAGO: Ginawang center para pati ang Mantech teams ay nakasentro rin */
     .org-team-column { text-align: center; background: rgba(255,255,255,0.02); position: relative; }
     .org-team-column::before { content: ''; position: absolute; left: -26px; top: 35px; width: 26px; height: 2px; background: var(--primary) !important; }
 
     .org-opscrew-container { grid-column: span 1; margin-top: 0; padding: 15px; background: rgba(72, 187, 120, 0.04); }
     .org-ops-grid { grid-template-columns: 1fr; gap: 8px; display: flex; flex-direction: column; }
 }
+
 /* --- FOOTER & HOVER GLOW --- */
 footer { background: #0b0e14; padding: 60px 5% 20px; border-top: 3px solid var(--primary); }
 .nutriveb-logo { color: var(--primary); font-size: 1.5rem; font-weight: 800; text-decoration: none; transition: 0.5s; display: inline-block; margin-bottom: 15px; }
