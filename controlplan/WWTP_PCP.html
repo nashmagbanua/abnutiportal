@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waste Water Treatment Control Plan</title>
+    <style>
+        :root {
+            --primary-color: #dce6f2;
+            --border-color: #000000;
+            --text-color: #333333;
+        }
+
+        body {
+            font-family: "Arial Narrow", Arial, sans-serif;
+            margin: 10px;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: var(--text-color);
+            font-size: 13px;
+        }
+
+        .control-plan-container {
+            width: 100%;
+            max-width: 100%;
+            background: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        /* Metadata Header Grid */
+        .cp-header {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            border-bottom: 2px solid var(--border-color);
+            background: #fff;
+        }
+
+        .cp-header-title {
+            grid-column: 1 / -1;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 15px;
+            background-color: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            letter-spacing: 1px;
+        }
+
+        .cp-header-block {
+            padding: 8px 12px;
+            border-right: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .cp-header-block:last-child {
+            border-right: none;
+        }
+
+        .cp-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #666;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .cp-value {
+            font-size: 13px;
+            font-weight: bold;
+            color: #000;
+        }
+
+        /* Table Styling */
+        .table-responsive {
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px; /* Ensures readable spacing in desktop/large viewports */
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 8px 10px;
+            text-align: left;
+            vertical-align: top;
+            line-height: 1.4;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: #000000;
+            text-align: center;
+            font-weight: bold;
+            font-size: 12px;
+            text-transform: uppercase;
+            vertical-align: middle;
+        }
+
+        /* Specific column alignments */
+        .center-cell {
+            text-align: center;
+        }
+
+        .spec-cell {
+            text-align: center;
+            font-weight: bold;
+            background-color: #fcfcfc;
+        }
+
+        /* Zebra striping for body rows */
+        tbody tr:nth-child(even) {
+            background-color: #fdfdfd;
+        }
+
+        tbody tr:hover {
+            background-color: #f5f8fa;
+        }
+
+        /* Footer Control Plan */
+        .cp-footer {
+            background: #f1f1f1;
+            padding: 15px;
+            border-top: 2px solid var(--border-color);
+            font-size: 11px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .proprietary-text {
+            font-weight: bold;
+            color: #555;
+            text-align: center;
+        }
+
+        .important-text {
+            color: #c00;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="control-plan-container">
+        
+        <div class="cp-header">
+            <div class="cp-header-title">WASTE WATER TREATMENT CONTROL PLAN</div>
+            
+            <div class="cp-header-block">
+                <div class="cp-label">Process Owner</div>
+                <div class="cp-value">A. CALISAY / A. ORTEGA / A. APUANG</div>
+            </div>
+            
+            <div class="cp-header-block">
+                <div class="cp-label">Control Plan No.</div>
+                <div class="cp-value">ABN1-NUD-L2-006</div>
+            </div>
+            
+            <div class="cp-header-block">
+                <div class="cp-label">Revision #</div>
+                <div class="cp-value">1</div>
+            </div>
+            
+            <div class="cp-header-block">
+                <div class="cp-label">Effective Date</div>
+                <div class="cp-value">-</div>
+            </div>
+
+            <div class="cp-header-block">
+                <div class="cp-label">Department / Section</div>
+                <div class="cp-value">UTILITIES / OPERATION</div>
+            </div>
+
+            <div class="cp-header-block" style="grid-column: span 2;">
+                <div class="cp-label">Process Description</div>
+                <div class="cp-value">TO TREAT ABN WASTE WATER AND DISCHARGE TO NEARBY BODY OF WATER IN COMPLIANCE WITH ALL REGULATORY REQUIREMENTS.</div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th rowspan="2" style="width: 40px;">No.</th>
+                        <th rowspan="2" style="width: 150px;">Process Name / Operation Description</th>
+                        <th rowspan="2" style="width: 130px;">Machine, Device, Jig, Tools</th>
+                        <th colspan="3">Characteristics</th>
+                        <th colspan="5">Methods</th>
+                        <th rowspan="2" style="width: 150px;">Responsibility</th>
+                        <th rowspan="2" style="width: 250px;">Reaction Plan</th>
+                    </tr>
+                    <tr>
+                        <th style="width: 50px;">No.</th>
+                        <th style="width: 120px;">Product</th>
+                        <th style="width: 150px;">Process</th>
+                        <th style="width: 140px;">Product / Process Spec. Tolerance</th>
+                        <th style="width: 120px;">Evaluation / Measurement Technique</th>
+                        <th style="width: 80px;">Sample Size</th>
+                        <th style="width: 90px;">Sample Freq.</th>
+                        <th style="width: 150px;">Control Method</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="center-cell">1</td>
+                        <td>Raw Waste Water Storage</td>
+                        <td>Sump Pit</td>
+                        <td class="center-cell">U43</td>
+                        <td>-</td>
+                        <td>Waste water level</td>
+                        <td class="spec-cell">≤ 4 meters (1-25)</td>
+                        <td>Manual Metering</td>
+                        <td class="center-cell">One reading</td>
+                        <td class="center-cell">Every 1 hour</td>
+                        <td>WWTP Monitoring Logsheet (ABN1-NUD-L4-006 Rev 00 WWTP Logsheet)</td>
+                        <td>WWTP Operator / Helper</td>
+                        <td>If not within specs, open sump pit pump and transfer wastes to influent pit until reach the desired level of sump pit.</td>
+                    </tr>
+                    <tr>
+                        <td class="center-cell">2</td>
+                        <td>Raw Waste Water Extraction</td>
+                        <td>Sump Pit Pump</td>
+                        <td class="center-cell">U44</td>
+                        <td>Raw Waste Water</td>
+                        <td>Sump pit pump on service</td>
+                        <td class="spec-cell">All pumps should be able to service</td>
+                        <td>Visual Inspection</td>
+                        <td class="center-cell">One reading</td>
+                        <td class="center-cell">Daily</td>
+                        <td>-</td>
+                        <td>WWTP Operator / Helper</td>
+                        <td>If any one of the pumps cant be utilized, troubleshoot latter, and use standby if needed.</td>
+                    </tr>
+                    <tr>
+                        <td class="center-cell" rowspan="2">3</td>
+                        <td rowspan="2">Influent Raw Waste Water Storage</td>
+                        <td rowspan="2">Influent Pit</td>
+                        <td class="center-cell" rowspan="2">U45</td>
+                        <td rowspan="2">-</td>
+                        <td>Influent pit transfer pump on service</td>
+                        <td class="spec-cell">All pumps should be able to service</td>
+                        <td>Visual Inspection</td>
+                        <td class="center-cell">One reading</td>
+                        <td class="center-cell">Daily</td>
+                        <td>-</td>
+                        <td>WWTP Operator / Helper</td>
+                        <td>If any one of the pumps cant be utilized, troubleshoot latter, and use standby if needed. If not within the specs inform Supervisor and QA for adjustment.</td>
+                    </tr>
+                    <tr>
+                        <td>Influent pit waste water volume</td>
+                        <td class="spec-cell">≤48 cu. meters</td>
+                        <td>Visual Inspection</td>
+                        <td class="center-cell">One reading</td>
+                        <td class="center-cell">Daily</td>
+                        <td>WWTP Monitoring Logsheet (ABN1-NUD-L4-006 Rev 00 WWTP Logsheet)</td>
+                        <td>WWTP Operator / Helper</td>
+                        <td>If not within specs turn on or off the sump pit feed pump.</td>
+                    </tr>
+                    <tr>
+                        <td class="center-cell">4</td>
+                        <td>Fine Screening</td>
+                        <td>Metal Screen Box</td>
+                        <td class="center-cell">U46</td>
+                        <td>Suspended solids free waste water</td>
+                        <td>-</td>
+                        <td class="spec-cell">-</td>
+                        <td>Visual Inspection</td>
+                        <td class="center-cell">One reading</td>
+                        <td class="center-cell">Daily</td>
+                        <td>WWTP Cleaning Checklist</td>
+                        <td>WWTP Operator / Helper</td>
+                        <td>Clean or change the metal screen once becomes damaged.</td>
+                    </tr>
+                    <tr>
+                        <td class="center-cell" rowspan="3">5</td>
+                        <td rowspan="3">Diffused Air Floatation</td>
+                        <td>DAF Feed Pump</td>
+                        <td class="center-cell" rowspan="3">U47</td>
+                        <td rowspan="3">Scum and coagulated wastes</td>
+                        <td>DAF feed pump in service</td>
+                        <td class="spec-cell">All pumps should be able to service</td>
+                        <td>Visual Inspection</td>
+                        <td class="center-cell">One reading</td>
+                        <td class="center-cell">Daily</td>
+                        <td>-</td>
+                        <td>WWTP Operator / Helper</td>
+                        <td>If any one of the pumps cant be utilized, troubleshoot latter, and use standby if needed.</td>
+                    </tr>
+                    <tr>
+                        <td>DAF Sump Pit</td>
+                        <td>DAF Waste water volume</td>
+                        <td class="spec-cell">≤48 cu. meters</td>
+                        <td>Manual Metering</td>
+                        <td class="center-cell">One reading</td>
+                        <td class="center-cell">Daily</td>
+                        <td>WWTP Monitoring Logsheet (ABN1-NUD-L4-006 Rev 00 WWTP Logsheet)</td>
+                        <td>WWTP Operator / Helper</td>
+                        <td>If not within specs turn on or off the sump pit feed pump.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="cp-footer">
+            <div class="proprietary-text">
+                PROPRIETARY NOTICE: THIS DOCUMENT CONTAINS INFORMATION PROPRIETARY TO AB NUTIBEV CORP. ANY DISCLOSURE OR USE IS EXPRESSLY PROHIBITED EXCEPT UPON WRITTEN PERMISSION BY AB NUTIBEV CORP.
+            </div>
+            <div class="important-text">
+                ⚠️ IMPORTANT: Printed documents without the blue controlled stamp are considered uncontrolled.
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

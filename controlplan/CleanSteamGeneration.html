@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clean Steam Generation Control Plan</title>
+    <style>
+        :root {
+            --primary-color: #dce6f2;
+            --border-color: #000000;
+            --text-color: #333333;
+        }
+
+        body {
+            font-family: "Arial Narrow", Arial, sans-serif;
+            margin: 10px;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: var(--text-color);
+            font-size: 13px;
+        }
+
+        .control-plan-container {
+            width: 100%;
+            max-width: 100%;
+            background: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        /* Metadata Header Grid */
+        .cp-header {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            border-bottom: 2px solid var(--border-color);
+            background: #fff;
+        }
+
+        .cp-header-title {
+            grid-column: 1 / -1;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 15px;
+            background-color: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            letter-spacing: 1px;
+        }
+
+        .cp-header-block {
+            padding: 8px 12px;
+            border-right: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .cp-header-block:last-child {
+            border-right: none;
+        }
+
+        .cp-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #666;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .cp-value {
+            font-size: 13px;
+            font-weight: bold;
+            color: #000;
+            line-height: 1.3;
+        }
+
+        /* Table Styling */
+        .table-responsive {
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1300px;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 8px 10px;
+            text-align: left;
+            vertical-align: top;
+            line-height: 1.4;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: #000000;
+            text-align: center;
+            font-weight: bold;
+            font-size: 12px;
+            text-transform: uppercase;
+            vertical-align: middle;
+        }
+
+        /* Specific cell alignments and styles */
+        .center-cell {
+            text-align: center;
+        }
+
+        .spec-cell {
+            text-align: center;
+            font-weight: bold;
+            background-color: #fcfcfc;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #fdfdfd;
+        }
+
+        tbody tr:hover {
+            background-color: #f5f8fa;
+        }
+
+        /* Footer Control Plan */
+        .cp-footer {
+            background: #f1f1f1;
+            padding: 15px;
+            border-top: 2px solid var(--border-color);
+            font-size: 11px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .proprietary-text {
+            font-weight: bold;
+            color: #555;
+            text-align: center;
+        }
+
+        .important-text {
+            color: #c00;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="control-plan-container">
+        
+        <div class="cp-header">
+            <div class="cp-header-title">CLEAN STEAM GENERATION CONTROL PLAN</div>
+            
+            <div class="cp-header-block">
+                <div class="cp-label">Process Owner</div>
+                <div class="cp-value">A. CALISAY / A. ORTEGA / A. APUANG</div>
+            </div>
+            
+            <div class="cp-header-block">
+                <div class="cp-label">Control Plan No.</div>
+                <div class="cp-value">ABN1-NUD-L2-010</div>
+            </div>
+            
+            <div class="cp-header-block">
+                <div class="cp-label">Revision #</div>
+                <div class="cp-value">1</div>
+            </div>
+            
+            <div class="cp-header-block">
+                <div class="cp-label">Effective Date</div>
+                <div class="cp-value">-</div>
+            </div>
+
+            <div class="cp-header-block">
+                <div class="cp-label">Department / Section</div>
+                <div class="cp-value">UTILITIES / OPERATION</div>
+            </div>
+
+            <div class="cp-header-block">
+                <div class="cp-label">Process Category</div>
+                <div class="cp-value">CLEAN STEAM GENERATION CONTROL PLAN</div>
+            </div>
+
+            <div class="cp-header-block" style="grid-column: span 2;">
+                <div class="cp-label">Process Description</div>
+                <div class="cp-value">DELIVER CLEAN STEAM TO THE END-USER BY MEANS OF CONVERTING R.O. WATER INTO CLEAN STEAM THROUGH BOILING USING PLANT STEAM.</div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th rowspan="2" style="width: 40px;">No.</th>
+                        <th rowspan="2" style="width: 160px;">Process Name / Operation Description</th>
+                        <th rowspan="2" style="width: 140px;">Machine, Device, Jig, Tools</th>
+                        <th colspan="3">Characteristics</th>
+                        <th colspan="5">Methods</th>
+                        <th rowspan="2" style="width: 150px;">Responsibility</th>
+                        <th rowspan="2" style="width: 250px;">Out of Control Action Plan</th>
+                    </tr>
+                    <tr>
+                        <th style="width: 40px;">No.</th>
+                        <th style="width: 110px;">Product</th>
+                        <th style="width: 130px;">Parameters</th>
+                        <th style="width: 140px;">Product / Process Spec. Tolerance</th>
+                        <th style="width: 130px;">Evaluation / Measurement Technique</th>
+                        <th style="width: 70px;">Size</th>
+                        <th style="width: 80px;">Frequency</th>
+                        <th style="width: 160px;">Control Method</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="center-cell">1</td>
+                        <td>1. Boiling of R.O. Water</td>
+                        <td>Clean Steam Generator</td>
+                        <td class="center-cell">U14</td>
+                        <td>Clean Steam</td>
+                        <td>Hot Water Level</td>
+                        <td class="spec-cell">55-65 %</td>
+                        <td>HMI / Magnetic Level Indicator</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">Every 1 hour</td>
+                        <td>CLEAN STEAM GENERATION Logsheet (ABN1-NUD-L4-002)</td>
+                        <td>Clean Steam Generator Operator</td>
+                        <td>
+                            <strong>Low water level:</strong><br>
+                            Check if RO tank water supply pump are working.<br>
+                            Replace or repair pump if defective.<br>
+                            Check if level sensor is working.<br>
+                            Replace or repair sensor if defective.<br><br>
+                            <strong>High water level:</strong><br>
+                            Check if level sensor is working.<br>
+                            Replace or repair sensor if defective.
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="center-cell" rowspan="3">2</td>
+                        <td rowspan="3">2. Issuance of Clean Steam to End-User</td>
+                        <td rowspan="3">Clean Steam Header</td>
+                        <td class="center-cell" rowspan="3">U15</td>
+                        <td rowspan="3">Clean Steam</td>
+                        <td rowspan="2">Clean Steam Pressure</td>
+                        <td class="spec-cell">VMR 3-4 Bars (Mixing & De-enzyme)</td>
+                        <td>Pressure Gauge HMI</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">Every Hour</td>
+                        <td>CLEAN STEAM GENERATION Logsheet (ABN1-NUD-L4-002)</td>
+                        <td>Clean Steam Generator Operator</td>
+                        <td rowspan="2">
+                            <strong>If not within specs:</strong><br>
+                            Adjust the pressure at the CSG HMI until desired parameter is reached.<br>
+                            Check steam supply pressure supply if within the steam pressure specification. If not within specification, check the steam supply valve, alert Boiler operator and Supervisor if needed.
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="spec-cell">VMD/VMB 5-7 Bars (De-enzyme)</td>
+                        <td>Pressure Gauge HMI</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">Every Hour</td>
+                        <td>CLEAN STEAM GENERATION Logsheet (ABN1-NUD-L4-002)</td>
+                        <td>Clean Steam Generator Operator</td>
+                    </tr>
+
+                    <tr>
+                        <td>Brand</td>
+                        <td class="spec-cell">Production schedule</td>
+                        <td class="center-cell">Every Change brand</td>
+                        <td class="center-cell">Once per change brand</td>
+                        <td class="center-cell">-</td>
+                        <td>CLEAN STEAM GENERATION Logsheet (ABN1-NUD-L4-002)</td>
+                        <td>Clean Steam Generator Operator</td>
+                        <td>-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="cp-footer">
+            <div class="proprietary-text">
+                PROPRIETARY NOTICE: THIS DOCUMENT CONTAINS INFORMATION PROPRIETARY TO AB NUTIBEV CORP. ANY DISCLOSURE OR USE IS EXPRESSLY PROHIBITED EXCEPT UPON WRITTEN PERMISSION BY AB NUTIBEV CORP.
+            </div>
+            <div class="important-text">
+                ⚠️ IMPORTANT: Printed documents without the blue controlled stamp are considered uncontrolled.
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

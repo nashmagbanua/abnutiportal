@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reverse Osmosis Water Treatment Control Plan</title>
+    <style>
+        :root {
+            --primary-color: #dce6f2;
+            --border-color: #000000;
+            --text-color: #333333;
+        }
+
+        body {
+            font-family: "Arial Narrow", Arial, sans-serif;
+            margin: 10px;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: var(--text-color);
+            font-size: 13px;
+        }
+
+        .control-plan-container {
+            width: 100%;
+            max-width: 100%;
+            background: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        /* Metadata Header Grid */
+        .cp-header {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            border-bottom: 2px solid var(--border-color);
+            background: #fff;
+        }
+
+        .cp-header-title {
+            grid-column: 1 / -1;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 15px;
+            background-color: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            letter-spacing: 1px;
+        }
+
+        .cp-header-block {
+            padding: 8px 12px;
+            border-right: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .cp-header-block:last-child {
+            border-right: none;
+        }
+
+        .cp-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #666;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .cp-value {
+            font-size: 13px;
+            font-weight: bold;
+            color: #000;
+        }
+
+        /* Table Styling */
+        .table-responsive {
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1300px;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 8px 10px;
+            text-align: left;
+            vertical-align: top;
+            line-height: 1.4;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: #000000;
+            text-align: center;
+            font-weight: bold;
+            font-size: 12px;
+            text-transform: uppercase;
+            vertical-align: middle;
+        }
+
+        /* Specific column alignments */
+        .center-cell {
+            text-align: center;
+        }
+
+        .spec-cell {
+            text-align: center;
+            font-weight: bold;
+            background-color: #fcfcfc;
+        }
+
+        /* Zebra striping for body rows */
+        tbody tr:nth-child(even) {
+            background-color: #fdfdfd;
+        }
+
+        tbody tr:hover {
+            background-color: #f5f8fa;
+        }
+
+        /* Footer Control Plan */
+        .cp-footer {
+            background: #f1f1f1;
+            padding: 15px;
+            border-top: 2px solid var(--border-color);
+            font-size: 11px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .proprietary-text {
+            font-weight: bold;
+            color: #555;
+            text-align: center;
+        }
+
+        .important-text {
+            color: #c00;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="control-plan-container">
+        
+        <div class="cp-header">
+            <div class="cp-header-title">WATER TREATMENT CONTROL PLAN</div>
+            
+            <div class="cp-header-block">
+                <div class="cp-label">Process Owner</div>
+                <div class="cp-value">A. CALISAY / A. ORTEGA / A. APUANG</div>
+            </div>
+            
+            <div class="cp-header-block">
+                <div class="cp-label">Control Plan No.</div>
+                <div class="cp-value">ABN1-NUD-L2-003</div>
+            </div>
+            
+            <div class="cp-header-block">
+                <div class="cp-label">Revision #</div>
+                <div class="cp-value">1</div>
+            </div>
+            
+            <div class="cp-header-block">
+                <div class="cp-label">Effective Date</div>
+                <div class="cp-value">-</div>
+            </div>
+
+            <div class="cp-header-block">
+                <div class="cp-label">Department / Section</div>
+                <div class="cp-value">UTILITIES / OPERATION</div>
+            </div>
+
+            <div class="cp-header-block">
+                <div class="cp-label">Process Category</div>
+                <div class="cp-value">REVERSE OSMOSIS WATER TREATMENT</div>
+            </div>
+
+            <div class="cp-header-block" style="grid-column: span 2;">
+                <div class="cp-label">Process Description</div>
+                <div class="cp-value">DELIVER R.O. WATER TO THE CLEAN STEAM GENERATOR BY MEANS OF PRESSURIZED SOFT WATER FILTRATION THAT PASSES THROUGH A PERMEABLE MEMBRANE.</div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th rowspan="2" style="width: 40px;">No.</th>
+                        <th rowspan="2" style="width: 160px;">Process Name / Operation Description</th>
+                        <th rowspan="2" style="width: 140px;">Machine, Device, Jig, Tools</th>
+                        <th colspan="3">Characteristics</th>
+                        <th colspan="5">Methods</th>
+                        <th rowspan="2" style="width: 150px;">Responsibility</th>
+                        <th rowspan="2" style="width: 250px;">Out of Control Action Plan</th>
+                    </tr>
+                    <tr>
+                        <th style="width: 40px;">No.</th>
+                        <th style="width: 110px;">Product</th>
+                        <th style="width: 130px;">Parameters</th>
+                        <th style="width: 140px;">Product / Process Spec. Tolerance</th>
+                        <th style="width: 130px;">Evaluation / Measurement Technique</th>
+                        <th style="width: 70px;">Size</th>
+                        <th style="width: 80px;">Frequency</th>
+                        <th style="width: 160px;">Control Method</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="center-cell">16</td>
+                        <td>16. R.O. Pre-Filtration</td>
+                        <td>Cartridge Filter (10 micron)</td>
+                        <td class="center-cell">U11</td>
+                        <td>Filtered Plant Water</td>
+                        <td>Differential Pressure</td>
+                        <td class="spec-cell">≤1 Bar</td>
+                        <td>Inlet and Outlet Pressure Gauge</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">Every Shift</td>
+                        <td>Water Treatment Logsheet (ABN1-NUD-L4-002)</td>
+                        <td>Water Treatment Operator</td>
+                        <td>once out of specs, drain a volume of water from Filtered Water Tank and change or clean filter elements.</td>
+                    </tr>
+                    <tr>
+                        <td class="center-cell">17</td>
+                        <td>17. Reverse Osmosis Filtration</td>
+                        <td>Reverse Osmosis Filter</td>
+                        <td class="center-cell">U12</td>
+                        <td>R.O. Water</td>
+                        <td>Pressure</td>
+                        <td class="spec-cell">-</td>
+                        <td>Inlet and Outlet Pressure Gauge</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">Every Shift</td>
+                        <td>Water Treatment Logsheet (ABN1-NUD-L4-002)</td>
+                        <td>Water Treatment Operator</td>
+                        <td>once out of specs, drain a volume of water from Filtered Water Tank and change or clean filter elements or perform CIP.</td>
+                    </tr>
+                    <tr>
+                        <td class="center-cell" rowspan="2">18</td>
+                        <td rowspan="2">18. R.O. Water Storage</td>
+                        <td rowspan="2">R.O. Water Storage Tank</td>
+                        <td class="center-cell" rowspan="2">U13</td>
+                        <td rowspan="2">R.O. Water</td>
+                        <td>R. O. Water level</td>
+                        <td class="spec-cell">10-90%</td>
+                        <td>Sight Glass</td>
+                        <td class="center-cell">-</td>
+                        <td class="center-cell">-</td>
+                        <td class="center-cell">-</td>
+                        <td class="center-cell">-</td>
+                        <td>
+                            <strong>Low water level:</strong><br>
+                            Check if RO water supply pump are working.<br>
+                            Replace or repair pump if defective.<br>
+                            Check if level sensor is working.<br>
+                            Replace or repair sensor if defective.<br><br>
+                            <strong>High water level:</strong><br>
+                            Check if level sensor is working.<br>
+                            Replace or repair sensor if defective.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>R. O. Water Conductivity</td>
+                        <td class="spec-cell">≤10 μS/cm²</td>
+                        <td>Conductivity Meter</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">Every Service</td>
+                        <td>CLEAN STEAM GENERATION Logsheet (ABN1-NUD-L4-002)</td>
+                        <td>Water Treatment Operator</td>
+                        <td>If not within specs, close the valve going to R.O. Tank and recirculate the R.O. Water until desired parameters reached.<br>Perform CIP or replace RO membrane</td>
+                    </tr>
+                    <tr>
+                        <td class="center-cell">19</td>
+                        <td>19. RO. Water Supply Pressure</td>
+                        <td>R.O. Pump</td>
+                        <td class="center-cell">M10</td>
+                        <td>R.O. Water</td>
+                        <td>R.O. water supply pressure</td>
+                        <td class="spec-cell">1-3 Bars</td>
+                        <td>Pressure Gauge</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">Every Four Hours</td>
+                        <td>Water Treatment Logsheet (ABN1-NUD-L4-001)</td>
+                        <td>Water Treatment Operator</td>
+                        <td>If not within specs, Check pump and adjust valve to get the suitable pressure. If defective pump repair or replace the pump.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="cp-footer">
+            <div class="proprietary-text">
+                PROPRIETARY NOTICE: THIS DOCUMENT CONTAINS INFORMATION PROPRIETARY TO AB NUTIBEV CORP. ANY DISCLOSURE OR USE IS EXPRESSLY PROHIBITED EXCEPT UPON WRITTEN PERMISSION BY AB NUTIBEV CORP.
+            </div>
+            <div class="important-text">
+                ⚠️ IMPORTANT: Printed documents without the blue controlled stamp are considered uncontrolled.
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steam Generation (Coal-Fired) Control Plan</title>
+    <style>
+        :root {
+            --primary-color: #dce6f2;
+            --border-color: #000000;
+            --text-color: #333333;
+        }
+
+        body {
+            font-family: "Arial Narrow", Arial, sans-serif;
+            margin: 10px;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: var(--text-color);
+            font-size: 13px;
+        }
+
+        .control-plan-container {
+            width: 100%;
+            max-width: 100%;
+            background: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        /* Metadata Header Grid */
+        .cp-header {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            border-bottom: 2px solid var(--border-color);
+            background: #fff;
+        }
+
+        .cp-header-title {
+            grid-column: 1 / -1;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 15px;
+            background-color: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            letter-spacing: 1px;
+        }
+
+        .cp-header-block {
+            padding: 8px 12px;
+            border-right: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .cp-header-block:last-child {
+            border-right: none;
+        }
+
+        .cp-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #666;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .cp-value {
+            font-size: 12px;
+            font-weight: bold;
+            color: #000;
+            line-height: 1.3;
+        }
+
+        /* Table Styling */
+        .table-responsive {
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1300px;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 8px 10px;
+            text-align: left;
+            vertical-align: top;
+            line-height: 1.4;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: #000000;
+            text-align: center;
+            font-weight: bold;
+            font-size: 12px;
+            text-transform: uppercase;
+            vertical-align: middle;
+        }
+
+        /* Specific cell setups */
+        .center-cell {
+            text-align: center;
+        }
+
+        .spec-cell {
+            text-align: center;
+            font-weight: bold;
+            background-color: #fcfcfc;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #fdfdfd;
+        }
+
+        tbody tr:hover {
+            background-color: #f5f8fa;
+        }
+
+        /* Footer Control Plan */
+        .cp-footer {
+            background: #f1f1f1;
+            padding: 15px;
+            border-top: 2px solid var(--border-color);
+            font-size: 11px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .proprietary-text {
+            font-weight: bold;
+            color: #555;
+            text-align: center;
+        }
+
+        .important-text {
+            color: #c00;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="control-plan-container">
+        
+        <div class="cp-header">
+            <div class="cp-header-title">STEAM GENERATION (COAL-FIRED) CONTROL PLAN</div>
+            
+            <div class="cp-header-block" style="grid-column: span 2;">
+                <div class="cp-label">Process Owner</div>
+                <div class="cp-value">
+                    A. CALISAY / A. ORTEGA / A. APUANG<br>
+                    JOEMAR BELLECA / RUEL CHRISTOPHER NARISMA / CLARISSE ALDAY
+                </div>
+            </div>
+            
+            <div class="cp-header-block">
+                <div class="cp-label">Control Plan No.</div>
+                <div class="cp-value">ABN1-NUD-L2-001</div>
+            </div>
+            
+            <div class="cp-header-block">
+                <div class="cp-label">Revision #</div>
+                <div class="cp-value">1</div>
+            </div>
+            
+            <div class="cp-header-block">
+                <div class="cp-label">Effective Date</div>
+                <div class="cp-value">-</div>
+            </div>
+
+            <div class="cp-header-block">
+                <div class="cp-label">Department / Section</div>
+                <div class="cp-value">UTILITIES / OPERATION</div>
+            </div>
+
+            <div class="cp-header-block">
+                <div class="cp-label">Process Category</div>
+                <div class="cp-value">STEAM GENERATION (COAL-FIRED)</div>
+            </div>
+
+            <div class="cp-header-block" style="grid-column: span 2;">
+                <div class="cp-label">Process Description</div>
+                <div class="cp-value">DELIVER STEAM TO THE DIFFERENT SUPPLY USERS BY MEANS OF DEAERATION AND BOILING OF SOFTWATER FROM THE WATER TREATMENT PLANT USING COAL-FIRED BOILERS.</div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th rowspan="2" style="width: 40px;">No.</th>
+                        <th rowspan="2" style="width: 160px;">Process Name / Operation Description</th>
+                        <th rowspan="2" style="width: 130px;">Machine, Device, Jig, Tools</th>
+                        <th colspan="3">Characteristics</th>
+                        <th colspan="5">Methods</th>
+                        <th rowspan="2" style="width: 150px;">Responsibility</th>
+                        <th rowspan="2" style="width: 250px;">Out of Control Action Plan</th>
+                    </tr>
+                    <tr>
+                        <th style="width: 40px;">No.</th>
+                        <th style="width: 100px;">Product</th>
+                        <th style="width: 140px;">Process</th>
+                        <th style="width: 150px;">Product / Process Spec. Tolerance</th>
+                        <th style="width: 130px;">Evaluation / Measurement Technique</th>
+                        <th style="width: 70px;">Sample Size</th>
+                        <th style="width: 80px;">Sample Freq.</th>
+                        <th style="width: 160px;">Control Method</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="center-cell" rowspan="5">1</td>
+                        <td rowspan="5">Feed Water Storage</td>
+                        <td rowspan="5">Feed Water Tank</td>
+                        <td class="center-cell" rowspan="5">U21</td>
+                        <td rowspan="5">-</td>
+                        <td>Feed Water Level</td>
+                        <td class="spec-cell">3/4 To Full Water Level</td>
+                        <td>Level sight glass</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">every hour</td>
+                        <td>STEAM GENERATION Logsheet (ABN1-NUD-L4-004)</td>
+                        <td>Boiler Operator</td>
+                        <td rowspan="2">
+                            <strong>High Water Level:</strong> Check utilities water transfer pump if automatic mode failed, turn off if running (manual mode).<br><br>
+                            <strong>Low Water Level:</strong> Check utilities water transfer pump if automatic mode failed, turn on if not in operation (manual mode), utilize available stand by pump if needed.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Boiler Water Level</td>
+                        <td class="spec-cell">50% - 70%</td>
+                        <td>HMI</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">every hour</td>
+                        <td>STEAM GENERATION Logsheet (ABN1-NUD-L4-004)</td>
+                        <td>Boiler Operator</td>
+                    </tr>
+                    <tr>
+                        <td rowspan="3">Feed Water Quality</td>
+                        <td class="spec-cell">pH - 7 to 9</td>
+                        <td>pH meter</td>
+                        <td class="center-cell">two reading</td>
+                        <td class="center-cell">every day</td>
+                        <td>Water Quality Report</td>
+                        <td>QA/QC</td>
+                        <td>QA to inform UD if out of specs, UD to conduct flushing at feed water tank until pH is within specs.</td>
+                    </tr>
+                    <tr>
+                        <td class="spec-cell">Conductivity - ≤1500 µS/cm</td>
+                        <td>Conductivity meter</td>
+                        <td class="center-cell">two reading</td>
+                        <td class="center-cell">every day</td>
+                        <td>Water Quality Report</td>
+                        <td>QA/QC</td>
+                        <td>QA to inform UD if out of specs, UD to conduct flushing at feed water tank until conductivity is within specs.</td>
+                    </tr>
+                    <tr>
+                        <td class="spec-cell">Hardness - ≤10 ppm</td>
+                        <td>Titration</td>
+                        <td class="center-cell">two reading</td>
+                        <td class="center-cell">every day</td>
+                        <td>Water Quality Report</td>
+                        <td>QA/QC</td>
+                        <td>QA to inform UD if out of specs, UD to conduct flushing at feed water tank until hardness is within specs.</td>
+                    </tr>
+
+                    <tr>
+                        <td class="center-cell" rowspan="3">2</td>
+                        <td rowspan="3">Deaeration</td>
+                        <td rowspan="3">Deaerator</td>
+                        <td class="center-cell" rowspan="3">U22</td>
+                        <td rowspan="3">Deaerated Water</td>
+                        <td rowspan="3">Deaerator Water Quality</td>
+                        <td class="spec-cell">pH - 7 to 9</td>
+                        <td>pH meter</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">every 6 hours</td>
+                        <td>Water Quality Report</td>
+                        <td>QA/QC</td>
+                        <td>QA to inform UD if out of specs, UD to conduct flushing at feed water tank until pH is within specs.</td>
+                    </tr>
+                    <tr>
+                        <td class="spec-cell">Conductivity - ≤1500 µS/cm</td>
+                        <td>Conductivity meter</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">every 6 hours</td>
+                        <td>Water Quality Report</td>
+                        <td>QA/QC</td>
+                        <td>QA to inform UD if out of specs, UD to conduct flushing at feed water tank until conductivity is within specs.</td>
+                    </tr>
+                    <tr>
+                        <td class="spec-cell">Hardness - ≤10 ppm</td>
+                        <td>Titration</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">every 6 hours</td>
+                        <td>Water Quality Report</td>
+                        <td>QA/QC</td>
+                        <td>QA to inform UD if out of specs, UD to conduct flushing at feed water tank until hardness is within specs.</td>
+                    </tr>
+
+                    <tr>
+                        <td class="center-cell">3</td>
+                        <td>Pre-heating</td>
+                        <td>Deaerator</td>
+                        <td class="center-cell">U23</td>
+                        <td>-</td>
+                        <td>Deaerated Water Temperature</td>
+                        <td class="spec-cell">60°C - 95°C</td>
+                        <td>Digital display</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">every hour</td>
+                        <td>STEAM GENERATION Logsheet (ABN1-NUD-L4-004)</td>
+                        <td>Steam Generation Coal-Fired Operator</td>
+                        <td>Adjust induced draft or forced draft fan speed until the required furnace temp is reached, shutdown boiler operation if furnace temp becomes abnormal for a period of time.</td>
+                    </tr>
+
+                    <tr>
+                        <td class="center-cell">4</td>
+                        <td>Steam Generation in Coal-Fired Boiler</td>
+                        <td>Coal-Fired Boiler</td>
+                        <td class="center-cell">U24</td>
+                        <td>Plant Steam</td>
+                        <td>Exhaust Gas Temperature Out</td>
+                        <td class="spec-cell">100°C - 200°C (if evaporation maintains rated value)<br>0 - 10 Bars</td>
+                        <td>Digital display</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">every hour</td>
+                        <td>STEAM GENERATION Logsheet (ABN1-NUD-L4-004)</td>
+                        <td>Steam Generation Coal-Fired Operator</td>
+                        <td>Values vary, depends on evaporation rate.</td>
+                    </tr>
+
+                    <tr>
+                        <td class="center-cell" rowspan="3">5</td>
+                        <td rowspan="3">Issuance of Steam to the End User</td>
+                        <td rowspan="3">Coal-Fired Boiler</td>
+                        <td class="center-cell" rowspan="3">U25</td>
+                        <td rowspan="3">Pressurized Plant Steam</td>
+                        <td rowspan="3">Steam Header Pressure</td>
+                        <td class="spec-cell">Process CIP & Sugar Dissolving - 6-9.5 Bars</td>
+                        <td>Pressure gauge</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">every hour</td>
+                        <td>STEAM GENERATION Logsheet (ABN1-NUD-L4-004)</td>
+                        <td>Steam Generation Coal-Fired Operator</td>
+                        <td rowspan="3">
+                            <strong>If Pressure is High and not within the specs:</strong> Open the steam drain valve.<br><br>
+                            <strong>If Pressure is Low and not within the specs:</strong> Open the standby boiler to suffice the needed pressure.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="spec-cell">Clean Steam & Alwin Soy - 6-9.5 Bars</td>
+                        <td>Pressure gauge</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">every hour</td>
+                        <td>STEAM GENERATION Logsheet (ABN1-NUD-L4-004)</td>
+                        <td>Steam Generation Coal-Fired Operator</td>
+                    </tr>
+                    <tr>
+                        <td class="spec-cell">Bottling - 6-9.5 Bars</td>
+                        <td>Pressure gauge</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">every hour</td>
+                        <td>STEAM GENERATION Logsheet (ABN1-NUD-L4-004)</td>
+                        <td>Steam Generation Coal-Fired Operator</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="cp-footer">
+            <div class="proprietary-text">
+                PROPRIETARY NOTICE: THIS DOCUMENT CONTAINS INFORMATION PROPRIETARY TO AB NUTIBEV CORP. ANY DISCLOSURE OR USE IS EXPRESSLY PROHIBITED EXCEPT UPON WRITTEN PERMISSION BY AB NUTIBEV CORP.
+            </div>
+            <div class="important-text">
+                ⚠️ IMPORTANT: Printed documents without the blue controlled stamp are considered uncontrolled.
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

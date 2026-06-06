@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Treatment Control Plan</title>
+    <style>
+        :root {
+            --primary-color: #dce6f2;
+            --border-color: #000000;
+            --text-color: #333333;
+        }
+
+        body {
+            font-family: "Arial Narrow", Arial, sans-serif;
+            margin: 10px;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: var(--text-color);
+            font-size: 13px;
+        }
+
+        .control-plan-container {
+            width: 100%;
+            max-width: 100%;
+            background: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        /* Metadata Header Grid */
+        .cp-header {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            border-bottom: 2px solid var(--border-color);
+            background: #fff;
+        }
+
+        .cp-header-title {
+            grid-column: 1 / -1;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 12px;
+            background-color: #fff;
+            border-bottom: 2px solid var(--border-color);
+            letter-spacing: 1px;
+        }
+
+        .header-box {
+            padding: 8px;
+            border-right: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .header-box:last-child {
+            border-right: none;
+        }
+
+        .label {
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #666;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .value {
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        /* Responsive Table Wrapper */
+        .table-wrapper {
+            overflow-x: auto;
+            width: 100%;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            min-width: 900px; /* Sapat na lapad para sa desktop nang hindi nagsisiksikan */
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            vertical-align: top;
+            font-size: 12px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            color: #000;
+            font-weight: bold;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .row-no {
+            text-align: center;
+            font-weight: bold;
+            width: 30px;
+        }
+
+        .spec-cell {
+            text-align: center;
+        }
+
+        /* Footer / Proprietary Notice */
+        .cp-footer {
+            padding: 15px;
+            background-color: #fff;
+            border-top: 2px solid var(--border-color);
+            font-size: 11px;
+        }
+
+        .proprietary-text {
+            color: #c00;
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+
+        .important-text {
+            background-color: #fff8e1;
+            border: 1px dashed #ffb300;
+            padding: 8px;
+            text-align: center;
+            font-weight: bold;
+            border-radius: 4px;
+        }
+
+        /* Mobile Optimization Hint */
+        .mobile-hint {
+            display: none;
+            font-size: 11px;
+            color: #666;
+            text-align: center;
+            margin-bottom: 5px;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-hint {
+                display: block;
+            }
+            body {
+                margin: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-hint">💡 Mag-swipe pakaliwa o pakanan para makita ang buong table.</div>
+
+    <div class="control-plan-container">
+        
+        <div class="cp-header">
+            <div class="cp-header-title">WATER TREATMENT CONTROL PLAN</div>
+            
+            <div class="header-box">
+                <span class="label">Process Owner</span>
+                <span class="value">A. CALISAY / A. ORTEGA / A. APUANG</span>
+            </div>
+            <div class="header-box">
+                <span class="label">Control Plan No.</span>
+                <span class="value">ABN1-NUD-L2-003</span>
+            </div>
+            <div class="header-box">
+                <span class="label">Revision #</span>
+                <span class="value">1</span>
+            </div>
+            <div class="header-box">
+                <span class="label">Effective Date</span>
+                <span class="value">-</span>
+            </div>
+            <div class="header-box">
+                <span class="label">Department / Section</span>
+                <span class="value">UTILITIES / OPERATION</span>
+            </div>
+            <div class="header-box">
+                <span class="label">Process Category</span>
+                <span class="value">RAW WATER EXTRACTION</span>
+            </div>
+            <div class="header-box" style="grid-column: span 2;">
+                <span class="label">Process Description</span>
+                <span class="value">DELIVER WATER TO WATER TREATMENT PLANT FROM THE DEEP WELLS.</span>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th rowspan="2" style="width: 40px;">No.</th>
+                        <th rowspan="2">Process Name / Operation Description</th>
+                        <th rowspan="2">Machine, Device, Jig, Tools</th>
+                        <th colspan="3">Characteristics</th>
+                        <th colspan="5">Methods</th>
+                        <th rowspan="2">Responsibility</th>
+                        <th rowspan="2" style="width: 250px;">Reaction Plan</th>
+                    </tr>
+                    <tr>
+                        <th style="width: 45px;">No.</th>
+                        <th>Product</th>
+                        <th>Process</th>
+                        <th>Product/Process Spec. Tolerance</th>
+                        <th>Evaluation/Measurement Technique</th>
+                        <th style="width: 60px;">Sample Size</th>
+                        <th style="width: 80px;">Frequency</th>
+                        <th>Control Method</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="row-no">1</td>
+                        <td>Raw Water Extraction</td>
+                        <td>Deep Well Pumps (Supplied by Main UTL)</td>
+                        <td class="spec-cell">U01</td>
+                        <td>Plant Water</td>
+                        <td>Deep well pump on service</td>
+                        <td>All pumps should be able to service</td>
+                        <td>Service count</td>
+                        <td class="spec-cell">One reading</td>
+                        <td class="spec-cell">Once Per Shift</td>
+                        <td>Water Treatment Logsheet (ABN1-NUD-L4-001)</td>
+                        <td>Water Treatment Operator</td>
+                        <td>If any one of the pumps cant be utilized contact ABI Utilities personnel and ask for assistance regarding deep well pumps.</td>
+                    </tr>
+                    <tr>
+                        <td class="row-no">2</td>
+                        <td>Plant Water Storage</td>
+                        <td>Concrete Water Tank (Combined Water Storage)</td>
+                        <td class="spec-cell">U02</td>
+                        <td>Plant Water</td>
+                        <td>Water level</td>
+                        <td class="spec-cell">0-100%</td>
+                        <td>Visual Inspection</td>
+                        <td class="spec-cell">One reading</td>
+                        <td class="spec-cell">Every 1 hour</td>
+                        <td>Water Treatment Logsheet (ABN1-NUD-L4-001)</td>
+                        <td>Water Treatment Operator / Water treatment OC</td>
+                        <td>
+                            <strong>Below maintaining water level:</strong> Contact ABI Utilities or turn on Deep Well to utilize additional deepwell pump.<br><br>
+                            <strong>Above maintaining water level:</strong> Decrease no. of deepwell pumps running.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="row-no">3</td>
+                        <td>Issuance to End Users</td>
+                        <td>2 Water Booster Pumps (Combined Water Storage)</td>
+                        <td class="spec-cell">U03</td>
+                        <td>Pressurized Plant Water</td>
+                        <td>Main header's supply pressure</td>
+                        <td class="spec-cell">3-6.5 Bars</td>
+                        <td>Pressure gauge</td>
+                        <td class="spec-cell">-</td>
+                        <td class="spec-cell">-</td>
+                        <td class="spec-cell">-</td>
+                        <td>Water Treatment Operator / Water treatment OC</td>
+                        <td>
+                            <strong>Low water supply pressure:</strong> Utilize additional water booster pumps.<br><br>
+                            <strong>Above water supply pressure limit:</strong> Decrease water booster pumps frequency.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="cp-footer">
+            <div class="proprietary-text">
+                PROPRIETARY NOTICE: THIS DOCUMENT CONTAINS INFORMATION PROPRIETARY TO AB NUTIBEV CORP. ANY DISCLOSURE OR USE IS EXPRESSLY PROHIBITED EXCEPT UPON WRITTEN PERMISSION BY AB NUTIBEV CORP.
+            </div>
+            <div class="important-text">
+                ⚠️ IMPORTANT: Printed documents without the blue controlled stamp are considered uncontrolled.
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
