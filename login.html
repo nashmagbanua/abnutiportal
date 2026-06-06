@@ -445,36 +445,39 @@ nav.scrolled {
     .org-supervisors-container::before, .org-supervisors-grid .org-card::before, .org-supervisors-container::after { display: none; }
 }
 
-/* ─── MOBILE TREE FLOW INTERFACE (MAX 820px) ─── */
+//* ─── MOBILE TREE FLOW INTERFACE (MAX 820px) ─── */
 @media (max-width: 820px) {
     .org-wrapper { align-items: stretch; padding-left: 20px; }
     .org-wrapper::before { content: ''; position: absolute; top: 0; bottom: 0; left: 15px; width: 2px; background: linear-gradient(to bottom, var(--primary), rgba(72, 187, 120, 0.2)); box-shadow: 0 0 6px var(--primary); z-index: 1; }
 
     /* INAYOS: Isahang pag-hide ng desktop pseudo lines nang walang sapaw sa ibaba */
     .org-level-dept::after, .org-supervisors-container::before, .org-supervisors-container::after,
-    .org-main-section::before, .org-team-column::before, .org-team-column::after, .org-opscrew-container::before {
-        display: none !important;
-    }
+    .org-main-section::before, .org-team-column::before, .org-team-column::after, .org-opscrew-container::before { display: none !important; }
 
     .org-level-dept { text-align: left; padding-left: 35px; padding-bottom: 25px; }
     .org-level-dept::before { content: ''; position: absolute; left: 11px; top: 22px; width: 10px; height: 10px; background: #0f1219; border: 2px solid var(--primary); border-radius: 50%; z-index: 2; }
 
     .org-supervisors-container { padding-top: 0; }
-    .org-supervisors-grid { grid-template-columns: 1fr; gap: 15px; margin-bottom: 25px; padding-left: 35px; padding-bottom: 0; text-align: left; width: 100%; }
     
-    /* INAYOS: Dito na natin idineklara ang mobile look ng card ::before nang malinis at walang clash */
-    .org-supervisors-grid .org-card { display: block; position: relative; }
+    /* BINAGO: Ginawang center ang text alignment ng grid ng mga supervisor */
+    .org-supervisors-grid { grid-template-columns: 1fr; gap: 15px; margin-bottom: 25px; padding-left: 35px; padding-bottom: 0; text-align: center; width: 100%; }
+    
+    /* BINAGO: Sinet ang card at ang laman nito (avatar/text) para mag-center lahat nang pantay */
+    .org-supervisors-grid .org-card { display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-align: center !important; position: relative; }
+    .org-supervisors-grid .org-card .member-info { display: flex; flex-direction: column; align-items: center; text-align: center; }
+    /* Linya na kumokonekta sa card mula sa kaliwa */
     .org-supervisors-grid .org-card::before { content: ''; position: absolute; left: -26px; top: 50%; width: 26px; height: 2px; background: var(--primary) !important; }
 
     .org-main-section { padding-top: 0; }
     .org-main-layout { grid-template-columns: 1fr; gap: 25px; padding-left: 35px; }
-    .org-team-column { text-align: left; background: rgba(255,255,255,0.02); position: relative; }
+    
+    /* BINAGO: Ginawang center para pati ang Mantech teams ay nakasentro rin */
+    .org-team-column { text-align: center; background: rgba(255,255,255,0.02); position: relative; }
     .org-team-column::before { content: ''; position: absolute; left: -26px; top: 35px; width: 26px; height: 2px; background: var(--primary) !important; }
 
     .org-opscrew-container { grid-column: span 1; margin-top: 0; padding: 15px; background: rgba(72, 187, 120, 0.04); }
     .org-ops-grid { grid-template-columns: 1fr; gap: 8px; display: flex; flex-direction: column; }
 }
-
 /* --- FOOTER & HOVER GLOW --- */
 footer { background: #0b0e14; padding: 60px 5% 20px; border-top: 3px solid var(--primary); }
 .nutriveb-logo { color: var(--primary); font-size: 1.5rem; font-weight: 800; text-decoration: none; transition: 0.5s; display: inline-block; margin-bottom: 15px; }
