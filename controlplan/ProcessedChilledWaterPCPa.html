@@ -6,27 +6,27 @@
     <title>Processed Chilled Water Control Plan</title>
     <style>
         :root {
-            --primary-color: #dce6f2;
+            --primary-color: #dce6f2; /* Kulay ng headers base sa nakaraang lapat */
             --border-color: #000000;
-            --text-color: #333333;
+            --text-color: #1e293b;
+            --header-bg: #0f172a;
         }
 
         body {
             font-family: "Arial Narrow", Arial, sans-serif;
-            margin: 10px;
+            margin: 15px;
             padding: 0;
-            background-color: #f9f9f9;
+            background-color: #f8fafc;
             color: var(--text-color);
-            font-size: 13px;
+            font-size: 12px;
         }
 
         .control-plan-container {
             width: 100%;
-            max-width: 100%;
             background: #ffffff;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             overflow: hidden;
             margin-bottom: 20px;
         }
@@ -34,7 +34,7 @@
         /* Metadata Header Grid */
         .cp-header {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             border-bottom: 2px solid var(--border-color);
             background: #fff;
         }
@@ -42,18 +42,19 @@
         .cp-header-title {
             grid-column: 1 / -1;
             text-align: center;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
-            padding: 15px;
+            padding: 12px;
             background-color: #ffffff;
             border-bottom: 1px solid var(--border-color);
             letter-spacing: 1px;
+            color: #000;
         }
 
         .cp-header-block {
             padding: 8px 12px;
-            border-right: 1px solid #e0e0e0;
-            border-bottom: 1px solid #e0e0e0;
+            border-right: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0;
         }
 
         .cp-header-block:last-child {
@@ -61,15 +62,15 @@
         }
 
         .cp-label {
-            font-size: 11px;
+            font-size: 10px;
             text-transform: uppercase;
-            color: #666;
+            color: #64748b;
             font-weight: bold;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
         }
 
         .cp-value {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: bold;
             color: #000;
             line-height: 1.3;
@@ -84,14 +85,14 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 1300px;
+            min-width: 1400px;
         }
 
         th, td {
             border: 1px solid var(--border-color);
             padding: 8px 10px;
             text-align: left;
-            vertical-align: top;
+            vertical-align: middle;
             line-height: 1.4;
         }
 
@@ -100,50 +101,61 @@
             color: #000000;
             text-align: center;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 11px;
             text-transform: uppercase;
-            vertical-align: middle;
         }
 
         /* Specific cell setups */
         .center-cell {
             text-align: center;
+            font-weight: bold;
         }
 
         .spec-cell {
             text-align: center;
             font-weight: bold;
-            background-color: #fcfcfc;
+            background-color: #fafafa;
         }
 
         tbody tr:nth-child(even) {
-            background-color: #fdfdfd;
+            background-color: #f8fafc;
         }
 
         tbody tr:hover {
-            background-color: #f5f8fa;
+            background-color: #f1f5f9;
+        }
+
+        .action-plan {
+            font-size: 11px;
+        }
+
+        .action-title {
+            font-weight: bold;
+            display: inline;
         }
 
         /* Footer Control Plan */
         .cp-footer {
-            background: #f1f1f1;
-            padding: 15px;
+            background: #f1f5f9;
+            padding: 12px;
             border-top: 2px solid var(--border-color);
             font-size: 11px;
             display: flex;
-            flex-direction: column;
-            gap: 5px;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .proprietary-text {
             font-weight: bold;
-            color: #555;
-            text-align: center;
+            color: #475569;
+            flex: 1;
+            min-width: 300px;
         }
 
         .important-text {
-            color: #c00;
-            text-align: center;
+            color: #dc2626;
             font-weight: bold;
         }
     </style>
@@ -152,7 +164,7 @@
 
     <div class="control-plan-container">
         
-        <!-- Header Grid Metadata -->
+        <!-- Header Grid Metadata batay sa Excel Sheet -->
         <div class="cp-header">
             <div class="cp-header-title">PROCESSED CHILLED WATER CONTROL PLAN</div>
             
@@ -163,7 +175,7 @@
             
             <div class="cp-header-block">
                 <div class="cp-label">Control Plan No.</div>
-                <div class="cp-value">ABN1-NUD-L2-002</div>
+                <div class="cp-value">ABN1-NUD-L2-005</div>
             </div>
             
             <div class="cp-header-block">
@@ -183,80 +195,177 @@
 
             <div class="cp-header-block">
                 <div class="cp-label">Process Category</div>
-                <div class="cp-value">PROCESSED CHILLED WATER SYSTEM</div>
+                <div class="cp-value">PROCESSED CHILLED WATER PROCESS CONTROL PLAN</div>
             </div>
 
             <div class="cp-header-block" style="grid-column: span 2;">
                 <div class="cp-label">Process Description</div>
-                <div class="cp-value">DELIVER CHILLED WATER TO END USERS BY MEANS OF PROPULATION FROM STORAGE TANK AND USING REFRIGERATION UNITS.</div>
+                <div class="cp-value">DELIVER CHILLED WATER TO END USERS BY CHILLING PROCESSED WATER USING AMMONIA-PROCESSED WATER HEAT EXCHANGER.</div>
             </div>
         </div>
 
-        <!-- Table Data -->
+        <!-- Table Data accurate na sa 6 items ng Excel -->
         <div class="table-responsive">
             <table>
                 <thead>
                     <tr>
                         <th rowspan="2" style="width: 40px;">No.</th>
-                        <th rowspan="2" style="width: 160px;">Process Name / Operation Description</th>
-                        <th rowspan="2" style="width: 140px;">Machine, Device, Jig, Tools</th>
+                        <th rowspan="2" style="width: 180px;">Process Name / Operation Description</th>
+                        <th rowspan="2" style="width: 150px;">Machine, Device, Jig, Tools</th>
                         <th colspan="3">Characteristics</th>
-                        <th colspan="5">Methods</th>
+                        <th colspan="4">Methods</th>
                         <th rowspan="2" style="width: 150px;">Responsibility</th>
-                        <th rowspan="2" style="width: 250px;">Reaction Plan</th>
+                        <th rowspan="2" style="width: 280px;">Out of Control Action Plan</th>
                     </tr>
                     <tr>
                         <th style="width: 40px;">No.</th>
-                        <th style="width: 110px;">Product</th>
-                        <th style="width: 130px;">Process</th>
-                        <th style="width: 140px;">Product / Process Spec. Tolerance</th>
-                        <th style="width: 130px;">Evaluation / Measurement Technique</th>
+                        <th style="width: 100px;">Product</th>
+                        <th style="width: 140px;">Process</th>
+                        <th style="width: 150px;">Product / Process Spec. Tolerance</th>
+                        <th style="width: 150px;">Evaluation / Measurement Technique</th>
                         <th style="width: 70px;">Sample Size</th>
                         <th style="width: 80px;">Sample Freq.</th>
-                        <th style="width: 160px;">Control Method</th>
+                        <th style="width: 180px;">Control Method</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Row 1 Part 1 -->
+                    <!-- Item 1 -->
                     <tr>
-                        <td class="center-cell" rowspan="2">1</td>
-                        <td rowspan="2">Chilled Water Production</td>
-                        <td rowspan="2">Chilled Water PHE / Chiller</td>
-                        <td class="center-cell" rowspan="2">U26</td>
-                        <td rowspan="2">Chilled Water Solution</td>
-                        <td rowspan="2">Temperature Control</td>
-                        <td class="spec-cell">Supply Temp. 1-4°C</td>
-                        <td>Inline Temperature Transmitter / Gauge</td>
-                        <td class="center-cell">One reading</td>
-                        <td class="center-cell">Every hour</td>
-                        <td>Main Refrigeration Logsheet</td>
-                        <td>Main NH3 Refrigeration Operator</td>
-                        <td rowspan="2">If supply temperature exceeds 4°C, adjust the ammonia compressor capacity settings or stage secondary chiller units to support the increased cooling demand.</td>
+                        <td class="center-cell">1</td>
+                        <td>Ammonia Storage</td>
+                        <td>Pressure Vessel Tank</td>
+                        <td class="center-cell">U26</td>
+                        <td class="center-cell">-</td>
+                        <td class="center-cell">-</td>
+                        <td class="spec-cell">-</td>
+                        <td class="center-cell">-</td>
+                        <td class="center-cell">-</td>
+                        <td class="center-cell">-</td>
+                        <td class="center-cell">-</td>
+                        <td class="center-cell">-</td>
+                        <td class="center-cell">-</td>
                     </tr>
-                    <!-- Row 1 Part 2 -->
-                    <tr>
-                        <td class="spec-cell">Return Temp. 6-10°C</td>
-                        <td>Inline Temperature Transmitter / Gauge</td>
-                        <td class="center-cell">One reading</td>
-                        <td class="center-cell">Every hour</td>
-                        <td>Main Refrigeration Logsheet</td>
-                        <td>Main NH3 Refrigeration Operator</td>
-                    </tr>
-                    <!-- Row 2 -->
+
+                    <!-- Item 2 -->
                     <tr>
                         <td class="center-cell">2</td>
-                        <td>Chilled Water Distribution</td>
-                        <td>Chilled Water Supply Pump</td>
+                        <td>Ammonia Expansion</td>
+                        <td>NH3 Receivers (3 units)</td>
                         <td class="center-cell">U27</td>
+                        <td>Ammonia Gas</td>
+                        <td>Liquid level</td>
+                        <td class="spec-cell">5 - 30%</td>
+                        <td>level gauge</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">every hour</td>
+                        <td>Refrigeration System Monitoring Logsheet (ABN1-NUD-L4-005)</td>
+                        <td>Refrigeration System Operator</td>
+                        <td class="action-plan">
+                            <div class="action-title">Low level:</div> transfer nh3 liquid from accumulator<br>
+                            <div class="action-title">High level:</div> transfer nh3 liquid to accumulator
+                        </td>
+                    </tr>
+
+                    <!-- Item 3 -->
+                    <tr>
+                        <td class="center-cell">3</td>
+                        <td>AMMONIA-PROCESSED WATER HEAT EXCHANGER (EVAPORATION)</td>
+                        <td>Plate Type Heat Exchanger</td>
+                        <td class="center-cell">U28</td>
+                        <td>Chilled Water</td>
+                        <td>Plate type chiller in service</td>
+                        <td class="spec-cell">all chillers should be able to service</td>
+                        <td>service count</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">every hour</td>
+                        <td>Logbook</td>
+                        <td>Refrigeration System Operator</td>
+                        <td class="action-plan">If any one of the chillers cant be utilized, troubleshoot latter, and use standby if needed</td>
+                    </tr>
+
+                    <!-- Item 4 - Row 1 (Discharge) -->
+                    <tr>
+                        <td class="center-cell" rowspan="3">4</td>
+                        <td rowspan="3">Ammonia Compression</td>
+                        <td rowspan="3">NH3 Compressors (2 units)</td>
+                        <td class="center-cell" rowspan="3">U29</td>
+                        <td rowspan="3">Compressed Ammonia</td>
+                        <td>NH3 gas discharge pressure</td>
+                        <td class="spec-cell">140 - 195 psig</td>
+                        <td>pressure gauge</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">every hour</td>
+                        <td>Refrigeration System Monitoring Logsheet (ABN1-NUD-L4-005)</td>
+                        <td rowspan="3">Refrigeration System Operator</td>
+                        <td class="action-plan">
+                            <div class="action-title">High discharge pressure:</div> utilize additional NH3 evaporative condenser and/or operate air purger to remove non-condensable gas in the system
+                        </td>
+                    </tr>
+                    <!-- Item 4 - Row 2 (Suction) -->
+                    <tr>
+                        <td>NH3 gas suction pressure</td>
+                        <td class="spec-cell">20 - 80 psig</td>
+                        <td>pressure gauge</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">every hour</td>
+                        <td>Refrigeration System Monitoring Logsheet (ABN1-NUD-L4-005)</td>
+                        <td class="action-plan">
+                            <div class="action-title">High suction pressure:</div> put NH3 compressor @ maximum load or utilize additional NH3 compressor<br><br>
+                            <div class="action-title">Low suction pressure:</div> reduce NH3 compressor capacity (e.g., part-loading) or shut off NH3 compressor
+                        </td>
+                    </tr>
+                    <!-- Item 4 - Row 3 (Voltage) -->
+                    <tr>
+                        <td>Voltage</td>
+                        <td class="spec-cell">440V +/- 3% tolerance</td>
+                        <td>digital voltmeter</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">every hour</td>
+                        <td>Refrigeration System Monitoring Logsheet (ABN1-NUD-L4-005)</td>
+                        <td class="action-plan">check power supply and troubleshoot</td>
+                    </tr>
+
+                    <!-- Item 5 - Row 1 (Blower) -->
+                    <tr>
+                        <td class="center-cell" rowspan="2">5</td>
+                        <td rowspan="2">Ammonia Condensation</td>
+                        <td rowspan="2">Condenser</td>
+                        <td class="center-cell" rowspan="2">U30</td>
+                        <td rowspan="2">Liquid Ammonia</td>
+                        <td>blower in service (2 per condenser)</td>
+                        <td class="spec-cell">all blowers should be able to service</td>
+                        <td>service count</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">every switching</td>
+                        <td>Logbook</td>
+                        <td rowspan="2">Refrigeration System Operator</td>
+                        <td class="action-plan" rowspan="2">If any one of the blowers/pumps cant be utilized, troubleshoot latter, and use standby if needed</td>
+                    </tr>
+                    <!-- Item 5 - Row 2 (Circulating Pump) -->
+                    <tr>
+                        <td>circulating pump in service</td>
+                        <td class="spec-cell">all pumps should be able to service</td>
+                        <td>service count</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">every switching</td>
+                        <td>Logbook</td>
+                    </tr>
+
+                    <!-- Item 6 -->
+                    <tr>
+                        <td class="center-cell">6</td>
+                        <td>Service of Chilled Water</td>
+                        <td>Chilled Water Pumps</td>
+                        <td class="center-cell">U31</td>
                         <td>Pressurized Chilled Water</td>
-                        <td>Supply Line Pressure</td>
-                        <td class="spec-cell">3.5 - 5.0 Bars</td>
+                        <td>Chilled Water Pressure</td>
+                        <td class="spec-cell">Process Chilled & VAC- 2-5 Bars</td>
                         <td>Pressure Gauge</td>
-                        <td class="center-cell">One reading</td>
-                        <td class="center-cell">Every hour</td>
-                        <td>Main Refrigeration Logsheet</td>
-                        <td>Main NH3 Refrigeration Operator</td>
-                        <td><strong>Low Pressure:</strong> Check for line leaks in the production area, verify pump VFD parameters, and run standby secondary pump if available.<br><br><strong>High Pressure:</strong> Gradually throttle discharge control valves or reduce pump VFD frequency.</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">every hour</td>
+                        <td>Refrigeration System Monitoring Logsheet (ABN1-NUD-L4-005)</td>
+                        <td>Refrigeration System Operator</td>
+                        <td class="action-plan">If any one of the pumps cant be utilized, troubleshoot latter, and use standby if needed</td>
                     </tr>
                 </tbody>
             </table>
