@@ -201,7 +201,7 @@
                         <th colspan="3">Characteristics</th>
                         <th colspan="5">Methods</th>
                         <th rowspan="2" style="width: 150px;">Responsibility</th>
-                        <th rowspan="2" style="width: 250px;">Reaction Plan</th>
+                        <th rowspan="2" style="width: 250px;">Reaction Plan / Out of Control Action Plan</th>
                     </tr>
                     <tr>
                         <th style="width: 40px;">No.</th>
@@ -214,83 +214,247 @@
                         <th style="width: 160px;">Control Method</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody>                 
+                    <!-- ITEM 4 -->
                     <tr>
-                        <td class="center-cell" rowspan="4">1</td>
-                        <td rowspan="4">1 Deepwell Water Extractions</td>
-                        <td rowspan="4">Deepwell Pumps</td>
-                        <td class="center-cell" rowspan="4">U01</td>
-                        <td rowspan="4">Raw Deepwell Water</td>
-                        <td rowspan="4">Deepwell Water Quality</td>
-                        <td class="spec-cell">pH - 6.5 to 8.5</td>
-                        <td>pH Meter</td>
-                        <td class="center-cell">2 readings</td>
-                        <td class="center-cell">Every day</td>
-                        <td>Water Quality Report</td>
-                        <td>QA/QC</td>
-                        <td rowspan="4">QA to inform UD if parameters are out of specs. Regenerate sand filter and carbon filter, adjust chemical dosing if needed.</td>
-                    </tr>
-                    <tr>
-                        <td class="spec-cell">Total Hardness - ≤350 ppm</td>
-                        <td>Titration</td>
-                        <td class="center-cell">2 readings</td>
-                        <td class="center-cell">Every day</td>
-                        <td>Water Quality Report</td>
-                        <td>QA/QC</td>
-                    </tr>
-                    <tr>
-                        <td class="spec-cell">Conductivity - ≤1500 µS/cm</td>
-                        <td>Conductivity Meter</td>
-                        <td class="center-cell">2 readings</td>
-                        <td class="center-cell">Every day</td>
-                        <td>Water Quality Report</td>
-                        <td>QA/QC</td>
-                    </tr>
-                    <tr>
-                        <td class="spec-cell">Chloride - ≤250 ppm</td>
-                        <td>Titration</td>
-                        <td class="center-cell">2 readings</td>
-                        <td class="center-cell">Every day</td>
-                        <td>Water Quality Report</td>
-                        <td>QA/QC</td>
-                    </tr>
-
-                    <tr>
-                        <td class="center-cell">2</td>
-                        <td>2 Water Holding Storage</td>
-                        <td>Combined Water Storage Tank (2 units)</td>
-                        <td class="center-cell">U02</td>
-                        <td>Raw Deepwell Water</td>
-                        <td>Water Level</td>
-                        <td class="spec-cell">10% to 90% Water Level</td>
-                        <td>Level indicator / HMI digital display</td>
+                        <td class="center-cell">4</td>
+                        <td>Iron Oxidation</td>
+                        <td>Atomerator</td>
+                        <td class="center-cell">U04</td>
+                        <td>-</td>
+                        <td>Compressed Dry Air Pressure</td>
+                        <td class="spec-cell">40 cfm</td>
+                        <td>Air regulator</td>
                         <td class="center-cell">one reading</td>
-                        <td class="center-cell">Every Hour</td>
+                        <td class="center-cell">Every 4 hours</td>
                         <td>Water Treatment Logsheet (ABN1-NUD-L4-001)</td>
-                        <td>Water Treatment Operator</td>
-                        <td>
-                            <strong>Low water level:</strong> Check running deep well pump if functional, utilize another standby deep well pump.<br><br>
-                            <strong>High water level:</strong> Turn off deep well pump.
-                        </td>
+                        <td>Water Treatment Operator / Water treatment OC</td>
+                        <td>If not within specs, adjust air regulator. Replace air regulator if defective.</td>
                     </tr>
 
+                    <!-- ITEM 5 -->
                     <tr>
-                        <td class="center-cell">3</td>
-                        <td>3 Distribution of water to Multimedia Filtration</td>
-                        <td>2 Water Booster Pumps (Combined Water Storage)</td>
-                        <td class="center-cell">U03</td>
-                        <td>Pressurized Plant Water</td>
-                        <td>Main header's supply pressure</td>
-                        <td class="spec-cell">3-6.5 Bars</td>
-                        <td>Pressure gauge</td>
-                        <td class="center-cell">-</td>
-                        <td class="center-cell">-</td>
-                        <td class="center-cell">-</td>
+                        <td class="center-cell">5</td>
+                        <td>Multi-Media Filtration</td>
+                        <td>Multi-Media Filter</td>
+                        <td class="center-cell">U05</td>
+                        <td>Filtered Plant Water</td>
+                        <td>Differential Pressure</td>
+                        <td class="spec-cell">≤1 Bar</td>
+                        <td>Differential Pressure Gauge</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">Daily</td>
+                        <td>Water Treatment Logsheet (ABN1-NUD-L4-001)</td>
                         <td>Water Treatment Operator / Water treatment OC</td>
-                        <td>
-                            <strong>Low water supply pressure:</strong> Utilize additional water booster pumps.<br><br>
-                            <strong>Above water supply pressure limit:</strong> Decrease water booster pumps frequency.
-                        </td>
+                        <td>Switch MMF and Backwash if possible once out of specs. Backwash twice month if possible depending on the schedule of Production operation regardless of differential pressure.</td>
+                    </tr>
+
+                    <!-- ITEM 6 -->
+                    <tr>
+                        <td class="center-cell">6</td>
+                        <td>Water Softening</td>
+                        <td>Alternating water Softener</td>
+                        <td class="center-cell">U06</td>
+                        <td>Soft Water</td>
+                        <td>Soft Water Hardness</td>
+                        <td class="spec-cell">≤ 10 ppm</td>
+                        <td>Titration</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">Daily</td>
+                        <td>Water Quality Report</td>
+                        <td>QA/QC and Water treatment Operator</td>
+                        <td>Softener regeneration if possible once out of specification, regardless of differential pressure.</td>
+                    </tr>
+
+                    <!-- ITEM 7 -->
+                    <tr>
+                        <td class="center-cell">7</td>
+                        <td>Chlorine Injection</td>
+                        <td>Chlorine Tank</td>
+                        <td class="center-cell">M05</td>
+                        <td>Chlorinated Water</td>
+                        <td>Chlorine cylinders stock on hand</td>
+                        <td class="spec-cell">min. of 10 liters</td>
+                        <td>Manual Count</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">Every 4 hours</td>
+                        <td>Water Treatment Logsheet (ABN1-NUD-L4-001)</td>
+                        <td>Water Treatment Operator / Water treatment OC</td>
+                        <td>When reaches minimum level refill chlorine tank.</td>
+                    </tr>
+
+                    <!-- ITEM 8 -->
+                    <tr>
+                        <td class="center-cell">8</td>
+                        <td>Chlorine Reaction</td>
+                        <td>Chlorine Reaction Tank</td>
+                        <td class="center-cell">U08</td>
+                        <td>Chlorinated Water</td>
+                        <td>Soft water chlorine concentration</td>
+                        <td class="spec-cell">0.1 - 0.3 ppm (target of 0.2 ppm)</td>
+                        <td>Colorimeter</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">Start-up and every 4 hours</td>
+                        <td>Water Quality Report</td>
+                        <td>QA/QC and Water treatment Operator</td>
+                        <td>QA to inform Utilities Department if out of specs, Utilities Department to adjust chlorine dosage.</td>
+                    </tr>
+
+                    <!-- ITEM 9 -->
+                    <tr>
+                        <td class="center-cell" rowspan="2">9</td>
+                        <td rowspan="2">Activated Carbon Filtration</td>
+                        <td rowspan="2">Activate Carbon Filter</td>
+                        <td class="center-cell" rowspan="2">U09</td>
+                        <td rowspan="2">Processed Water</td>
+                        <td>Differential Pressure</td>
+                        <td class="spec-cell">≤1 Bar</td>
+                        <td>Differential Pressure Gauge</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">Every 4 hours</td>
+                        <td>Water Treatment Logsheet (ABN1-NUD-L4-001)</td>
+                        <td>Water Treatment Operator / Water treatment OC</td>
+                        <td>Utilities Department to Backwash if out of specs and switch to the stand by ACF.</td>
+                    </tr>
+                    <tr>
+                        <td>Free Chlorine</td>
+                        <td class="spec-cell">0.1 - 0.3 ppm (target of 0.2 ppm)</td>
+                        <td>Colorimeter</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">Daily</td>
+                        <td>Water Quality Report</td>
+                        <td>QA/QC and Water treatment Operator</td>
+                        <td>QA to inform Utilities Department if out of specs, Utilities Department to back wash ACF.</td>
+                    </tr>
+
+                    <!-- ITEM 10 -->
+                    <tr>
+                        <td class="center-cell">10</td>
+                        <td>Bag Filtration</td>
+                        <td>1 micron Bag Filter</td>
+                        <td class="center-cell">U10</td>
+                        <td>Processed Water</td>
+                        <td>Differential Pressure</td>
+                        <td class="spec-cell">≤1 Bar</td>
+                        <td>Pressure Gauge</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">Every 4 hours</td>
+                        <td>Water Treatment Logsheet (ABN1-NUD-L4-001)</td>
+                        <td>Water Treatment Operator / Water treatment OC</td>
+                        <td>Change filter bags every 1 months of constant usage. Replace the serviced filter if the pressure difference is above or equal to 1 bar.</td>
+                    </tr>
+
+                    <!-- ITEM 11 -->
+                    <tr>
+                        <td class="center-cell" rowspan="2">11</td>
+                        <td rowspan="2">Process Water Storage</td>
+                        <td rowspan="2">Process Water Tank</td>
+                        <td class="center-cell" rowspan="2">U16</td>
+                        <td rowspan="2">Processed Water</td>
+                        <td>Process Water Level</td>
+                        <td class="spec-cell">1-6 Level (HMI level reading) or 1000 Li-100,000 li</td>
+                        <td>Sight Glass</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">Every 1 hour</td>
+                        <td>Water Treatment Logsheet (ABN1-NUD-L4-001)</td>
+                        <td>Water Treatment Operator / Water treatment OC</td>
+                        <td>High Water Level: Turn off Transfer pump of Chlorine reaction tank.<br>Low Water Level: Turn on Transfer pump of Chlorine reaction tank.</td>
+                    </tr>
+                    <tr>
+                        <td>CIP</td>
+                        <td class="spec-cell">Dirty or contaminated process water tank.</td>
+                        <td>Visual</td>
+                        <td class="center-cell">Once</td>
+                        <td class="center-cell">Annually</td>
+                        <td>Water treatment logbook</td>
+                        <td>Water Treatment Operator / Water treatment OC</td>
+                        <td>Perform CIP of tanks annually or as per needed.</td>
+                    </tr>
+
+                    <!-- ITEM 12 -->
+                    <tr>
+                        <td class="center-cell" rowspan="2">12</td>
+                        <td rowspan="2">Service of In-Line Process Water</td>
+                        <td rowspan="2">Utilities Water Pump</td>
+                        <td class="center-cell" rowspan="2">U17</td>
+                        <td rowspan="2">Processed Water</td>
+                        <td rowspan="2">Process Water Pressure</td>
+                        <td class="spec-cell">Bottling - 2-7 bars</td>
+                        <td>Pressure Gauge</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">Every 4 hours</td>
+                        <td>Water Treatment Logsheet (ABN1-NUD-L4-001)</td>
+                        <td>Water Treatment Operator / Water treatment OC</td>
+                        <td rowspan="2">Low water supply pressure:<br>Add vfd frequency up to 60 hz<br>Utilize additional potable water booster pumps<br>High water pressure:<br>Lower vfd frequency.</td>
+                    </tr>
+                    <tr>
+                        <td class="spec-cell">Utilities - 2-7 bars</td>
+                        <td>Pressure Gauge</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">Every 4 hours</td>
+                        <td>Water Treatment Logsheet (ABN1-NUD-L4-001)</td>
+                        <td>Water Treatment Operator / Water treatment OC</td>
+                    </tr>
+
+                    <!-- ITEM 13 -->
+                    <tr>
+                        <td class="center-cell">13</td>
+                        <td>Polishing Filtration</td>
+                        <td>10 micron Polishing Filter</td>
+                        <td class="center-cell">U18</td>
+                        <td>Processed Water</td>
+                        <td>Differential Pressure</td>
+                        <td class="spec-cell">Decanter/Mixing/CIP ≤1 Bars</td>
+                        <td>Pressure Gauge</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">Every 4 hours</td>
+                        <td>Water Treatment Logsheet (ABN1-NUD-L4-001)</td>
+                        <td>Water Treatment Operator / Water treatment OC</td>
+                        <td>Low water supply pressure:<br>Check and replace the filter if clogged.</td>
+                    </tr>
+
+                    <!-- ITEM 14 -->
+                    <tr>
+                        <td class="center-cell">14</td>
+                        <td>UV Sterilization</td>
+                        <td>UV- Sterilizer</td>
+                        <td class="center-cell">U19</td>
+                        <td>Sterilized Processed Water</td>
+                        <td>Running Time</td>
+                        <td class="spec-cell">≤ 8000 Hours</td>
+                        <td>Hour Meter</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">Every Start and Finish of day</td>
+                        <td>Water Treatment Logsheet (ABN1-NUD-L4-001)</td>
+                        <td>Water Treatment Operator / Water treatment OC</td>
+                        <td>Replacement of UV lamps every 8,000 hours or 24 months. Replace busted UV lamp if QA micro test failed.</td>
+                    </tr>
+
+                    <!-- ITEM 15 -->
+                    <tr>
+                        <td class="center-cell" rowspan="2">15</td>
+                        <td rowspan="2">Issuance of Process Water to End Users</td>
+                        <td rowspan="2">Process Water Pump</td>
+                        <td class="center-cell" rowspan="2">U20</td>
+                        <td rowspan="2">Process Water</td>
+                        <td>Process Water Pressure</td>
+                        <td class="spec-cell">CIP/Decanter/Mixing - 2-6 Bars</td>
+                        <td>Pressure Gauge</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">Every 4 hours</td>
+                        <td>Water Treatment Logsheet (ABN1-NUD-L4-001)</td>
+                        <td>Water Treatment Operator / Water treatment OC</td>
+                        <td>If pressure is out of specs check for malfunctioning motor and valves.</td>
+                    </tr>
+                    <tr>
+                        <td>CIP</td>
+                        <td class="spec-cell">Water clear of any sediments</td>
+                        <td>Visual</td>
+                        <td class="center-cell">one reading</td>
+                        <td class="center-cell">After CIP</td>
+                        <td>Water treatment logbook</td>
+                        <td>Water Treatment Operator / Water treatment OC</td>
+                        <td>Perform CIP of pipe line annually or as per needed.</td>
                     </tr>
                 </tbody>
             </table>
