@@ -135,6 +135,27 @@
             transform: scale(0.9); 
         }
 
+        /* Eksaktong galaw ng pagtalon ng abnlogo */
+        @keyframes logoJump {
+            0%, 100% {
+                transform: translateY(0) scale(1);
+            }
+            30% {
+                transform: translateY(-18px) scale(0.9, 1.1); /* Tatalon pataas at hahaba nang konti */
+            }
+            50% {
+                transform: translateY(0) scale(1.1, 0.9); /* Pagbagsak, medyo maiipit sa sahig */
+            }
+            70% {
+                transform: translateY(-6px) scale(0.95, 1.05); /* Konting bounce pataas uli */
+            }
+        }
+
+        /* Class na ikakabit ng JavaScript kapag idle na ang screen */
+        .floating-hamburger.jump {
+            animation: logoJump 0.8s ease-in-out;
+        }
+
         /* Dim background overlay para sa premium transition block */
         .sidebar-overlay {
             display: none;
@@ -227,6 +248,11 @@
     </div>
 
     <script>
+        
+    let idleTimer = null;
+    const logoButton = document.querySelector('.floating-hamburger');
+    const idleTimeoutDuration = 7000; // 7000ms = 7 segundo (Maaari mong baguhin ito)
+
     function loadPage(url, element) {
         document.getElementById('content-frame').src = url;
 
@@ -246,6 +272,42 @@
         sidebar.classList.toggle('open');
         overlay.classList.toggle('show');
     }
+     // ==========================================================================
+    // IDLE ANIMATION LOGIC FOR LOGO
+    // ==========================================================================
+    
+    function startIdleTimer() {
+        // Siguraduhing malinis ang dating timer at tanggalin ang class kung meron man
+        clearTimeout(idleTimer);
+        if (logoButton) logoButton.classList.remove('jump');
+
+        // Mag-abang ng 7 segundo bago patakbuhin ang animation
+        idleTimer = setTimeout(() => {
+            if (logoButton) {
+                logoButton.classList.add('jump');
+
+                // Tanggalin ang class pagkatapos ng animation (0.8s) para pwede siyang umulit uli mamaya
+                setTimeout(() => {
+                    logoButton.classList.remove('jump');
+                    // Pagkatapos tumalon, mag-start uli ng bagong idle timer para tumalon uli kung idle pa rin
+                    startIdleTimer();
+                }, 800); 
+            }
+        }, idleTimeoutDuration);
+    }
+
+    function resetIdleTimer() {
+        // Kapag may ginawa ang user, magre-reset ang bilang ng segundo mula sa simula
+        startIdleTimer();
+    }
+
+    // Listahan ng mga aktibidad na nagpapatunay na HINDI idle ang user
+    window.addEventListener('load', startIdleTimer);
+    window.addEventListener('mousemove', resetIdleTimer);
+    window.addEventListener('mousedown', resetIdleTimer);
+    window.addEventListener('touchstart', resetIdleTimer); // Para sa mobile touch
+    window.addEventListener('click', resetIdleTimer);
+    window.addEventListener('scroll', resetIdleTimer);
 
     window.addEventListener('DOMContentLoaded', () => {
         const urlParams = new URLSearchParams(window.location.search);
