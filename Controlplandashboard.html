@@ -150,21 +150,28 @@
 </head>
 <body>
 
-    <div class="mobile-header">
-        <button class="hamburger" onclick="toggleSidebar()">☰</button>
-        <div class="mobile-title" id="mobile-page-title">WWTP PCP</div>
-        <a href="login.html" style="color: #ef4444; font-size: 1.2rem; margin-left: auto; padding-right: 10px;">
-            <i class="fas fa-sign-out-alt"></i>
-        </a>
+    <div class="mobile-header" style="display: flex; align-items: center; padding: 10px 15px; background-color: #1e293b; color: white;">
+    <button class="hamburger" onclick="toggleSidebar()" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; margin-right: 12px;">☰</button>
+    
+    <div style="display: flex; align-items: center; gap: 8px;">
+        <img src="assets/abnlogo.svg" alt="ABN Logo" style="width: 25px; height: 25px; object-fit: contain;">
+        <div class="mobile-title" id="mobile-page-title" style="font-size: 1.1rem; font-weight: bold;">WWTP PCP</div>
     </div>
     
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <span>ABN Utilities</span>
-            <a href="login.html" title="Logout" style="color: #ef4444; font-size: 1.2rem; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
-                <i class="fas fa-sign-out-alt"></i>
-            </a>
-        </div>
+    <a href="login.html" style="color: #ef4444; font-size: 1.2rem; margin-left: auto; padding-right: 5px;">
+        <i class="fas fa-sign-out-alt"></i>
+    </a>
+</div>
+    
+    <div class="sidebar-header" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <img src="assets/abnlogo.svg" alt="ABN Logo" style="width: 30px; height: 30px; object-fit: contain;">
+        <span>ABN Utilities</span>
+    </div>
+    <a href="login.html" title="Logout" style="color: #ef4444; font-size: 1.2rem; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
+        <i class="fas fa-sign-out-alt"></i>
+    </a>
+</div>
         
         <ul class="menu-list">
             <li class="menu-item active" onclick="loadPage('controlplan/WWTP_PCP.html', 'WWTP', this)">WWTP PCP</li>
