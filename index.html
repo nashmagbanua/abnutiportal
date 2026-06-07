@@ -192,14 +192,14 @@
     #sidebar.collapsed { width: var(--sidebar-min); }
 
     .sidebar-brand {
-        height: 80px; display: flex; align-items: center; padding: 0 20px;
+        height: 60px; display: flex; align-items: center; padding: 0 20px;
         color: var(--dark-text); cursor: pointer; white-space: nowrap;
     }
     .sidebar-logo {
         width: 40px; height: 40px; object-fit: contain; min-width: 40px;
     }
     .nav-item {
-        display: flex; align-items: center; padding: 18px 25px;
+        display: flex; align-items: center; padding: 12px 20px;
         color: var(--text-sub); text-decoration: none; cursor: pointer; transition: 0.2s;
     }
     .nav-item.active {
@@ -208,9 +208,24 @@
         border-left: 4px solid var(--accent);
     }
     .nav-item:hover { background: rgba(0,0,0,0.05); color: var(--accent); }
-    .nav-item i { font-size: 1.3rem; min-width: 35px; }
+    .nav-item i { font-size: 1.1rem; min-width: 30px; }
     #sidebar.collapsed .nav-item span { display: none; }
     #sidebar.collapsed .sidebar-brand span { opacity: 0; pointer-events: none; }
+
+    /* Mag-aapply lang ito sa mga screens na mas malaki sa laptop/desktop (769px pataas) */
+@media (min-width: 769px) {
+    .sidebar-brand {
+        height: 60px;
+    }
+    .nav-item {
+        padding: 12px 20px;
+        font-size: 0.9rem;
+    }
+    .nav-item i {
+        font-size: 1.1rem;
+        min-width: 30px;
+    }
+}
 
     /* --- TABLES & FILTERS --- */
     .data-card { background: var(--bg-card); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); margin-top: 20px; }
