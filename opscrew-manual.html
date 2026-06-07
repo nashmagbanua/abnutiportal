@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opscrew Duties and Responsibilities Manual</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen pb-12">
+
+    <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 shadow-lg">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+                <a href="tools.html" class="text-xs font-bold uppercase tracking-wider text-amber-500 hover:text-amber-400 flex items-center gap-1 mb-1">
+   <i class="fas fa-arrow-left mr-1"></i> Bumalik sa Dashboard
+</a>
+                <h1 class="text-xl md:text-2xl font-black text-white flex items-center gap-2">
+                    <i class="fa-solid fa-book-open text-amber-500"></i> Opscrew Duties and Responsibilities Manual
+                </h1>
+            </div>
+            <div class="relative w-full md:w-72">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+                <input type="text" id="searchInput" placeholder="Maghanap ng tungkulin..." 
+                    class="w-full pl-10 pr-4 py-2 bg-slate-950 border border-slate-600 rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-500 text-sm transition-all">
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 mt-6">
+        
+        <div class="flex overflow-x-auto gap-2 pb-3 mb-6 scrollbar-none border-b border-slate-700 whitespace-nowrap">
+            <button onclick="switchTab('general')" id="btn-general" class="tab-btn px-4 py-2.5 bg-amber-500 text-slate-950 font-bold rounded-lg text-sm flex items-center gap-2 shadow transition-all cursor-pointer">
+                <i class="fa-solid fa-layer-group"></i> General
+            </button>
+            <button onclick="switchTab('boiler')" id="btn-boiler" class="tab-btn px-4 py-2.5 bg-slate-800 text-slate-300 font-semibold rounded-lg text-sm flex items-center gap-2 hover:bg-slate-700 transition-all cursor-pointer">
+                <i class="fa-solid fa-fire text-orange-500"></i> Boiler Area
+            </button>
+            <button onclick="switchTab('wtp')" id="btn-wtp" class="tab-btn px-4 py-2.5 bg-slate-800 text-slate-300 font-semibold rounded-lg text-sm flex items-center gap-2 hover:bg-slate-700 transition-all cursor-pointer">
+                <i class="fa-solid fa-droplet text-blue-400"></i> WTP
+            </button>
+            <button onclick="switchTab('wwtp')" id="btn-wwtp" class="tab-btn px-4 py-2.5 bg-slate-800 text-slate-300 font-semibold rounded-lg text-sm flex items-center gap-2 hover:bg-slate-700 transition-all cursor-pointer">
+                <i class="fa-solid fa-biohazard text-emerald-400"></i> WWTP
+            </button>
+            <button onclick="switchTab('standards')" id="btn-standards" class="tab-btn px-4 py-2.5 bg-slate-800 text-slate-300 font-semibold rounded-lg text-sm flex items-center gap-2 hover:bg-slate-700 transition-all cursor-pointer">
+                <i class="fa-solid fa-scale-balanced text-purple-400"></i> Rules & Standards
+            </button>
+        </div>
+
+        <div id="tab-general" class="tab-content space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-md card-item">
+                    <h2 class="text-lg font-bold text-amber-500 border-b border-slate-700 pb-2 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-clock"></i> 1. Attendance and Shift Endorsement
+                    </h2>
+                    <ul class="space-y-2 text-sm text-slate-300">
+                        <li class="flex items-start gap-2">
+                            <span class="text-amber-500 font-bold">1.1</span> Dumating nang maaga at nasa tamang oras para sa shift endorsement.
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-amber-500 font-bold">1.2</span> Makinig nang mabuti sa endorsement ng outgoing shift at tiyaking nauunawaan ang lahat ng mahahalagang impormasyon.
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-amber-500 font-bold">1.3</span> Basahin at suriin ang mga logbook at logsheet bago simulan ang duty.
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-amber-500 font-bold">1.4</span> Siguraduhing maayos ang turnover ng trabaho sa susunod na shift.
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-md card-item">
+                    <h2 class="text-lg font-bold text-amber-500 border-b border-slate-700 pb-2 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-shield-halved"></i> 2. Safety and PPE Compliance
+                    </h2>
+                    <ul class="space-y-2 text-sm text-slate-300">
+                        <li class="flex items-start gap-2"><span class="text-amber-500 font-bold">2.1</span> Magsuot ng kumpletong Personal Protective Equipment (PPE) sa lahat ng oras.</li>
+                        <li class="flex items-start gap-2"><span class="text-amber-500 font-bold">2.2</span> Panatilihing nasa maayos na kondisyon ang lahat ng PPE.</li>
+                        <li class="flex items-start gap-2"><span class="text-amber-500 font-bold">2.3</span> Agad na i-report ang anumang unsafe condition, unsafe act, o abnormality sa Supervisor o Mantech.</li>
+                        <li class="flex items-start gap-2"><span class="text-amber-500 font-bold">2.4</span> Huwag ipagwalang-bahala ang anumang sugat, karamdaman, o hindi magandang pakiramdam habang nasa trabaho.</li>
+                        <li class="flex items-start gap-2"><span class="text-amber-500 font-bold">2.5</span> Magtungo agad sa Clinic at mag-report sa Supervisor kung kinakailangan.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-md card-item">
+                    <h2 class="text-lg font-bold text-amber-500 border-b border-slate-700 pb-2 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-broom"></i> 3. Housekeeping and Workplace Cleanliness
+                    </h2>
+                    <ul class="space-y-2 text-sm text-slate-300">
+                        <li class="flex items-start gap-2"><span class="text-amber-500 font-bold">3.1</span> Panatilihing malinis at maayos ang lahat ng work areas.</li>
+                        <li class="flex items-start gap-2"><span class="text-amber-500 font-bold">3.2</span> Linisin agad ang anumang natapong tubig, langis, o materyales na maaaring maging sanhi ng aksidente.</li>
+                        <li class="flex items-start gap-2"><span class="text-amber-500 font-bold">3.3</span> Panatilihing maayos ang mga mesa, upuan, electric fan, ilaw, at iba pang kagamitan sa area.</li>
+                        <li class="flex items-start gap-2"><span class="text-amber-500 font-bold">3.4</span> Siguraduhing nasa tamang lagayan ang lahat ng tools at kagamitan pagkatapos gamitin.</li>
+                        <li class="flex items-start gap-2"><span class="text-amber-500 font-bold">3.5</span> I-report agad kung may nawawala, sira, o hindi maayos na kagamitan.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-md card-item">
+                    <h2 class="text-lg font-bold text-amber-500 border-b border-slate-700 pb-2 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-bullhorn"></i> 4. Communication and Reporting
+                    </h2>
+                    <ul class="space-y-2 text-sm text-slate-300">
+                        <li class="flex items-start gap-2"><span class="text-amber-500 font-bold">4.1</span> Agad na i-report ang lahat ng abnormalities, alarms, leaks, unusual noises, at equipment malfunction.</li>
+                        <li class="flex items-start gap-2"><span class="text-amber-500 font-bold">4.2</span> Makipag-coordinate sa Supervisor at Mantech sa lahat ng operational concerns.</li>
+                        <li class="flex items-start gap-2"><span class="text-amber-500 font-bold">4.3</span> Ipaalam agad kung may emergency, maagang pag-uwi, seminar, o official activity.</li>
+                        <li class="flex items-start gap-2"><span class="text-amber-500 font-bold">4.4</span> Huwag magsagawa ng anumang trabaho na hindi awtorisado ng Supervisor o Mantech.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-md card-item md:col-span-2">
+                    <h2 class="text-lg font-bold text-amber-500 border-b border-slate-700 pb-2 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-screwdriver-wrench"></i> 5. Maintenance Support
+                    </h2>
+                    <ul class="space-y-2 text-sm text-slate-300">
+                        <li class="flex items-start gap-2"><span class="text-amber-500 font-bold">5.1</span> Tumulong sa troubleshooting, preventive maintenance, at corrective maintenance activities.</li>
+                        <li class="flex items-start gap-2"><span class="text-amber-500 font-bold">5.2</span> Siguraduhing malinis ang area bago at pagkatapos ng maintenance work.</li>
+                        <li class="flex items-start gap-2"><span class="text-amber-500 font-bold">5.3</span> Ibalik sa tamang lagayan ang lahat ng tools, spare parts, scaffolding, at iba pang kagamitan pagkatapos gamitin.</li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="tab-boiler" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-md card-item">
+                    <h2 class="text-lg font-bold text-orange-400 border-b border-slate-700 pb-2 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-cubes"></i> 1. Fuel and Coalyard Monitoring
+                    </h2>
+                    <ul class="space-y-2 text-sm text-slate-300">
+                        <li class="flex items-start gap-2"><span class="text-orange-400 font-bold">1.1</span> Regular na i-check ang hopper ng parehong boiler.</li>
+                        <li class="flex items-start gap-2"><span class="text-orange-400 font-bold">1.2</span> Siguraduhing may sapat na supply ng coal at mag-refill bago ito maubos.</li>
+                        <li class="flex items-start gap-2"><span class="text-orange-400 font-bold">1.3</span> I-monitor ang kasalukuyang coalyard at makipag-coordinate sa Mantech kung alin ang susunod na gagamitin.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-md card-item">
+                    <h2 class="text-lg font-bold text-orange-400 border-b border-slate-700 pb-2 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-trowel-shovel"></i> 2. Equipment and Tools Inspection
+                    </h2>
+                    <ul class="space-y-2 text-sm text-slate-300">
+                        <li class="flex items-start gap-2"><span class="text-orange-400 font-bold">2.1</span> I-check ang kondisyon ng mga wheelbarrow.</li>
+                        <li class="flex items-start gap-2"><span class="text-orange-400 font-bold">2.2</span> I-report agad kung may sirang gulong o anumang depekto.</li>
+                        <li class="flex items-start gap-2"><span class="text-orange-400 font-bold">2.3</span> Suriin ang mga shovel at iba pang kagamitan bago gamitin.</li>
+                        <li class="flex items-start gap-2"><span class="text-orange-400 font-bold">2.4</span> Humingi agad ng kapalit kung may sirang kagamitan.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-md card-item">
+                    <h2 class="text-lg font-bold text-orange-400 border-b border-slate-700 pb-2 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-magnifying-glass-chart"></i> 3. Area Monitoring
+                    </h2>
+                    <ul class="space-y-2 text-sm text-slate-300 mb-3">
+                        <li class="flex items-start gap-2"><span class="text-orange-400 font-bold">3.1</span> Mag-inspeksyon ng area para sa anumang abnormal na kondisyon.</li>
+                        <li class="flex items-start gap-2"><span class="text-orange-400 font-bold">3.2</span> I-report agad ang mga sumusunod:</li>
+                    </ul>
+                    <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 grid grid-cols-2 gap-2 text-xs text-slate-400">
+                        <span class="flex items-center gap-1.5"><i class="fa-solid fa-triangle-exclamation text-red-400"></i> Pneumatic hose leaks</span>
+                        <span class="flex items-center gap-1.5"><i class="fa-solid fa-triangle-exclamation text-red-400"></i> Defective pneumatic valves</span>
+                        <span class="flex items-center gap-1.5"><i class="fa-solid fa-triangle-exclamation text-red-400"></i> Equipment abnormalities</span>
+                        <span class="flex items-center gap-1.5"><i class="fa-solid fa-triangle-exclamation text-red-400"></i> Excessive vibration</span>
+                        <span class="flex items-center gap-1.5"><i class="fa-solid fa-triangle-exclamation text-red-400"></i> Unusual noises</span>
+                        <span class="flex items-center gap-1.5"><i class="fa-solid fa-triangle-exclamation text-red-400"></i> System alarms</span>
+                    </div>
+                    <ul class="space-y-2 text-sm text-slate-300 mt-3">
+                        <li class="flex items-start gap-2"><span class="text-orange-400 font-bold">3.3</span> Panatilihing malinis ang main steam header drainage area.</li>
+                        <li class="flex items-start gap-2"><span class="text-orange-400 font-bold">3.4</span> Regular na i-drain ang naipong tubig sa mga kanal kung kinakailangan.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-md card-item">
+                    <h2 class="text-lg font-bold text-orange-400 border-b border-slate-700 pb-2 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-pen-to-square"></i> 4. Documentation
+                    </h2>
+                    <ul class="space-y-2 text-sm text-slate-300">
+                        <li class="flex items-start gap-2"><span class="text-orange-400 font-bold">4.1</span> Siguraduhing tama at kumpleto ang lahat ng logbook entries.</li>
+                        <li class="flex items-start gap-2"><span class="text-orange-400 font-bold">4.2</span> I-verify ang mga naitalang coal loading ng nakaraang shift.</li>
+                        <li class="flex items-start gap-2"><span class="text-orange-400 font-bold">4.3</span> Itala agad ang lahat ng operational activities at observations.</li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="tab-wtp" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-md card-item">
+                    <h2 class="text-lg font-bold text-blue-400 border-b border-slate-700 pb-2 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-gears"></i> 1. Operations Monitoring
+                    </h2>
+                    <ul class="space-y-2 text-sm text-slate-300">
+                        <li class="flex items-start gap-2"><span class="text-blue-400 font-bold">1.1</span> Suriin ang mga water samples ayon sa schedule.</li>
+                        <li class="flex items-start gap-2"><span class="text-blue-400 font-bold">1.2</span> I-monitor ang Combined Water Storage tank level.</li>
+                        <li class="flex items-start gap-2"><span class="text-blue-400 font-bold">1.3</span> I-check ang operasyon ng mga Deepwell Pumps.</li>
+                        <li class="flex items-start gap-2"><span class="text-blue-400 font-bold">1.4</span> I-report agad kung hindi sapat ang kapasidad ng kasalukuyang pump.</li>
+                        <li class="flex items-start gap-2"><span class="text-blue-400 font-bold">1.5</span> I-monitor ang Booster Pumps at i-report ang anumang alarms o abnormalities.</li>
+                        <li class="flex items-start gap-2" class="text-red-400"><span class="text-blue-400 font-bold">1.6</span> <strong class="text-red-400">I-report agad kung may ammonia leak o abnormal odor sa area.</strong></li>
+                    </ul>
+                </div>
+
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-md card-item">
+                    <h2 class="text-lg font-bold text-blue-400 border-b border-slate-700 pb-2 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-hand-holding-hand"></i> 2. Maintenance Support
+                    </h2>
+                    <ul class="space-y-2 text-sm text-slate-300 mb-3">
+                        <li class="flex items-start gap-2"><span class="text-blue-400 font-bold">2.1</span> Tumulong sa troubleshooting at preventive maintenance activities.</li>
+                        <li class="flex items-start gap-2"><span class="text-blue-400 font-bold">2.2</span> Tumulong sa paglo-load ng asin para sa water treatment operations.</li>
+                        <li class="flex items-start gap-2"><span class="text-blue-400 font-bold">2.3</span> Magbigay ng suporta sa malalaking maintenance activities sa:</li>
+                    </ul>
+                    <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 flex flex-wrap gap-4 text-xs font-semibold text-blue-300">
+                        <span><i class="fa-solid fa-snowflake"></i> Refrigeration System</span>
+                        <span><i class="fa-solid fa-wind"></i> CDA</span>
+                        <span><i class="fa-solid fa-fan"></i> AHU</span>
+                        <span><i class="fa-solid fa-faucet-drip"></i> WTP</span>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-md card-item">
+                    <h2 class="text-lg font-bold text-blue-400 border-b border-slate-700 pb-2 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-soap"></i> 3. Housekeeping
+                    </h2>
+                    <ul class="space-y-2 text-sm text-slate-300">
+                        <li class="flex items-start gap-2"><span class="text-blue-400 font-bold">3.1</span> Panatilihing malinis ang WTP area, tanks, at floorings.</li>
+                        <li class="flex items-start gap-2"><span class="text-blue-400 font-bold">3.2</span> Alisin ang mga alikabok, cobwebs, at iba pang dumi bago at pagkatapos ng shift.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-md card-item">
+                    <h2 class="text-lg font-bold text-blue-400 border-b border-slate-700 pb-2 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-file-invoice"></i> 4. Documentation
+                    </h2>
+                    <ul class="space-y-2 text-sm text-slate-300">
+                        <li class="flex items-start gap-2"><span class="text-blue-400 font-bold">4.1</span> Siguraduhing kumpleto at tama ang lahat ng logbook at logsheet entries bago mag-endorse.</li>
+                        <li class="flex items-start gap-2"><span class="text-blue-400 font-bold">4.2</span> Itala ang lahat ng abnormalities at corrective actions na isinagawa.</li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="tab-wwtp" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-md card-item">
+                    <h2 class="text-lg font-bold text-emerald-400 border-b border-slate-700 pb-2 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-flask"></i> 1. Operations Monitoring
+                    </h2>
+                    <ul class="space-y-2 text-sm text-slate-300">
+                        <li class="flex items-start gap-2"><span class="text-emerald-400 font-bold">1.1</span> Dumating nang maaga para sa shift endorsement.</li>
+                        <li class="flex items-start gap-2"><span class="text-emerald-400 font-bold">1.2</span> Siguraduhing nakasara ang mga valves na hindi ginagamit.</li>
+                        <li class="flex items-start gap-2"><span class="text-emerald-400 font-bold">1.3</span> I-monitor ang antas at kondisyon ng mga treatment chemicals.</li>
+                        <li class="flex items-start gap-2"><span class="text-emerald-400 font-bold">1.4</span> I-report agad ang anumang abnormalities sa equipment at process operations.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-md card-item">
+                    <h2 class="text-lg font-bold text-emerald-400 border-b border-slate-700 pb-2 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-hand-holding-medical"></i> 2. Housekeeping and Safety
+                    </h2>
+                    <ul class="space-y-2 text-sm text-slate-300">
+                        <li class="flex items-start gap-2"><span class="text-emerald-400 font-bold">2.1</span> Panatilihing malinis at ligtas ang buong WWTP area.</li>
+                        <li class="flex items-start gap-2"><span class="text-emerald-400 font-bold">2.2</span> Agad na linisin ang anumang spill o leak.</li>
+                        <li class="flex items-start gap-2"><span class="text-emerald-400 font-bold">2.3</span> Sundin ang lahat ng safety procedures sa paghawak ng chemicals.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-md card-item">
+                    <h2 class="text-lg font-bold text-emerald-400 border-b border-slate-700 pb-2 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-folder-closed"></i> 3. Documentation
+                    </h2>
+                    <ul class="space-y-2 text-sm text-slate-300">
+                        <li class="flex items-start gap-2"><span class="text-emerald-400 font-bold">3.1</span> Itala ang lahat ng operational readings at observations.</li>
+                        <li class="flex items-start gap-2"><span class="text-emerald-400 font-bold">3.2</span> Siguraduhing maayos ang endorsement sa susunod na shift.</li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="tab-standards" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-md card-item">
+                    <h2 class="text-lg font-bold text-purple-400 border-b border-slate-700 pb-2 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-user-gear"></i> Work Attitude and Discipline
+                    </h2>
+                    <ul class="list-disc list-inside space-y-2 text-sm text-slate-300">
+                        <li>Ang bawat Opscrew Personnel ay inaasahang magpakita ng <strong class="text-purple-300">inisyatibo (initiative)</strong> sa trabaho.</li>
+                        <li>Iwasan ang pagbibilangan o pagtuturuan ng trabaho. Inaasahang magtulungan ang lahat.</li>
+                        <li>Panatilihin ang positibong pakikipag-ugnayan at propesyonalismo.</li>
+                        <li>Tumulong sa ibang area kapag inatasan ng Supervisor o Mantech.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-md card-item">
+                    <h2 class="text-lg font-bold text-purple-400 border-b border-slate-700 pb-2 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-ban-smoke"></i> Workplace Conduct & 5S
+                    </h2>
+                    <ul class="list-disc list-inside space-y-1.5 text-sm text-slate-300 mb-3">
+                        <li><strong class="text-red-400">Mahigpit na ipinagbabawal ang pagtulog habang naka-duty.</strong></li>
+                        <li>Bawal ang cellphone habang nag-oopera (maliban kung para sa trabaho).</li>
+                        <li>Bawal umalis sa area nang walang paalam.</li>
+                    </ul>
+                    <div class="mt-2 bg-slate-950 p-3 rounded-lg border border-slate-700">
+                        <span class="text-xs font-bold text-purple-400 block mb-1.5">5S PRINCIPLES:</span>
+                        <div class="flex flex-wrap gap-1.5 text-[11px] font-mono font-bold">
+                            <span class="px-2 py-0.5 bg-slate-800 border border-purple-500 rounded">1. SORT</span>
+                            <span class="px-2 py-0.5 bg-slate-800 border border-purple-500 rounded">2. SET IN ORDER</span>
+                            <span class="px-2 py-0.5 bg-slate-800 border border-purple-500 rounded">3. SHINE</span>
+                            <span class="px-2 py-0.5 bg-slate-800 border border-purple-500 rounded">4. STANDARDIZE</span>
+                            <span class="px-2 py-0.5 bg-slate-800 border border-purple-500 rounded">5. SUSTAIN</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-md card-item">
+                    <h2 class="text-lg font-bold text-purple-400 border-b border-slate-700 pb-2 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-truck-ramp-box"></i> Delivery Assistance
+                    </h2>
+                    <p class="text-xs text-slate-400 mb-2">Tumulong mag-monitor at mag-assist sa mga sumusunod:</p>
+                    <div class="grid grid-cols-2 gap-2 text-xs text-slate-300 bg-slate-900 p-3 rounded-lg border border-slate-700">
+                        <span><i class="fa-solid fa-circle-check text-purple-400"></i> Coal Deliveries</span>
+                        <span><i class="fa-solid fa-circle-check text-purple-400"></i> Chemical (WTP)</span>
+                        <span><i class="fa-solid fa-circle-check text-purple-400"></i> Chemical (WWTP)</span>
+                        <span><i class="fa-solid fa-circle-check text-purple-400"></i> Boiler Spare Parts</span>
+                        <span><i class="fa-solid fa-circle-check text-purple-400"></i> Maintenance Materials</span>
+                        <span><i class="fa-solid fa-circle-check text-purple-400"></i> Equipment Deliveries</span>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-md card-item">
+                    <h2 class="text-lg font-bold text-purple-400 border-b border-slate-700 pb-2 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-comments text-purple-400"></i> Communication & Coordination
+                    </h2>
+                    <ul class="list-disc list-inside space-y-1.5 text-sm text-slate-300">
+                        <li>I-report agad sa Supervisor/Mantech kung may external personnel (Contractors, Suppliers, Visitors, ibang dept).</li>
+                        <li>I-coordinate nang maayos ang lahat ng pumapasok sa area para sa seguridad.</li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+
+        <section class="mt-8 bg-gradient-to-r from-slate-800 to-slate-950 border-l-4 border-amber-500 rounded-r-xl p-6 shadow-xl card-item">
+            <h3 class="text-xs font-bold uppercase tracking-widest text-amber-500 mb-1">Ownership and Accountability</h3>
+            <p class="text-base italic text-slate-200">
+                "Kung kaya mong ayusin nang ligtas at nasa saklaw ng iyong tungkulin, gawin agad. Kung hindi, agad itong i-report sa Supervisor o Mantech."
+            </p>
+            <div class="mt-4 flex items-center justify-between text-xs text-slate-500 font-mono">
+                <span>© 2026 Utilities Dept.</span>
+                <span class="font-bold text-slate-400 tracking-wider">TEAM APPWISE</span>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Tab Switcher Logic
+        function switchTab(tabId) {
+            // Hide all contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            // Show selected content
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+
+            // Reset buttons styles
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = "tab-btn px-4 py-2.5 bg-slate-800 text-slate-300 font-semibold rounded-lg text-sm flex items-center gap-2 hover:bg-slate-700 transition-all cursor-pointer";
+            });
+
+            // Set active styles for clicked button
+            const activeColors = {
+                general: 'bg-amber-500 text-slate-950',
+                boiler: 'bg-orange-500 text-white',
+                wtp: 'bg-blue-500 text-white',
+                wwtp: 'bg-emerald-500 text-white',
+                standards: 'bg-purple-500 text-white'
+            };
+            
+            document.getElementById('btn-' + tabId).className = `tab-btn px-4 py-2.5 ${activeColors[tabId]} font-bold rounded-lg text-sm flex items-center gap-2 shadow transition-all cursor-pointer`;
+        }
+
+        // Vanilla JS Live Search Feature
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const keyword = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.card-item');
+
+            // Force show all contents when searching to scan across tabs
+            if (keyword.length > 0) {
+                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('hidden'));
+            } else {
+                // Return to default tab view if blank
+                const activeTabButton = document.querySelector('.tab-btn.font-bold');
+                const currentTabId = activeTabButton.id.replace('btn-', '');
+                switchTab(currentTabId);
+            }
+
+            // Filter specific elements inside cards
+            cards.forEach(card => {
+                const text = card.innerText.toLowerCase();
+                if (text.includes(keyword)) {
+                    card.classList.remove('hidden');
+                    card.style.opacity = '1';
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
