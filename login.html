@@ -604,40 +604,40 @@ footer { background: #0b0e14; padding: 60px 5% 20px; border-top: 3px solid var(-
     <p style="text-align:center; color:#a0aec0; margin-bottom:50px;" data-aos="fade-up">Precision monitoring applications for Nutriveb industrial workflows.</p>
     
     <div class="grid-areas">
-        <a href="https://abnpowercon.vercel.app" class="area-card" style="text-decoration: none; color: inherit; display: block;" data-aos="zoom-in-up">
+        <div class="area-card" onclick="openIOSLink('https://abnpowercon.vercel.app')" style="cursor: pointer;" data-aos="zoom-in-up">
             <i class="fas fa-bolt"></i>
             <h3>PowerCon</h3>
             <p>Real-time tracking of kWh consumption and peak demand to optimize plant energy costs.</p>
             <span class="card-link" style="display: inline-block; margin-top: 15px;">LAUNCH TOOL</span>
-        </a>
+        </div>
 
-        <a href="https://abncoaldumping.vercel.app" class="area-card" style="text-decoration: none; color: inherit; display: block;" data-aos="zoom-in-up" data-aos-delay="100">
+        <div class="area-card" onclick="openIOSLink('https://abncoaldumping.vercel.app')" style="cursor: pointer;" data-aos="zoom-in-up" data-aos-delay="100">
             <i class="fas fa-cubes"></i>
             <h3>Coal Dumping</h3>
             <p>Digital management of coal pile levels and unloading logs for inventory accuracy.</p>
             <span class="card-link" style="display: inline-block; margin-top: 15px;">LAUNCH TOOL</span>
-        </a>
+        </div>
 
-        <a href="https://abncoaldelivery.vercel.app" class="area-card" style="text-decoration: none; color: inherit; display: block;" data-aos="zoom-in-up" data-aos-delay="200">
+        <div class="area-card" onclick="openIOSLink('https://abncoaldelivery.vercel.app')" style="cursor: pointer;" data-aos="zoom-in-up" data-aos-delay="200">
             <i class="fas fa-truck"></i>
             <h3>Coal Delivery</h3>
             <p>Monitors incoming coal delivery, Yard schedules/locators</p>
             <span class="card-link" style="display: inline-block; margin-top: 15px;">LAUNCH TOOL</span>
-        </a>
+        </div>
 
-        <a href="https://abnchemical.vercel.app" class="area-card" style="text-decoration: none; color: inherit; display: block;" data-aos="zoom-in-up" data-aos-delay="300">
+        <div class="area-card" onclick="openIOSLink('https://abnchemical.vercel.app')" style="cursor: pointer;" data-aos="zoom-in-up" data-aos-delay="300">
             <i class="fas fa-flask"></i>
             <h3>ChemiTrack</h3>
             <p>Automated inventory and dosage tracking for WTP and WWTP chemical processes.</p>
             <span class="card-link" style="display: inline-block; margin-top: 15px;">LAUNCH TOOL</span>
-        </a>
+        </div>
 
-        <a href="https://gpmcalculatorv2.vercel.app" class="area-card" style="text-decoration: none; color: inherit; display: block;" data-aos="zoom-in-up" data-aos-delay="400">
+        <div class="area-card" onclick="openIOSLink('https://gpmcalculatorv2.vercel.app')" style="cursor: pointer;" data-aos="zoom-in-up" data-aos-delay="400">
             <i class="fas fa-calculator"></i>
             <h3>GPM Calculator</h3>
             <p>High-precision flow rate computations for deepwell pumps and water distribution.</p>
             <span class="card-link" style="display: inline-block; margin-top: 15px;">LAUNCH TOOL</span>
-        </a>
+        </div>
     </div>
 </section>
 
@@ -977,6 +977,17 @@ footer { background: #0b0e14; padding: 60px 5% 20px; border-top: 3px solid var(-
         localStorage.setItem('userRole', role);
         localStorage.setItem('userAvatar', avatar);
     }
+   
+function openIOSLink(url) {
+    // Pinipilit nitong buksan ang link sa labas ng PWA container o kaya ay sa main top viewport
+    if (window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches) {
+        // Kung naka-save bilang PWA Home Screen App sa iOS
+        window.top.location.href = url;
+    } else {
+        // Normal browser mode
+        window.location.href = url;
+    }
+}
 
     window.addEventListener('scroll', () => {
         const nav = document.getElementById('navbar');
