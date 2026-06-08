@@ -3596,30 +3596,6 @@ async function renderLiveBirthdayBoard() {
         previewArea.innerHTML = `<div style="color:red; padding:20px; font-weight:bold;">❌ Sira ang linya sa database: ${err.message}</div>`;
     }
 }
-        // HEADER TEXT STYLE AT ANG ATING BAGONG FLEX-CENTER GRIDS
-        previewArea.innerHTML = `
-            <div id="printableWhiteboard" style="${activeStyle.bg} padding: 40px; border-radius: 16px; min-height: 520px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.15); box-sizing: border-box; color: white; display: flex; flex-direction: column;">
-                
-                ${activeStyle.decorations}
-
-                <div style="text-align: center; border-bottom: 2px dashed rgba(255,255,255,0.4); padding-bottom: 25px; margin-bottom: 35px; position: relative; z-index: 2;">
-                    <h1 style="margin: 0; font-size: 3rem; letter-spacing: 3px; font-weight: 950; text-transform: uppercase; color: #ffffff; text-shadow: 0 4px 8px rgba(0,0,0,0.4);">
-                        ✨ ${monthText} CELEBRANTS ✨
-                    </h1>
-                    <p style="margin: 10px 0 0 0; font-size: 1.15rem; letter-spacing: 1px; opacity: 0.95; font-weight: bold; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.4);">
-                        ${chosenSlogan}
-                    </p>
-                </div>
-
-                <div style="display: flex; justify-content: center; align-items: center; gap: 30px; flex-wrap: wrap; margin: auto 0; position: relative; z-index: 2; width: 100%;">
-                    ${cardsHtml}
-                </div>
-            </div>
-        `;
-    } catch (err) {
-        previewArea.innerHTML = `<div style="color:red; padding:20px; font-weight:bold;">❌ Sira ang linya sa database: ${err.message}</div>`;
-    }
-}
         
 function printBirthdayWhiteboard() {
     const target = document.getElementById('printableWhiteboard');
