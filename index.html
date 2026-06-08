@@ -3443,72 +3443,75 @@ async function renderLiveBirthdayBoard() {
             return (bDate.getMonth() + 1) === monthNum;
         }).sort((a, b) => new Date(a.dob).getDate() - new Date(b.dob).getDate());
 
-       // MGA DESIGN AT KULAY BASE SA TEMA (Inayos ang sukat at alignment para sumako sa border images)
+    // MGA DESIGN AT KULAY BASE SA AKTWAL MONG MGA BORDERS (Inayos ang alignment base sa iyong adjustment list)
         const posterThemes = {
             classic: { 
                 bg: "background: linear-gradient(135deg, #1e3a8a, #3b82f6);", 
                 card: "background: transparent; color: white;", 
                 bdayCardBorder: "background-image: url('assets/corporateborder.png'); background-size: contain; background-repeat: no-repeat; background-position: center;", 
-                cardSize: "width: 240px; height: 240px;", // Ginawang square dahil bilog ang border
-                avatarStyle: "position: absolute; top: 41px; left: 50%; transform: translateX(-50%); width: 105px; height: 105px; border-radius: 50%; z-index: 1;",
-                nameStyle: "position: absolute; bottom: 50px; left: 10%; width: 80%; font-size: 1rem; z-index: 2; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); font-weight: 950;",
-                dateStyle: "position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); padding: 2px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 950; background: #000000; color: #ffffff; border: 1px solid rgba(255,255,255,0.4); z-index: 2; width: auto; max-width: 110px;",
-                decorations: `
-                    <div style="position:absolute; top:-10px; left:-15px; font-size:6.5rem; opacity:0.12; color:white;"><i class="fas fa-building"></i></div>
-                    <div style="position:absolute; bottom:20px; right:20px; font-size:5.5rem; opacity:0.1; color:white;"><i class="fas fa-briefcase"></i></div>
-                `
+                cardSize: "width: 240px; height: 260px;", 
+                avatarStyle: "position: absolute; top: 52px; left: 50%; transform: translateX(-50%); width: 105px; height: 105px; border-radius: 50%; z-index: 1;", // Ibinaba nang kaunti
+                isCurveName: true,
+                curveConfig: {
+                    viewBox: "0 0 240 260",
+                    path: "M 55,164 A 72,72 0 0,0 185,164", // Curve na sumusunod sa ilalim ng avatar na may manipis na agwat
+                    fillColor: "#ffffff",
+                    fontSize: "0.95rem"
+                },
+                dateStyle: "position: absolute; bottom: 18px; left: 52%; transform: translateX(-50%) rotate(-3deg); padding: 2px 10px; font-size: 0.85rem; font-weight: 950; color: #ffffff; z-index: 3; text-shadow: 0 1px 2px rgba(0,0,0,0.5); font-family: sans-serif; letter-spacing: 1px;", // Naka-tilt / slight rotational slant sa ribbon
+                decorations: ``
             },
             festive: { 
                 bg: "background: linear-gradient(135deg, #b91c1c, #f59e0b, #d97706);", 
                 card: "background: transparent; color: white;", 
                 bdayCardBorder: "background-image: url('assets/festiveborder.png'); background-size: contain; background-repeat: no-repeat; background-position: center;", 
-                cardSize: "width: 250px; height: 250px;", // Sakto sa bilog na may mga lobo sa labas
-                avatarStyle: "position: absolute; top: 58px; left: 50%; transform: translateX(-50%); width: 100px; height: 100px; border-radius: 50%; z-index: 1;",
-                nameStyle: "position: absolute; bottom: 52px; left: 15%; width: 70%; font-size: 0.95rem; z-index: 2; color: #333333; font-weight: 950;", // Madilim na kulay para sa puting ribbon sa ilalim
-                dateStyle: "position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); padding: 4px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: 950; background: #d97706; color: #fef3c7; border: 1px solid #fef3c7; z-index: 2;",
-                decorations: `
-                    <div style="position:absolute; top:15px; left:25px; font-size:5.5rem; opacity:0.25;">🎈</div>
-                    <div style="position:absolute; bottom:20px; right:30px; font-size:4.5rem; opacity:0.2;">🎈</div>
-                `
+                cardSize: "width: 250px; height: 250px;", 
+                avatarStyle: "position: absolute; top: 64px; left: 50%; transform: translateX(-50%); width: 95px; height: 95px; border-radius: 50%; z-index: 1;", // Ibinaba pa para sumakto sa bilog
+                isCurveName: true,
+                curveConfig: {
+                    viewBox: "0 0 250 250",
+                    path: "M 45,168 A 82,82 0 0,0 205,168", // Curve na swabe ang lapat sa arko ng ribbon sa ilalim
+                    fillColor: "#333333", // Madilim na kulay para litaw sa cream-colored ribbon banner
+                    fontSize: "0.9rem"
+                },
+                dateStyle: "position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); padding: 4px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: 950; background: #d97706; color: #fef3c7; border: 1px solid #fef3c7; z-index: 2;", // Goods na default alignment nito
+                decorations: ``
             },
-            flowers: { 
+            flowers: { // Beautiful Garden Theme
                 bg: "background: linear-gradient(135deg, #ec4899, #fbcfe8, #f472b6);", 
                 card: "background: transparent; color: #6d073b;", 
                 bdayCardBorder: "background-image: url('assets/beautifulborder.jpg'); background-size: contain; background-repeat: no-repeat; background-position: center; border-radius: 12px;", 
-                cardSize: "width: 240px; height: 240px;", // Square ratio para sa beautifulborder.jpg
-                avatarStyle: "position: absolute; top: 82px; left: 50%; transform: translateX(-50%); width: 95px; height: 95px; border-radius: 50%; z-index: 1;",
-                nameStyle: "position: absolute; bottom: 44px; left: 15%; width: 70%; font-size: 0.95rem; z-index: 2; color: #ffffff; text-shadow: 0 1px 3px rgba(0,0,0,0.8); font-weight: 950;",
-                dateStyle: "position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); padding: 3px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 950; background: #be185d; color: #ffffff; z-index: 2;",
-                decorations: `
-                    <div style="position:absolute; top:15px; left:20px; font-size:6.5rem; opacity:0.35;">🌸</div>
-                    <div style="position:absolute; bottom:25px; right:45px; font-size:5rem; opacity:0.25;">🌸</div>
-                `
+                cardSize: "width: 240px; height: 240px;", 
+                avatarStyle: "position: absolute; top: 92px; left: 50%; transform: translateX(-50%); width: 95px; height: 95px; border-radius: 50%; z-index: 1;", // Ibinaba para nakadikit sa label ng month sa ilalim
+                isCurveName: false,
+                // Ang name ay tuwid at nasa itaas ng circular border frame
+                nameStyle: "position: absolute; top: 58px; left: 5%; width: 90%; font-size: 1rem; z-index: 2; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); font-weight: 950; text-align: center;",
+                dateStyle: "position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); padding: 2px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 950; background: #be185d; color: #ffffff; z-index: 2; text-align: center; white-space: nowrap;",
+                decorations: ``
             },
-            nature: { 
+            nature: { // Refreshing Nature Theme
                 bg: "background: linear-gradient(135deg, #065f46, #10b981, #34d399);", 
                 card: "background: transparent; color: #064e3b;", 
                 bdayCardBorder: "background-image: url('assets/clasicborder.png'); background-size: contain; background-repeat: no-repeat; background-position: center;", 
-                cardSize: "width: 240px; height: 240px;", // Oval-circular shape base sa clasicborder.png
-                avatarStyle: "position: absolute; top: 38px; left: 51%; transform: translateX(-50%); width: 110px; height: 110px; border-radius: 50%; z-index: 1;",
-                nameStyle: "position: absolute; bottom: 58px; left: 10%; width: 80%; font-size: 1rem; z-index: 2; color: #064e3b; font-weight: 950;",
-                dateStyle: "position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); padding: 4px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: 950; background: #047857; color: #ffffff; z-index: 2;",
-                decorations: `
-                    <div style="position:absolute; top:15px; left:25px; font-size:5.5rem; opacity:0.3;">🐦</div>
-                    <div style="position:absolute; bottom:20px; left:35px; font-size:5rem; opacity:0.25;">🍃</div>
-                `
+                cardSize: "width: 240px; height: 240px;", 
+                avatarStyle: "position: absolute; top: 38px; left: 51%; transform: translateX(-50%); width: 110px; height: 110px; border-radius: 50%; z-index: 1;", // Goods na ang pwesto ng avatar
+                isCurveName: false,
+                // Magkadikit ang pangalan at buwan sa loob ng purple ribbon, pero nasa TAAS ang month label
+                nameStyle: "position: absolute; bottom: 34px; left: 10%; width: 80%; font-size: 0.95rem; z-index: 2; color: #ffffff; font-weight: 950; text-align: center; text-shadow: 0 1px 2px rgba(0,0,0,0.5);", 
+                dateStyle: "position: absolute; bottom: 54px; left: 10%; width: 80%; font-size: 0.75rem; font-weight: 950; color: #ffff00; z-index: 2; text-align: center; text-shadow: 0 1px 2px rgba(0,0,0,0.5);", // Dilaw o litaw na kulay sa ribbon, nakapatong sa pangalan
+                decorations: ``
             },
-            industrial: {
+            industrial: { // Industrial Utilities & Maintenance Theme
                 bg: "background: linear-gradient(135deg, #2d3748, #4a5568, #1a202c);", 
                 card: "background: transparent; color: white;",
                 bdayCardBorder: "background-image: url('assets/allborder.png'); background-size: contain; background-repeat: no-repeat; background-position: center;", 
-                cardSize: "width: 240px; height: 260px;", // Pinahaba nang kaunti para hindi tabingi ang arko ng lobo
-                avatarStyle: "position: absolute; top: 58px; left: 50%; transform: translateX(-50%); width: 100px; height: 100px; border-radius: 50%; z-index: 1;",
-                nameStyle: "position: absolute; bottom: 62px; left: 10%; width: 80%; font-size: 1rem; z-index: 2; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); font-weight: 950;",
-                dateStyle: "position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 4px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 950; background: #d69e2e; color: #1a202c; border: 1px solid #f6e05e; z-index: 2;", 
-                decorations: `
-                    <div style="position:absolute; top:-10px; left:-20px; font-size:6.5rem; opacity:0.12; color:#cbd5e0; transform: rotate(15deg);"><i class="fas fa-cog"></i></div>
-                    <div style="position:absolute; bottom:25px; right:45px; font-size:4rem; opacity:0.15; color:#cbd5e0;"><i class="fas fa-hammer"></i></div>
-                `
+                cardSize: "width: 240px; height: 260px;", 
+                avatarStyle: "position: absolute; top: 68px; left: 50%; transform: translateX(-50%); width: 102px; height: 102px; border-radius: 50%; z-index: 1;", // Ibinaba pa lalo ang avatar border
+                isCurveName: false,
+                // Pinagdikit ang name at month sa ibabang pulang banner na may kaunting space lang sa gitna nila
+                nameStyle: "position: absolute; bottom: 42px; left: 10%; width: 80%; font-size: 0.95rem; z-index: 2; color: #ffffff; font-weight: 950; text-align: center; text-shadow: 0 1px 3px rgba(0,0,0,0.6);",
+                dateStyle: "position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); padding: 2px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: 950; background: #e53e3e; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); z-index: 2; text-align: center; white-space: nowrap;", 
+                decorations: ``
             },
             custom: {
                 bg: window.currentCustomBgBase64 ? `background-image: url('${window.currentCustomBgBase64}'); background-size: cover; background-position: center; background-repeat: no-repeat;` : `background: #4a5568;`,
@@ -3516,6 +3519,7 @@ async function renderLiveBirthdayBoard() {
                 bdayCardBorder: "border: 2px dashed rgba(255,255,255,0.5); border-radius: 16px;", 
                 cardSize: "width: 220px; height: 300px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: space-between;",
                 avatarStyle: "width: 105px; height: 105px; border-radius: 50%; border: 4px solid white; margin-top: 10px;",
+                isCurveName: false,
                 nameStyle: "font-weight: 950; font-size: 1.15rem; color: #ffffff;",
                 dateStyle: "padding: 6px 16px; border-radius: 20px; font-size: 0.95rem; font-weight: 950; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); width: 100%; box-sizing: border-box;",
                 decorations: !window.currentCustomBgBase64 ? `<div style="position:absolute; top:45%; width:100%; text-align:center; color:#cbd5e0; font-size:0.9rem;">⚠️ Walang file na napili.</div>` : ''
@@ -3532,7 +3536,6 @@ async function renderLiveBirthdayBoard() {
                 const day = new Date(person.dob).getDate();
                 const img = person.avatar_url && person.avatar_url.trim() !== "" ? person.avatar_url : `https://ui-avatars.com/api/?name=${encodeURIComponent(person.full_name)}&background=random&size=150`;
                 
-                // Kapag 'custom' theme, gagamit tayo ng lumang structured layout, kapag borders naman gagamitan natin ng absolute alignments para selyado sa loob ng graphics.
                 if (theme === 'custom') {
                     cardsHtml += `
                         <div style="${activeStyle.cardSize} ${activeStyle.card} ${activeStyle.bdayCardBorder} position: relative; box-sizing: border-box; text-align: center;">
@@ -3548,6 +3551,34 @@ async function renderLiveBirthdayBoard() {
                         </div>
                     `;
                 } else {
+                    // PANG-RENDER NG MGA CARD NA MAY IMAGE BORDERS
+                    let nameSectionHtml = '';
+                    
+                    if (activeStyle.isCurveName) {
+                        // Gagamit ng inline SVG textPath para maging pakurba ang pangalan base sa configuration ng tema
+                        const cfg = activeStyle.curveConfig;
+                        const uniquePathId = `curve-path-${person.id || Math.random().toString(36).substr(2, 9)}`;
+                        nameSectionHtml = `
+                            <svg viewBox="${cfg.viewBox}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2;">
+                                <defs>
+                                    <path id="${uniquePathId}" d="${cfg.path}" fill="none" />
+                                </defs>
+                                <text font-weight="950" font-size="${cfg.fontSize}" font-family="sans-serif">
+                                    <textPath href="#${uniquePathId}" startOffset="50%" text-anchor="middle" fill="${cfg.fillColor}">
+                                        ${person.full_name.toUpperCase()}
+                                    </textPath>
+                                </text>
+                            </svg>
+                        `;
+                    } else {
+                        // Standalone standard flat text positioning kung hindi naman kailangan ikurba
+                        nameSectionHtml = `
+                            <div style="${activeStyle.nameStyle}">
+                                ${person.full_name}
+                            </div>
+                        `;
+                    }
+
                     cardsHtml += `
                         <div style="${activeStyle.cardSize} ${activeStyle.card} ${activeStyle.bdayCardBorder} position: relative; box-sizing: border-box;">
                             
@@ -3555,19 +3586,16 @@ async function renderLiveBirthdayBoard() {
                                 <img src="${img}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(person.full_name)}'"/>
                             </div>
                             
-                            <div style="${activeStyle.nameStyle} text-align: center; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                ${person.full_name}
-                            </div>
+                            ${nameSectionHtml}
                             
-                            <div style="${activeStyle.dateStyle} text-align: center; white-space: nowrap;">
-                                ${monthText.substring(0,3)} ${day}
+                            <div style="${activeStyle.dateStyle}">
+                                ${monthText} ${day}
                             </div>
                         </div>
                     `;
                 }
             });
         }
-
         // WHITEBOARD CONTAINER SCREEN VIEW
         previewArea.innerHTML = `
             <div id="printableWhiteboard" style="${activeStyle.bg} padding: 40px; border-radius: 16px; min-height: 540px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.15); box-sizing: border-box; color: white; display: flex; flex-direction: column;">
