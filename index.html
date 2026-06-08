@@ -3419,7 +3419,7 @@ function handleCustomBgUpload() {
     reader.readAsDataURL(file);
 }
 // ==========================================
-// UPDATED REAL WHITEBOARD-READY BIRTHDAY MAKER WITH IMAGE BORDERS
+// FIXED & CLEAN WHITEBOARD-READY BIRTHDAY MAKER WITH IMAGE BORDERS
 // ==========================================
 async function renderLiveBirthdayBoard() {
     const monthNum = parseInt(document.getElementById('bdayMonthSelect').value);
@@ -3443,12 +3443,12 @@ async function renderLiveBirthdayBoard() {
             return (bDate.getMonth() + 1) === monthNum;
         }).sort((a, b) => new Date(a.dob).getDate() - new Date(b.dob).getDate());
 
-        // MGA DESIGN AT KULAY BASE SA TEMA (Pinalitan ang CSS borders ng iyong mga totoong Images!)
+        // MGA DESIGN AT KULAY BASE SA TEMA (Gamit ang assets folder)
         const posterThemes = {
             classic: { 
                 bg: "background: linear-gradient(135deg, #1e3a8a, #3b82f6);", 
                 card: "background: rgba(255,255,255,0.15); color: white;", 
-                bdayCardBorder: "background-image: url('assets/corporateborder.png'); background-size: 100% 100%; background-repeat: no-repeat;", // Ginamit ang corporate PNG
+                bdayCardBorder: "background-image: url('assets/corporateborder.png'); background-size: 100% 100%; background-repeat: no-repeat;", 
                 textStyle: "color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.5);",
                 dateBox: "background: rgba(0,0,0,0.3); color: #ffffff; border: 1px solid rgba(255,255,255,0.4);",
                 decorations: `
@@ -3462,7 +3462,7 @@ async function renderLiveBirthdayBoard() {
             festive: { 
                 bg: "background: linear-gradient(135deg, #b91c1c, #f59e0b, #d97706);", 
                 card: "background: transparent; color: white;", 
-                bdayCardBorder: "background-image: url('assets/festiveborder.png'); background-size: 100% 100%; background-repeat: no-repeat;", // Ginamit ang festive PNG border
+                bdayCardBorder: "background-image: url('assets/festiveborder.png'); background-size: 100% 100%; background-repeat: no-repeat;", 
                 textStyle: "color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.6);",
                 dateBox: "background: #d97706; color: #fef3c7; border: 1px solid #fef3c7;",
                 decorations: `
@@ -3478,7 +3478,7 @@ async function renderLiveBirthdayBoard() {
             flowers: { 
                 bg: "background: linear-gradient(135deg, #ec4899, #fbcfe8, #f472b6);", 
                 card: "background: transparent; color: #6d073b;", 
-                bdayCardBorder: "background-image: url('assets/beautifulborder.jpg'); background-size: 100% 100%; background-repeat: no-repeat; border-radius: 16px;", // Ginamit ang beautiful JPG border
+                bdayCardBorder: "background-image: url('assets/beautifulborder.jpg'); background-size: 100% 100%; background-repeat: no-repeat; border-radius: 16px;", 
                 textStyle: "color: #6d073b; text-shadow: none; font-weight: 950;", 
                 dateBox: "background: #be185d; color: #ffffff; border: none;",
                 decorations: `
@@ -3494,7 +3494,7 @@ async function renderLiveBirthdayBoard() {
             nature: { 
                 bg: "background: linear-gradient(135deg, #065f46, #10b981, #34d399);", 
                 card: "background: transparent; color: #064e3b;", 
-                bdayCardBorder: "background-image: url('assets/clasicborder.png'); background-size: 100% 100%; background-repeat: no-repeat;", // Ginamit ang clasic PNG border
+                bdayCardBorder: "background-image: url('assets/clasicborder.png'); background-size: 100% 100%; background-repeat: no-repeat;", 
                 textStyle: "color: #064e3b; text-shadow: none; font-weight: 950;", 
                 dateBox: "background: #047857; color: #ffffff; border: none;",
                 decorations: `
@@ -3510,7 +3510,7 @@ async function renderLiveBirthdayBoard() {
             industrial: {
                 bg: "background: linear-gradient(135deg, #2d3748, #4a5568, #1a202c);", 
                 card: "background: rgba(0,0,0,0.1); color: white;",
-                bdayCardBorder: "background-image: url('assets/allborder.png'); background-size: 100% 100%; background-repeat: no-repeat;", // Ginamit ang allborder composite frame
+                bdayCardBorder: "background-image: url('assets/allborder.png'); background-size: 100% 100%; background-repeat: no-repeat;", 
                 textStyle: "color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.8);",
                 dateBox: "background: #d69e2e; color: #1a202c; border: 1px solid #f6e05e; font-weight: 950;", 
                 decorations: `
@@ -3526,7 +3526,7 @@ async function renderLiveBirthdayBoard() {
             custom: {
                 bg: window.currentCustomBgBase64 ? `background-image: url('${window.currentCustomBgBase64}'); background-size: cover; background-position: center; background-repeat: no-repeat;` : `background: #4a5568;`,
                 card: "background: rgba(0, 0, 0, 0.5); color: white; backdrop-filter: blur(4px);",
-                bdayCardBorder: "border: 2px dashed rgba(255,255,255,0.5);", // Default fallback border lang kapag walang system image background
+                bdayCardBorder: "border: 2px dashed rgba(255,255,255,0.5);", 
                 textStyle: "color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.6);",
                 dateBox: "background: rgba(255,255,255,0.2); color: #ffffff; border: 1px solid rgba(255,255,255,0.4);",
                 decorations: !window.currentCustomBgBase64 ? `<div style="position:absolute; top:45%; width:100%; text-align:center; color:#cbd5e0; font-size:0.9rem;">⚠️ Walang file na napili. Mangyaring mag-upload ng image file sa itaas.</div>` : ''
@@ -3543,7 +3543,6 @@ async function renderLiveBirthdayBoard() {
                 const day = new Date(person.dob).getDate();
                 const img = person.avatar_url && person.avatar_url.trim() !== "" ? person.avatar_url : `https://ui-avatars.com/api/?name=${encodeURIComponent(person.full_name)}&background=random&size=150`;
                 
-                // 1. BALLOON OVERLAP LOGIC: Ginamit natin ulit para sa extra floating balloon effect sa ibabaw ng picture border mo
                 let balloonOverlapHtml = '';
                 if (theme === 'festive') {
                     balloonOverlapHtml = `
@@ -3552,7 +3551,6 @@ async function renderLiveBirthdayBoard() {
                     `;
                 }
 
-                // 2. UNIFIED CARD WITH FIXED HEIGHT AT PHYSICAL IMAGE BORDER
                 cardsHtml += `
                     <div style="width: 220px; height: 300px; padding: 30px 22px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: space-between; box-sizing: border-box; position: relative; transition: 0.2s; ${activeStyle.card} ${activeStyle.bdayCardBorder}">
                         
