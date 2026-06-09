@@ -1043,26 +1043,42 @@ function openIOSLink(url) {
 }
 
     window.addEventListener('scroll', () => {
-    // Kasalukuyang code mo para sa navbar (Huwag galawin)
+    // 1. Para sa Navbar (Huwag galawin, goods na ito)
     const nav = document.getElementById('navbar');
     if (window.scrollY > 50) nav.classList.add('scrolled');
     else nav.classList.remove('scrolled');
 
-    // --- BAGONG LOGIC: MAGTATAGO PAPUNTANG KANAN KAPAG NAG-SCROLL ---
+    // 2. KONTROL PARA SA FORM ANIMATION AT LOCKING SYSTEM
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
     
-    // Kapag nag-scroll pababa ng higit sa 150px, tatakbo pakanan ang form
+    // Kukunin natin ang mga input fields para malaman kung may sinusulat na sila
+    const regNameInput = document.getElementById('regName'); // Unang text box sa sign-up
+    const loginUserInput = document.getElementById('username'); // Opsyonal: Unang text box sa login (kung meron man)
+
+    // Titingnan kung may laman na ang sign-up name box
+    const isRegistering = regNameInput && regNameInput.value.trim() !== "";
+    // Titingnan kung may laman na ang login user box (pwedeng i-adjust ang id depende sa code mo)
+    const isLoggingIn = loginUserInput && loginUserInput.value.trim() !== "";
+
+    // DITO SA BAHAGING ITO ANG LOGIC NG PAG-LOCK:
+    // Kung may input na kahit isa sa kanila, tatanggalin ang animation/pagtatago at hihinto na ang code dito (.remove at return)
+    if (isRegistering || isLoggingIn) {
+        if (loginForm) loginForm.classList.remove('hidden-form');
+        if (registerForm) registerForm.classList.remove('hidden-form');
+        return; // Break! Hihinto na ang script dito kaya bale-wala na ang scroll depth sa ibaba
+    }
+
+    // KUNG BLANKO PA ANG MGA INPUT BOX, MAGPAPATULOY ANG SWABENG ANIMATION MO PAG NAG-SCROLL
     if (window.scrollY > 150) {
         if (loginForm) loginForm.classList.add('hidden-form');
         if (registerForm) registerForm.classList.add('hidden-form');
     } else {
-        // Kapag bumalik sa pinakataas, babalik sa gitna/orihinal na pwesto
         if (loginForm) loginForm.classList.remove('hidden-form');
         if (registerForm) registerForm.classList.remove('hidden-form');
     }
 });
-
+    
     function toggleForms() {
         const login = document.getElementById('login-form');
         const register = document.getElementById('register-form');
