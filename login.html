@@ -348,6 +348,20 @@ nav.scrolled {
         opacity: 1; transform: translateY(0); pointer-events: auto;
     }
 }
+        /* Style para sa bagong Avatar Preview */
+.avatar-preview-container button:hover {
+    background: var(--primary) !important;
+    color: #0b0e14 !important;
+    transition: all 0.3s ease;
+}
+#avatar-preview-box {
+    transition: all 0.3s ease;
+}
+#avatar-preview-box.has-image {
+    border-style: solid;
+    border-color: var(--primary);
+    box-shadow: 0 0 10px rgba(78, 205, 196, 0.3);
+}
 
 /* MOBILE CLICK/ACTIVE LOGIC */
 @media (max-width: 820px) {
@@ -497,6 +511,11 @@ footer { background: #0b0e14; padding: 60px 5% 20px; border-top: 3px solid var(-
 .footer-col a:hover { color: var(--primary); padding-left: 5px; }
 
 .footer-bottom { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #2d3748; color: #4a5568; font-size: 0.85rem; }
+    
+/* Para kapag cliniclick ang dropdown, may swabeng glow effect */
+#regRole:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(78, 205, 196, 0.2); outline: none;}
+/* ITO ANG PINAKAMAHALAGA: Taga-ayos ng itim/madilim na background sa dropdown list para lumitaw ang puting text */
+#regRole option { background-color: #121620; color: #ffffff; padding: 10px; }
 
 /* --- TOAST NOTIFICATION --- */
 #toast-container { position: fixed; top: 80px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
@@ -586,22 +605,43 @@ footer { background: #0b0e14; padding: 60px 5% 20px; border-top: 3px solid var(-
         </div>
 
         <div id="register-form" class="glass-box" style="display:none;">
-            <h2 style="text-align:center; margin-top:0;">Register</h2>
-            <div class="input-group"><input type="text" id="regName" placeholder="Full Name"></div>
-            <div style="display:flex; gap:10px; margin-bottom:10px;">
-                <input type="text" id="regID" placeholder="ID" style="flex:1; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:10px; color:white;">
-                <select id="regRole" style="flex:1; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:10px; color:white;">
-                    <option value="mantech">Mantech</option>
-                    <option value="opscrew">OpsCrew</option>
-                    <option value="supervisor">Supervisor</option>
-                </select>
+    <h2 style="text-align:center; margin-top:0;">Register</h2>
+    <div class="input-group"><input type="text" id="regName" placeholder="Full Name"></div>
+    <div style="display:flex; gap:10px; margin-bottom:10px;">
+       <input type="text" id="regID" placeholder="ID" style="width: 40%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:10px; color:white; box-sizing: border-box;">
+        <select id="regRole" style="flex:1; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:10px; color:white;">
+            <option value="mantech">Mantech</option>
+            <option value="opscrew">OpsCrew</option>
+            <option value="supervisor">Supervisor</option>
+            <option value="prev_maint">Prev. Maintenance</option>
+        </select>
+    </div>
+    <div class="input-group"><input type="date" id="regDOB"></div>
+    
+    <div class="input-group" style="margin-bottom: 20px;">
+        <label style="display: block; color: #a0aec0; margin-bottom: 8px; font-size: 0.9rem; text-align: left;">
+            <i class="fas fa-camera" style="margin-right: 5px; color: var(--primary);"></i> Profile Photo / Avatar
+        </label>
+        
+        <div class="avatar-preview-container" style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
+            <div id="avatar-preview-box" style="width: 60px; height: 60px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 2px dashed var(--border); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
+                <i class="fas fa-user" id="default-avatar-icon" style="font-size: 1.5rem; color: #4a5568;"></i>
+                <img id="avatar-image-preview" src="" alt="Preview" style="display: none; width: 100%; height: 100%; object-fit: cover;">
             </div>
-            <div class="input-group"><input type="date" id="regDOB"></div>
-            <div class="avatar-grid" id="avatarGrid"></div>
-            <div class="input-group"><input type="password" id="regPass" placeholder="Password"></div>
-            <button class="login-btn" id="registerBtn" onclick="handleRegister()">REGISTER</button>
-            <p style="text-align:center; font-size:0.85rem; margin-top:10px; cursor:pointer;" onclick="toggleForms()">Back to Login</p>
+            
+            <div style="text-align: left;">
+                <input type="file" id="register-avatar" accept="image/*" style="display: none;">
+                <button type="button" onclick="document.getElementById('register-avatar').click();" class="btn-action" style="padding: 8px 15px; font-size: 0.85rem; background: rgba(78, 205, 196, 0.1); border: 1px solid var(--primary); color: var(--primary); border-radius: 8px; cursor: pointer;">
+                    Choose Photo / Take Picture
+                </button>
+                <p style="font-size: 0.75rem; color: #718096; margin-top: 4px;">Supports file upload & live phone camera</p>
+            </div>
         </div>
+    </div>
+    <div class="input-group"><input type="password" id="regPass" placeholder="Password"></div>
+    <button class="login-btn" id="registerBtn" onclick="handleRegister()">REGISTER</button>
+    <p style="text-align:center; font-size:0.85rem; margin-top:10px; cursor:pointer;" onclick="toggleForms()">Back to Login</p>
+</div>
     </div>
 
 </section>
@@ -1344,6 +1384,91 @@ document.querySelectorAll('.area-card').forEach(card => {
         this.classList.toggle('show-actions');
     });
 });
+    
+// --- AVATAR LOGIC TAKE PHOTO & UPLOAD FILE ---
+    document.addEventListener('DOMContentLoaded', () => {
+    const avatarInput = document.getElementById('register-avatar');
+    const avatarPreviewImg = document.getElementById('avatar-image-preview');
+    const defaultAvatarIcon = document.getElementById('default-avatar-icon');
+    const previewBox = document.getElementById('avatar-preview-box');
+
+    if (avatarInput) {
+        avatarInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            
+            if (file) {
+                const maxAllowedSize = 5 * 1024 * 1024; 
+                if (file.size > maxAllowedSize) {
+                    alert("⚠️ Masyadong malaki ang file! Pumili ng litrato na mas mababa sa 5MB para makatipid sa storage.");
+                    this.value = ""; 
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        // Itakda ang gustong laki ng cropped image (Perfect Square para sa avatar)
+                        const TARGET_SIZE = 300; // 300x300 pixels (sakto ang linaw at sobrang gaan sa storage)
+                        canvas.width = TARGET_SIZE;
+                        canvas.height = TARGET_SIZE;
+                        
+                        // --- DITO GAGAWIN ANG AUTOMATIC CENTER CROP LOGIC ---
+                        let sourceX = 0;
+                        let sourceY = 0;
+                        let sourceWidth = img.width;
+                        let sourceHeight = img.height;
+                        
+                        if (img.width > img.height) {
+                            // Kung Landscape (mas malapad): Gupitin ang kaliwa at kanan, iwan ang gitna
+                            sourceWidth = img.height;
+                            sourceX = (img.width - img.height) / 2;
+                        } else if (img.height > img.width) {
+                            // Kung Portrait (mas mataas): Gupitin ang itaas at ibaba, iwan ang gitna
+                            sourceHeight = img.width;
+                            sourceY = (img.height - img.width) / 2;
+                        }
+                        
+                        // I-draw ang kinrop na bahagi ng larawan papunta sa square canvas
+                        ctx.drawImage(
+                            img, 
+                            sourceX, sourceY, sourceWidth, sourceHeight, // Ang kukunin sa original image (Gitna)
+                            0, 0, TARGET_SIZE, TARGET_SIZE              // Ang bagsakan sa bagong liit na square canvas
+                        );
+                        
+                        // I-convert sa JPEG na may 60% quality (Nasa 30KB - 80KB na lang ito!)
+                        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.6);
+                        
+                        // I-display agad ang perpektong parisukat na mukha sa preview
+                        avatarPreviewImg.src = compressedDataUrl;
+                        avatarPreviewImg.style.display = 'block';
+                        if (defaultAvatarIcon) defaultAvatarIcon.style.display = 'none';
+                        previewBox.classList.add('has-image');
+                        
+                        // I-save ang kinrop at pinaliit na file para handa sa upload mamaya sa Supabase
+                        window.compressedAvatarFile = dataURLtoFile(compressedDataUrl, `avatar-${Date.now()}.jpg`);
+                    };
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+});
+
+// Helper function (Huwag itong aalisin, ito ang taga-convert pabalik sa File Object)
+function dataURLtoFile(dataurl, filename) {
+    var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+        bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+    while(n--){
+        u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, {type:mime});
+}
     
 // --- LOGOUT SYSTEM CONTROL ---
 function logout() {
