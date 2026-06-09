@@ -3445,22 +3445,25 @@ async function renderLiveBirthdayBoard() {
 
     // MGA DESIGN AT KULAY BASE SA AKTWAL MONG MGA BORDERS (Inayos ang alignment base sa iyong adjustment list)
         const posterThemes = {
-            classic: { 
-                bg: "background: linear-gradient(135deg, #1e3a8a, #3b82f6);", 
-                card: "background: transparent; color: white;", 
-                bdayCardBorder: "position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('assets/corporateborder.png'); background-size: contain; background-repeat: no-repeat; background-position: center; z-index: 2; pointer-events: none;",
-                cardSize: "width: 220px; height: 240px;", 
-                avatarStyle: "position: absolute; top: 52px; left: 50%; transform: translateX(-50%); width: 150px; height: 150px; border-radius: 50%; z-index: 1;", // Ibinaba nang kaunti
-                isCurveName: true,
-                curveConfig: {
-                    viewBox: "0 0 240 260",
-                    path: "M 55,130 A 72,72 0 0,0 185,130", // Curve na sumusunod sa ilalim ng avatar na may manipis na agwat
-                    fillColor: "#000000",
-                    fontSize: "0.95rem"
-                },
-                dateStyle: "position: absolute; bottom: 35px; left: 52%; transform: translateX(-50%) rotate(-3deg); padding: 2px 10px; font-size: 0.85rem; font-weight: 950; color: #ffffff; z-index: 3; text-shadow: 0 1px 2px rgba(0,0,0,0.5); font-family: sans-serif; letter-spacing: 1px;", // Naka-tilt / slight rotational slant sa ribbon
-                decorations: ``
-            },
+            cclassic: { 
+    bg: "background: linear-gradient(135deg, #1e3a8a, #3b82f6);", 
+    card: "position: relative; background: transparent; color: white; overflow: hidden;", 
+    bdayCardBorder: "position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('assets/corporateborder.png'); background-size: contain; background-repeat: no-repeat; background-position: center; z-index: 2; pointer-events: none;",
+    cardSize: "width: 220px; height: 240px;", 
+    // Ginawang 110px ang avatar para sakto sa 220px na card at iniangat sa top: 35px
+    avatarStyle: "position: absolute; top: 35px; left: 50%; transform: translateX(-50%); width: 110px; height: 110px; border-radius: 50%; z-index: 1;", 
+    isCurveName: true,
+    curveConfig: {
+        // TAMA NA: Tugma na ang viewBox sa cardSize mo ngayon (220 x 240)
+        viewBox: "0 0 220 240",
+        // Bagong path na saktong yayakap sa ilalim ng 110px avatar
+        path: "M 40,125 A 70,70 0 0,0 180,125", 
+        fillColor: "#ffffff", // Ginawang white para lutang sa blue background ng classic
+        fontSize: "0.85rem" // Pinaliliit ng konti para magkasya sa curve
+    },
+    dateStyle: "position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%) rotate(-3deg); padding: 2px 10px; font-size: 0.8rem; font-weight: 950; color: #ffffff; z-index: 3; text-shadow: 0 1px 2px rgba(0,0,0,0.5); font-family: sans-serif; letter-spacing: 1px;", 
+    decorations: ``
+}, 
             festive: { 
                 bg: "background: linear-gradient(135deg, #b91c1c, #f59e0b, #d97706);", 
                 card: "background: transparent; color: white;", 
@@ -3474,7 +3477,7 @@ async function renderLiveBirthdayBoard() {
                     fillColor: "#333333", 
                     fontSize: "0.9rem"
                 },
-                nameStyle: "position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); font-size: 1rem; font-weight: bold; color: white; width: 100%; text-align: center; z-index: 2;",
+                nameStyle: "position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%); font-size: 1rem; font-weight: bold; color: white; width: 100%; text-align: center; z-index: 2;",
                 dateStyle: "position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%); padding: 4px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: 950; background: #d97706; color: #fef3c7; border: 1px solid #fef3c7; z-index: 2;", 
                 decorations: ``
             },
@@ -3487,7 +3490,7 @@ async function renderLiveBirthdayBoard() {
                 isCurveName: false,
                 // Ang name ay tuwid at nasa itaas ng circular border frame
                 nameStyle: "position: absolute; top: 70px; left: 5%; width: 90%; font-size: 1rem; z-index: 2; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); font-weight: 950; text-align: center;",
-                dateStyle: "position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 2px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 950; background: #be185d; color: #ffffff; z-index: 2; text-align: center; white-space: nowrap;",
+                dateStyle: "position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); padding: 2px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 950; background: #be185d; color: #ffffff; z-index: 2; text-align: center; white-space: nowrap;",
                 decorations: ``
             },
             nature: { // Refreshing Nature Theme
@@ -3499,7 +3502,7 @@ async function renderLiveBirthdayBoard() {
                 isCurveName: false,
                 // Magkadikit ang pangalan at buwan sa loob ng purple ribbon, pero nasa TAAS ang month label
                 nameStyle: "position: absolute; bottom: -15px; left: 10%; width: 80%; font-size: 0.95rem; z-index: 2; color: #ffffff; font-weight: 950; text-align: center; text-shadow: 0 1px 2px rgba(0,0,0,0.5);", 
-                dateStyle: "position: absolute; bottom: 54px; left: 10%; width: 80%; font-size: 0.75rem; font-weight: 950; color: #ffff00; z-index: 2; text-align: center; text-shadow: 0 1px 2px rgba(0,0,0,0.5);", // Dilaw o litaw na kulay sa ribbon, nakapatong sa pangalan
+                dateStyle: "position: absolute; bottom: 20px; left: 10%; width: 80%; font-size: 0.75rem; font-weight: 950; color: #ffff00; z-index: 2; text-align: center; text-shadow: 0 1px 2px rgba(0,0,0,0.5);", // Dilaw o litaw na kulay sa ribbon, nakapatong sa pangalan
                 decorations: ``
             },
             industrial: { // Industrial Utilities & Maintenance Theme
