@@ -246,6 +246,12 @@ nav.scrolled {
     border: 1px solid var(--border); border-radius: 25px;
     padding: 30px; width: 100%; max-width: 400px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.glass-box.hidden-form {
+    opacity: 0;
+    pointer-events: none; /* Hindi mapipindot habang nakatago */
+    transform: translateX(100px); /* Dito sya lalakad papuntang KANAN (Right) */
 }
 
 @media (min-width: 1024px) {
@@ -389,7 +395,7 @@ nav.scrolled {
 }
 
 /* ─── PRECISE CONNECTING ORG CHART STYLES ─── */
-.org-section { padding: 100px 5%; background: #0f1219; text-align: center; }
+.org-section { padding: 100px 5%; background: rgba(15, 18, 25, 0.2); text-align: center; }
 .org-wrapper { max-width: 1100px; margin: 50px auto 0; display: flex; flex-direction: column; align-items: center; position: relative; }
  
 .org-card {
@@ -990,10 +996,25 @@ function openIOSLink(url) {
 }
 
     window.addEventListener('scroll', () => {
-        const nav = document.getElementById('navbar');
-        if (window.scrollY > 50) nav.classList.add('scrolled');
-        else nav.classList.remove('scrolled');
-    });
+    // Kasalukuyang code mo para sa navbar (Huwag galawin)
+    const nav = document.getElementById('navbar');
+    if (window.scrollY > 50) nav.classList.add('scrolled');
+    else nav.classList.remove('scrolled');
+
+    // --- BAGONG LOGIC: MAGTATAGO PAPUNTANG KANAN KAPAG NAG-SCROLL ---
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    
+    // Kapag nag-scroll pababa ng higit sa 150px, tatakbo pakanan ang form
+    if (window.scrollY > 150) {
+        if (loginForm) loginForm.classList.add('hidden-form');
+        if (registerForm) registerForm.classList.add('hidden-form');
+    } else {
+        // Kapag bumalik sa pinakataas, babalik sa gitna/orihinal na pwesto
+        if (loginForm) loginForm.classList.remove('hidden-form');
+        if (registerForm) registerForm.classList.remove('hidden-form');
+    }
+});
 
     function toggleForms() {
         const login = document.getElementById('login-form');
