@@ -3447,24 +3447,21 @@ async function renderLiveBirthdayBoard() {
         const posterThemes = {
            classic: { 
     bg: "background: linear-gradient(135deg, #1e3a8a, #3b82f6);", 
-    // TINANGGAL ANG overflow: hidden PARA LUMITAW ANG AVATAR
-    card: "position: relative; background: transparent; color: white;", 
-    // Binalik sa mas simpleng style ang border para hindi mag-conflict sa html positioning
-    bdayCardBorder: "background-image: url('assets/corporateborder.png'); background-size: contain; background-repeat: no-repeat; background-position: center; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none;",
-    cardSize: "width: 220px; height: 240px;", 
-    // In-adjust ang top: 40px para saktong pumasok sa loob ng border ang mukha ng tao
+    card: "position: relative; width: 220px; height: 240px; background: transparent; color: white;", 
+    cardSize: "width: 220px; height: 240px;", // Iniwan natin to kung sakaling hinahanap ng system mo
+    bdayCardBorder: "position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('assets/corporateborder.png'); background-size: contain; background-repeat: no-repeat; background-position: center; z-index: 2; pointer-events: none;",
     avatarStyle: "position: absolute; top: 40px; left: 50%; transform: translateX(-50%); width: 110px; height: 110px; border-radius: 50%; z-index: 1;", 
     isCurveName: true,
     curveConfig: {
         viewBox: "0 0 220 240",
-        path: "M 40,125 A 70,70 0 0,0 180,125", 
+        // Ang path na ito ay gagawa ng curve sa ilalim lang ng avatar
+        path: "M 40,145 A 70,70 0 0,0 180,145", 
         fillColor: "#ffffff", 
         fontSize: "0.85rem" 
     },
-    dateStyle: "position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%) rotate(-3deg); padding: 2px 10px; font-size: 0.8rem; font-weight: 950; color: #ffffff; z-index: 3; text-shadow: 0 1px 2px rgba(0,0,0,0.5); font-family: sans-serif; letter-spacing: 1px;", 
+    dateStyle: "position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%) rotate(-3deg); padding: 2px 10px; font-size: 0.8rem; font-weight: 950; color: #ffffff; z-index: 3; text-shadow: 0 1px 2px rgba(0,0,0,0.5); font-family: sans-serif; letter-spacing: 1px;", 
     decorations: ``
-},
-            festive: { 
+},            festive: { 
                 bg: "background: linear-gradient(135deg, #b91c1c, #f59e0b, #d97706);", 
                 card: "background: transparent; color: white;", 
                 bdayCardBorder: "background-image: url('assets/festiveborder.png'); background-size: contain; background-repeat: no-repeat; background-position: center;", 
@@ -3489,7 +3486,7 @@ async function renderLiveBirthdayBoard() {
                 avatarStyle: "position: absolute; top: 72px; left: 50%; transform: translateX(-50%); width: 135px; height: 135px; border-radius: 50%; z-index: 1;", // Ibinaba para nakadikit sa label ng month sa ilalim
                 isCurveName: false,
                 // Ang name ay tuwid at nasa itaas ng circular border frame
-                nameStyle: "position: absolute; top: 70px; left: 5%; width: 90%; font-size: 1rem; z-index: 2; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); font-weight: 950; text-align: center;",
+                nameStyle: "position: absolute; top: -5px; left: 5%; width: 90%; font-size: 1rem; z-index: 2; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); font-weight: 950; text-align: center;",
                 dateStyle: "position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); padding: 2px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 950; background: #be185d; color: #ffffff; z-index: 2; text-align: center; white-space: nowrap;",
                 decorations: ``
             },
@@ -3498,7 +3495,7 @@ async function renderLiveBirthdayBoard() {
                 card: "background: transparent; color: #064e3b;", 
                 bdayCardBorder: "background-image: url('assets/clasicborder.png'); background-size: contain; background-repeat: no-repeat; background-position: center;", 
                 cardSize: "width: 240px; height: 240px;", 
-                avatarStyle: "position: absolute; top: 20px; left: 51%; transform: translateX(-50%); width: 235px; height: 235px; border-radius: 50%; z-index: 1;", // Goods na ang pwesto ng avatar
+                avatarStyle: "position: absolute; top: 20px; left: 51%; transform: translateX(-50%); width: 205px; height: 205px; border-radius: 50%; z-index: 1;", // Goods na ang pwesto ng avatar
                 isCurveName: false,
                 // Magkadikit ang pangalan at buwan sa loob ng purple ribbon, pero nasa TAAS ang month label
                 nameStyle: "position: absolute; bottom: -15px; left: 10%; width: 80%; font-size: 0.95rem; z-index: 2; color: #ffffff; font-weight: 950; text-align: center; text-shadow: 0 1px 2px rgba(0,0,0,0.5);", 
