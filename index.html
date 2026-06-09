@@ -3445,8 +3445,8 @@ async function renderLiveBirthdayBoard() {
 
     // MGA DESIGN AT KULAY BASE SA AKTWAL MONG MGA BORDERS (Inayos ang alignment base sa iyong adjustment list)
         const posterThemes = {
-              classic: { 
-                bg: "background: linear-gradient(135deg, #b91c1c, #f59e0b, #d97706);", 
+              classic: { // Corporate blue Theme
+                bg: "background: linear-gradient(135deg, #1e3a8a, #3b82f6);",
                 card: "background: transparent; color: white;", 
                 bdayCardBorder: "background-image: url('assets/corporateborder.png'); background-size: contain; background-repeat: no-repeat; background-position: center;", 
                 cardSize: "width: 250px; height: 250px;", 
@@ -3454,7 +3454,7 @@ async function renderLiveBirthdayBoard() {
                 isCurveName: false,
                 curveConfig: {
                     viewBox: "0 0 250 250",
-                    path: "M 48,100 A 78,78 0 0,0 202,110", // Inakyat sa 152 at pinasok nang bahagya ang radius para yakapin ang avatar
+                    path: "M 48,100 A 78,78 0 0,0 202,110", 
                     fillColor: "#333333", 
                     fontSize: "0.9rem"
                 },
@@ -3475,8 +3475,8 @@ async function renderLiveBirthdayBoard() {
                     fillColor: "#333333", 
                     fontSize: "0.9rem"
                 },
-                nameStyle: "position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%); font-size: 1rem; font-weight: bold; color: white; width: 100%; text-align: center; z-index: 2;",
-                dateStyle: "position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%); padding: 4px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: 950; background: #d97706; color: #fef3c7; border: 1px solid #fef3c7; z-index: 2;", 
+                nameStyle: "position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); font-size: 1rem; font-weight: bold; color: white; width: 100%; text-align: center; z-index: 2;",
+                dateStyle: "position: absolute; bottom: 58px; left: 50%; transform: translateX(-50%); padding: 4px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: 950; background: #d97706; color: #fef3c7; border: 1px solid #fef3c7; z-index: 2;", 
                 decorations: ``
             },
             flowers: { // Beautiful Garden Theme
@@ -3487,7 +3487,7 @@ async function renderLiveBirthdayBoard() {
                 avatarStyle: "position: absolute; top: 72px; left: 50%; transform: translateX(-50%); width: 135px; height: 135px; border-radius: 50%; z-index: 1;", // Ibinaba para nakadikit sa label ng month sa ilalim
                 isCurveName: false,
                 // Ang name ay tuwid at nasa itaas ng circular border frame
-                nameStyle: "position: absolute; top: 90px; left: 5%; width: 90%; font-size: 1rem; z-index: 2; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); font-weight: 950; text-align: center;",
+                nameStyle: "position: absolute; top: 180px; left: 5%; width: 90%; font-size: 1rem; z-index: 2; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); font-weight: 950; text-align: center;",
                 dateStyle: "position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); padding: 2px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 950; background: #be185d; color: #ffffff; z-index: 2; text-align: center; white-space: nowrap;",
                 decorations: ``
             },
