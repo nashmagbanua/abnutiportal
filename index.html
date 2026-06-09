@@ -3445,31 +3445,31 @@ async function renderLiveBirthdayBoard() {
 
     // MGA DESIGN AT KULAY BASE SA AKTWAL MONG MGA BORDERS (Inayos ang alignment base sa iyong adjustment list)
         const posterThemes = {
-            classic: { 
+           classic: { 
     bg: "background: linear-gradient(135deg, #1e3a8a, #3b82f6);", 
-    card: "position: relative; background: transparent; color: white; overflow: hidden;", 
-    bdayCardBorder: "position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('assets/corporateborder.png'); background-size: contain; background-repeat: no-repeat; background-position: center; z-index: 2; pointer-events: none;",
+    // TINANGGAL ANG overflow: hidden PARA LUMITAW ANG AVATAR
+    card: "position: relative; background: transparent; color: white;", 
+    // Binalik sa mas simpleng style ang border para hindi mag-conflict sa html positioning
+    bdayCardBorder: "background-image: url('assets/corporateborder.png'); background-size: contain; background-repeat: no-repeat; background-position: center; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none;",
     cardSize: "width: 220px; height: 240px;", 
-    // Ginawang 110px ang avatar para sakto sa 220px na card at iniangat sa top: 35px
-    avatarStyle: "position: absolute; top: 35px; left: 50%; transform: translateX(-50%); width: 110px; height: 110px; border-radius: 50%; z-index: 1;", 
+    // In-adjust ang top: 40px para saktong pumasok sa loob ng border ang mukha ng tao
+    avatarStyle: "position: absolute; top: 40px; left: 50%; transform: translateX(-50%); width: 110px; height: 110px; border-radius: 50%; z-index: 1;", 
     isCurveName: true,
     curveConfig: {
-        // TAMA NA: Tugma na ang viewBox sa cardSize mo ngayon (220 x 240)
         viewBox: "0 0 220 240",
-        // Bagong path na saktong yayakap sa ilalim ng 110px avatar
         path: "M 40,125 A 70,70 0 0,0 180,125", 
-        fillColor: "#ffffff", // Ginawang white para lutang sa blue background ng classic
-        fontSize: "0.85rem" // Pinaliliit ng konti para magkasya sa curve
+        fillColor: "#ffffff", 
+        fontSize: "0.85rem" 
     },
     dateStyle: "position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%) rotate(-3deg); padding: 2px 10px; font-size: 0.8rem; font-weight: 950; color: #ffffff; z-index: 3; text-shadow: 0 1px 2px rgba(0,0,0,0.5); font-family: sans-serif; letter-spacing: 1px;", 
     decorations: ``
-}, 
+},
             festive: { 
                 bg: "background: linear-gradient(135deg, #b91c1c, #f59e0b, #d97706);", 
                 card: "background: transparent; color: white;", 
                 bdayCardBorder: "background-image: url('assets/festiveborder.png'); background-size: contain; background-repeat: no-repeat; background-position: center;", 
                 cardSize: "width: 250px; height: 250px;", 
-                avatarStyle: "position: absolute; top: 64px; left: 50%; transform: translateX(-50%); width: 155px; height: 155px; border-radius: 50%; z-index: 1;", 
+                avatarStyle: "position: absolute; top: 35px; left: 50%; transform: translateX(-50%); width: 155px; height: 155px; border-radius: 50%; z-index: 1;", 
                 isCurveName: false,
                 curveConfig: {
                     viewBox: "0 0 250 250",
@@ -3486,7 +3486,7 @@ async function renderLiveBirthdayBoard() {
                 card: "background: transparent; color: #6d073b;", 
                 bdayCardBorder: "background-image: url('assets/beautifulborder.jpg'); background-size: contain; background-repeat: no-repeat; background-position: center; border-radius: 12px;", 
                 cardSize: "width: 240px; height: 240px;", 
-                avatarStyle: "position: absolute; top: 92px; left: 50%; transform: translateX(-50%); width: 135px; height: 135px; border-radius: 50%; z-index: 1;", // Ibinaba para nakadikit sa label ng month sa ilalim
+                avatarStyle: "position: absolute; top: 72px; left: 50%; transform: translateX(-50%); width: 135px; height: 135px; border-radius: 50%; z-index: 1;", // Ibinaba para nakadikit sa label ng month sa ilalim
                 isCurveName: false,
                 // Ang name ay tuwid at nasa itaas ng circular border frame
                 nameStyle: "position: absolute; top: 70px; left: 5%; width: 90%; font-size: 1rem; z-index: 2; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); font-weight: 950; text-align: center;",
