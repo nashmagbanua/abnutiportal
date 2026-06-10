@@ -2370,28 +2370,58 @@ window.onload = function() {
     });
 
     // 1. Kunin ang data mula sa localStorage
-    const userCode = localStorage.getItem('userCode');
-    const userName = localStorage.getItem('userName');
-    const userRole = localStorage.getItem('userRole');
-    const userAvatar = localStorage.getItem('userAvatar');
+const userCode = localStorage.getItem('userCode');
+const userName = localStorage.getItem('userName');
+const userRole = localStorage.getItem('userRole');
+const userAvatar = localStorage.getItem('userAvatar');
 
-    // 2. Security Check
-    if (!userCode || userRole !== 'supervisor') {
-        window.location.href = 'login.html';
-        return;
-    }
+// 2. Security Check
+if (!userCode || userRole !== 'supervisor') {
+    window.location.href = 'login.html';
+    return;
+}
 
-    // ✅ Auth passed — reveal dashboard
-    document.getElementById('main-app').style.display = 'block';
+// ✅ Auth passed — reveal dashboard
+document.getElementById('main-app').style.display = 'block';
 
-    // 3. I-display ang User Info
-    if (document.getElementById('pName')) document.getElementById('pName').innerText = userName;
-    if (document.getElementById('pRole')) document.getElementById('pRole').innerText = userRole;
+// 3. I-display ang User Info (May Supabase & Online Fallback Logic)
+if (document.getElementById('pName')) document.getElementById('pName').innerText = userName;
+if (document.getElementById('pRole')) document.getElementById('pRole').innerText = userRole;
+
+if (document.getElementById('profileBtn')) {
+    let finalAvatarUrl = '';
     
-    if (document.getElementById('profileBtn')) {
-        const profilePath = 'assets/' + (userAvatar || 'visor.svg'); // Default avatar kung empty
-        document.getElementById('profileBtn').style.backgroundImage = `url('${profilePath}')`;
+    // Isang sikat at laging gising na online avatar placeholder (AdminLTE default avatar)
+    const globalFallbackAvatar = 'https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/img/avatar5.png';
+
+    if (userAvatar && userAvatar !== 'null' && userAvatar !== 'undefined') {
+        // Kung buong URL na ang naka-save (nagsisimula sa http)
+        if (userAvatar.startsWith('http')) {
+            finalAvatarUrl = userAvatar;
+        } else {
+            // KUNG FILE NAME LANG: Kunin ang tamang Public URL mula sa Supabase Storage
+            // (Palitan ang 'avatars' kung iba ang pangalan ng Bucket mo sa Supabase)
+            const { data: imgData } = supabaseClient.storage.from('avatars').getPublicUrl(userAvatar);
+            finalAvatarUrl = imgData.publicUrl;
+        }
+    } else {
+        // FALLBACK: Dahil malinis ang repo mo, gagamit tayo ng online image placeholder
+        finalAvatarUrl = globalFallbackAvatar;
     }
+
+    // I-apply bilang background ng profile circle
+    const profileBtn = document.getElementById('profileBtn');
+    profileBtn.style.backgroundImage = `url('${finalAvatarUrl}')`;
+    profileBtn.style.backgroundSize = 'cover';
+    profileBtn.style.backgroundPosition = 'center';
+    
+    // Safety net: Kung sakaling may link nga sa Supabase pero broken/delete na sa storage, i-fallback sa online image
+    const imgTest = new Image();
+    imgTest.src = finalAvatarUrl;
+    imgTest.onerror = function() {
+        profileBtn.style.backgroundImage = `url('${globalFallbackAvatar}')`;
+    };
+}
 
    // 🔴 PINAGANDANG SUPABASE REALTIME — PROTEKTADO SA MULTONG ROW
 supabaseClient
@@ -2482,7 +2512,15 @@ supabaseClient
         }
     }
 }
-        async function fetchUsers() {
+        // Helper Function para sa Initials (Ilagay ito sa taas o kahit saan sa iyong script file)
+function getUserInitials(name) {
+    if (!name) return "?";
+    const words = name.trim().split(" ");
+    if (words.length === 1) return words[0].charAt(0).toUpperCase();
+    return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toUpperCase();
+}
+
+async function fetchUsers() {
     const { data, error } = await supabaseClient
         .from('profiles')
         .select('*')
@@ -2501,11 +2539,37 @@ supabaseClient
 
     data.forEach(user => {
         const isPending = !user.is_approved;
+        const initials = getUserInitials(user.full_name);
+
+        // --- SUPABASE STORAGE AVATAR LOGIC WITH FALLBACK ---
+        let avatarHTML = '';
+        
+        if (user.avatar_url) {
+            // Kunin ang Public URL mula sa Supabase Storage (Palitan ang 'avatars' kung iba ang Bucket Name mo)
+            const { data: imgData } = supabaseClient.storage.from('avatars').getPublicUrl(user.avatar_url);
+            
+            avatarHTML = `
+                <img src="${imgData.publicUrl}" 
+                     style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover;"
+                     onerror="this.onerror=null; this.parentNode.innerHTML='<div style=\"width:30px; height:30px; border-radius:50%; background:#4299e1; color:white; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:bold;\">${initials}</div>';">
+            `;
+        } else {
+            // Fallback kapag walang avatar_url sa database (null o empty)
+            avatarHTML = `
+                <div style="width: 30px; height: 30px; border-radius: 50%; background: #4299e1; color: white; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold;">
+                    ${initials}
+                </div>
+            `;
+        }
+        // ----------------------------------------------------
+
         tbody.innerHTML += `
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.3s;">
                 <td style="padding: 12px; display: flex; align-items: center; gap: 10px;">
-                    <img src="assets/${user.avatar_url}" style="width: 30px; height: 30px; border-radius: 50%;">
-                    <span>${user.full_name}</span>
+                    <div style="display: flex; align-items: center; justify-content: center; width: 30px; height: 30px;">
+                        ${avatarHTML}
+                    </div>
+                    <span>${user.full_name || 'Unknown'}</span>
                 </td>
                 <td>${user.company_id}</td>
                 <td style="font-size: 0.8rem; opacity: 0.7;">${user.role}</td>
@@ -2597,10 +2661,14 @@ supabaseClient
 
     fetchUsers();
 }
-// --- RESET PASSWORD (no more prompt()) ---
+// --- RESET PASSWORD (No more prompt() / Fix Cancel Bug) ---
 function resetPassword(id) {
+    // Siguraduhin muna na walang duplicate modal na nakabukas
+    document.getElementById('resetPasswordModalOverlay')?.remove();
+
     // Build inline modal
     const overlay = document.createElement('div');
+    overlay.id = 'resetPasswordModalOverlay'; // BINIGYAN NG ID PARA MADALING BURAHIN
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9998;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
     overlay.innerHTML = `
         <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:16px;padding:28px;width:300px;max-width:90vw;color:var(--text-main);">
@@ -2609,7 +2677,7 @@ function resetPassword(id) {
             <input type="password" id="newPassInput" placeholder="New password (min. 6 chars)" 
                 style="width:100%;padding:10px 12px;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-body);color:var(--text-main);font-size:0.875rem;outline:none;box-sizing:border-box;margin-bottom:14px;">
             <div style="display:flex;gap:10px;">
-                <button onclick="this.closest('div[style]').remove()" 
+                <button onclick="document.getElementById('resetPasswordModalOverlay').remove()" 
                     style="flex:1;padding:10px;border:1px solid var(--border-color);background:transparent;color:var(--text-sub);border-radius:8px;cursor:pointer;font-weight:600;">Cancel</button>
                 <button id="confirmResetBtn" onclick="confirmReset('${id}', this)" 
                     style="flex:1;padding:10px;border:none;background:var(--accent);color:white;border-radius:8px;cursor:pointer;font-weight:600;">Confirm</button>
@@ -2624,10 +2692,18 @@ async function confirmReset(id, btn) {
     if (!newPass || newPass.length < 6) {
         return showToast('Password must be at least 6 characters.', 'warning');
     }
+    
     btn.disabled = true;
     btn.textContent = 'Saving...';
-    const { error } = await supabaseClient.from('profiles').update({ password: newPass }).eq('company_id', id);
-    btn.closest('div[style]').remove();
+    
+    const { error } = await supabaseClient
+        .from('profiles')
+        .update({ password: newPass })
+        .eq('company_id', id);
+        
+    // INAYOS NA CONFIRMation CLOSING: Isasara ang buong modal pagkatapos ng request
+    document.getElementById('resetPasswordModalOverlay')?.remove();
+    
     if (error) {
         showToast('Error resetting password: ' + error.message, 'error');
     } else {
