@@ -2775,7 +2775,11 @@ async function doApprove(id, btn) {
 }
 // --- DELETE USER ---
 async function deleteUser(id) {
+    // Siguraduhin muna na walang duplicate modal na nakabukas
+    document.getElementById('deleteUserModalOverlay')?.remove();
+
     const overlay = document.createElement('div');
+    overlay.id = 'deleteUserModalOverlay'; // BINIGYAN NG NATATANGING ID
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9998;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
     overlay.innerHTML = `
         <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:16px;padding:28px;width:300px;max-width:90vw;color:var(--text-main);text-align:center;">
@@ -2783,7 +2787,7 @@ async function deleteUser(id) {
             <h3 style="margin:0 0 8px;font-size:1rem;color:#f56565;">Delete Operator?</h3>
             <p style="margin:0 0 20px;font-size:0.8rem;color:var(--text-sub);">ID: <strong>${id}</strong> will be permanently removed. This cannot be undone.</p>
             <div style="display:flex;gap:10px;">
-                <button onclick="this.closest('div[style]').remove()" 
+                <button onclick="document.getElementById('deleteUserModalOverlay').remove()" 
                     style="flex:1;padding:10px;border:1px solid var(--border-color);background:transparent;color:var(--text-sub);border-radius:8px;cursor:pointer;font-weight:600;">Cancel</button>
                 <button onclick="doDelete('${id}', this)" 
                     style="flex:1;padding:10px;border:none;background:#f56565;color:white;border-radius:8px;cursor:pointer;font-weight:600;">Delete</button>
@@ -2793,9 +2797,14 @@ async function deleteUser(id) {
 }
 
 async function doDelete(id, btn) {
-    btn.disabled = true; btn.textContent = 'Deleting...';
+    btn.disabled = true; 
+    btn.textContent = 'Deleting...';
+    
     const { error } = await supabaseClient.from('profiles').delete().eq('company_id', id);
-    btn.closest('div[style]').remove();
+    
+    // INAYOS NA CLOSING: Tinatanggal ang buong modal overlay pagkatapos ng request
+    document.getElementById('deleteUserModalOverlay')?.remove();
+    
     if (error) {
         showToast('Error deleting user: ' + error.message, 'error');
     } else {
@@ -2803,19 +2812,20 @@ async function doDelete(id, btn) {
         fetchUsers();
     }
 }
-        // ─── TOAST HELPER ────────────────────────────────────────
-        function showToast(message, type = 'info', duration = 3500) {
-            const icons = { success: 'fa-check-circle', error: 'fa-times-circle', info: 'fa-info-circle', warning: 'fa-exclamation-triangle' };
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.innerHTML = `<i class="fas ${icons[type]}"></i><span>${message}</span>`;
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.style.animation = 'toastFadeOut 0.3s ease forwards';
-                setTimeout(() => toast.remove(), 300);
-            }, duration);
-        }
+
+// ─── TOAST HELPER ────────────────────────────────────────
+function showToast(message, type = 'info', duration = 3500) {
+    const icons = { success: 'fa-check-circle', error: 'fa-times-circle', info: 'fa-info-circle', warning: 'fa-exclamation-triangle' };
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `<i class="fas ${icons[type]}"></i><span>${message}</span>`;
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.style.animation = 'toastFadeOut 0.3s ease forwards';
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
+}
 // ====================================================================
 // NEW FIX: Function para sa pagbura ng GPM Log nang walang Auth dependency
 // ====================================================================
