@@ -2512,7 +2512,7 @@ supabaseClient
         }
     }
 }
-        // Helper Function para sa Initials (Ilagay ito sa taas o kahit saan sa iyong script file)
+// 1. Helper para sa Initials (Gaya ng dati)
 function getUserInitials(name) {
     if (!name) return "?";
     const words = name.trim().split(" ");
@@ -2520,15 +2520,35 @@ function getUserInitials(name) {
     return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toUpperCase();
 }
 
+// 1. Helper para sa Initials
+function getUserInitials(name) {
+    if (!name) return "?";
+    const words = name.trim().split(" ");
+    if (words.length === 1) return words[0].charAt(0).toUpperCase();
+    return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toUpperCase();
+}
+
+// 2. Fallback function kapag broken ang image
+function handleAvatarError(imgElement, initials) {
+    if (imgElement && imgElement.parentNode) {
+        imgElement.parentNode.innerHTML = `
+            <div style="width: 30px; height: 30px; border-radius: 50%; background: #4299e1; color: white; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold;">
+                ${initials}
+            </div>
+        `;
+    }
+}
+
+// 3. Main Fetch Function
 async function fetchUsers() {
     const { data, error } = await supabaseClient
         .from('profiles')
         .select('*')
         .neq('company_id', '090909')
-        .order('is_approved', { ascending: true }); // Para maunang lumitaw yung mga pending
+        .order('is_approved', { ascending: true });
 
     const tbody = document.getElementById('userTableBody');
-    if(!tbody) return; // Guard clause kung wala pa sa screen yung table
+    if (!tbody) return;
 
     if (error) {
         tbody.innerHTML = `<tr><td colspan="5" style="color:red; text-align:center;">Error: ${error.message}</td></tr>`;
@@ -2541,27 +2561,41 @@ async function fetchUsers() {
         const isPending = !user.is_approved;
         const initials = getUserInitials(user.full_name);
 
-        // --- SUPABASE STORAGE AVATAR LOGIC WITH FALLBACK ---
         let avatarHTML = '';
         
         if (user.avatar_url) {
-            // Kunin ang Public URL mula sa Supabase Storage (Palitan ang 'avatars' kung iba ang Bucket Name mo)
-            const { data: imgData } = supabaseClient.storage.from('avatars').getPublicUrl(user.avatar_url);
+            let fullStoragePath = user.avatar_url;
             
-            avatarHTML = `
-                <img src="${imgData.publicUrl}" 
-                     style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover;"
-                     onerror="this.onerror=null; this.parentNode.innerHTML='<div style=\"width:30px; height:30px; border-radius:50%; background:#4299e1; color:white; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:bold;\">${initials}</div>';">
-            `;
+            // Siguraduhin na may 'avatars/' sa unahan ng path kung file name lang ang naka-save
+            if (!fullStoragePath.startsWith('http') && !fullStoragePath.startsWith('avatars/')) {
+                fullStoragePath = 'avatars/' + fullStoragePath;
+            }
+
+            if (fullStoragePath.startsWith('http')) {
+                // Kung buong URL na ang nakasave sa DB
+                avatarHTML = `
+                    <img src="${fullStoragePath}" 
+                         style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover;"
+                         onerror="handleAvatarError(this, '${initials}')">
+                `;
+            } else {
+                // KUNG MULA SA STORAGE: Tinatawag ang tamang Bucket Name na 'profile'
+                const { data: imgData } = supabaseClient.storage.from('profile').getPublicUrl(fullStoragePath);
+                
+                avatarHTML = `
+                    <img src="${imgData.publicUrl}" 
+                         style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover;"
+                         onerror="handleAvatarError(this, '${initials}')">
+                `;
+            }
         } else {
-            // Fallback kapag walang avatar_url sa database (null o empty)
+            // Fallback kapag walang avatar_url (null/empty)
             avatarHTML = `
                 <div style="width: 30px; height: 30px; border-radius: 50%; background: #4299e1; color: white; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold;">
                     ${initials}
                 </div>
             `;
         }
-        // ----------------------------------------------------
 
         tbody.innerHTML += `
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.3s;">
